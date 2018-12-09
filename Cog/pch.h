@@ -100,8 +100,8 @@ void Println(const TArgs& ...aArgs)
 }
 
 template <typename TTo, typename TFrom>
-TTo CastBoundsChecked(const TFrom from)
+TTo CastBoundsChecked(const TFrom value)
 {
-	CHECK(from >= MinOf<TTo> && from <= MaxOf<TTo>);
-	return static_cast<TTo>(from);
+	CHECK(static_cast<i64>(value) >= static_cast<i64>(MinOf<TTo>) && static_cast<i64>(value) <= static_cast<i64>(MaxOf<TTo>));
+	return static_cast<TTo>(value);
 }

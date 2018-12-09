@@ -189,6 +189,7 @@
     <ClInclude Include="Bitset.h" />
     <ClInclude Include="BitsetForEachTables.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="ByteColor.h" />
     <ClInclude Include="CityHash\city.h" />
     <ClInclude Include="CityHash\citycrc.h" />
     <ClInclude Include="CityHash\config.h" />
@@ -214,6 +215,7 @@
     <ClInclude Include="GameWorld.h" />
     <ClInclude Include="Hashing.h" />
     <ClInclude Include="HeapAllocator.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="json.h" />
     <ClInclude Include="LinearColor.h" />
@@ -238,6 +240,7 @@
     <ClInclude Include="StackAllocatorBlock.h" />
     <ClInclude Include="StandardVertex.h" />
     <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="CogTime.h" />
     <ClInclude Include="TypeID.h" />
@@ -253,6 +256,7 @@
   <ItemGroup>
     <ClCompile Include="AwaitableWorkItem.cpp" />
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="ByteColor.cpp" />
     <ClCompile Include="CityHash\city.cc" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Convert.cpp" />
@@ -263,6 +267,7 @@
     <ClCompile Include="FilesystemEntry.cpp" />
     <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="HeapAllocator.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="LinearColor.cpp" />
     <ClCompile Include="lodepng.cpp" />
@@ -280,6 +285,7 @@
     <ClCompile Include="StackAllocator.cpp" />
     <ClCompile Include="StackAllocatorBlock.cpp" />
     <ClCompile Include="Stopwatch.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="Vec2.cpp" />
     <ClCompile Include="Vec4.cpp" />

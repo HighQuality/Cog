@@ -74,6 +74,9 @@
     <ClInclude Include="VertexShader.h" />
     <ClInclude Include="PixelShader.h" />
     <ClInclude Include="InputLayout.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="ByteColor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AwaitableWorkItem.cpp" />
@@ -106,6 +109,9 @@
     <ClCompile Include="VertexShader.cpp" />
     <ClCompile Include="PixelShader.cpp" />
     <ClCompile Include="InputLayout.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="ByteColor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

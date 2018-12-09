@@ -291,7 +291,7 @@ void RenderEngine::ClearRenderTexture(RenderTexture& aTexture, const LinearColor
 
 void RenderEngine::Draw()
 {
-	myContext->Draw(3, 0);
+	myContext->Draw(6, 0);
 }
 
 void RenderEngine::CreateBuffers(const i32 aWidth, const i32 aHeight)

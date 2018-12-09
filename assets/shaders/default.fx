@@ -30,9 +30,12 @@ PixelInputType vs_main(VertexInputType input)
     return output;
 }
 
+Texture2D boundTexture : register( t0 );
+SamplerState defaultSampler : register(s0);
+
 PixelOutputType ps_main(PixelInputType input)
 {
 	PixelOutputType output;
-	output.color = input.color;
+	output.color = boundTexture.Sample(defaultSampler, input.uv) * input.color;
 	return output;
 }

@@ -7,6 +7,7 @@
 #include "VertexShader.h"
 #include "PixelShader.h"
 #include "InputLayout.h"
+#include "Texture.h"
 
 int main()
 {
@@ -19,14 +20,18 @@ int main()
 	renderingMode.width = window.GetWidth();
 	renderingMode.height = window.GetHeight();
 	renderingMode.fullscreen = false;
-	renderingMode.vsync = false;
+	renderingMode.vsync = true;
 
 	RenderEngine renderer(window.GetHandle(), renderingMode);
 
 	VertexBuffer<StandardVertex> vb(renderer, {
-		{ { 0.f, 1.f, 0.5f, 1.f }, LinearColor(1.f, 0.f, 0.f), {0.f, 0.f} },
-		{ { 1.f, -1.f, 0.5f, 1.f }, LinearColor(0.f, 1.f, 0.f), {0.f, 0.f} },
-		{ { -1.f, -1.f, 0.5f, 1.f }, LinearColor(0.f, 0.f, 1.f), {0.f, 0.f} }
+		{ { -1.f, 1.f, 0.5f, 1.f }, LinearColor::White, {0.f, 0.f} },
+		{ { 1.f, 1.f, 0.5f, 1.f }, LinearColor::White, {1.f, 0.f} },
+		{ { 1.f, -1.f, 0.5f, 1.f }, LinearColor::White, {1.f, 1.f} },
+
+		{ { 1.f, -1.f, 0.5f, 1.f }, LinearColor::White, {1.f, 1.f} },
+		{ { -1.f, -1.f, 0.5f, 1.f }, LinearColor::White, {0.f, 1.f} },
+		{ { -1.f, 1.f, 0.5f, 1.f }, LinearColor::White, {0.f, 0.f} }
 	});
 
 	vb.Bind(0);
@@ -41,6 +46,10 @@ int main()
 
 	vs.Bind();
 	ps.Bind();
+	
+	Texture texture(renderer, L"../assets/textures/logo.png");
+
+	texture.BindToPS(0);
 
 	window.SetVisible(true);
 	window.RequestFocus();
@@ -78,6 +87,9 @@ int main()
 
 			case WindowEventType::Resize:
 				renderer.Resize(event.data.resize.newWidth, event.data.resize.newHeight);
+				break;
+
+			default:
 				break;
 			}
 		}
