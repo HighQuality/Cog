@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "GameWorld.h"
+#include "Component.h"
 #include "BaseComponentFactory.h"
 #include "BaseComponentFactoryChunk.h"
 #include "Object.h"
-#include "Component.h"
 #include "ObjectFactory.h"
 
 GameWorld::GameWorld()

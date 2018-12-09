@@ -33,8 +33,8 @@ Window::Window()
 {
 	myIsOpen = false;
 	myHasFocus = true;
-	myWidth = 640;
-	myHeight = 480;
+	myWidth = 1280;
+	myHeight = 720;
 	myTitle = String(L"Cog");
 }
 
@@ -67,6 +67,14 @@ void Window::ProcessMessages()
 		DispatchMessage(&msg);
 		LateParseMessage(myHandle, msg.message, msg.wParam, msg.lParam);
 	}
+}
+
+bool Window::PollMessage(WindowEvent& event)
+{
+	if (queuedEvents.GetLength() == 0)
+		return false;
+	event = queuedEvents.Pop();
+	return true;
 }
 
 void Window::Open()
@@ -108,8 +116,7 @@ void Window::Open()
 		myTitle.GetData(),
 		windowStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT,
-	// TODO: Figure out if the +4s are necessary
-		rect.right - rect.left + 4, rect.bottom - rect.top + 4,
+		rect.right - rect.left, rect.bottom - rect.top,
 		nullptr, nullptr, mHandle, nullptr);
 
 	myIsOpen = true;
@@ -134,11 +141,6 @@ void Window::SetVisible(bool aIsVisible)
 	ShowWindow(myHandle, aIsVisible ? SW_SHOW : SW_HIDE);
 }
 
-void* Window::GetHandle() const
-{
-	return myHandle;
-}
-
 void Window::RequestFocus()
 {
 	SetFocus(myHandle);
@@ -147,6 +149,9 @@ void Window::RequestFocus()
 
 bool Window::ReceiveMessage(HWND aHwnd, UINT aMessage, WPARAM aWParam, LPARAM aLParam)
 {
+	WindowEvent event;
+	event.type = WindowEventType::None;
+
 	switch (aMessage)
 	{
 	case WM_SETFOCUS:
@@ -158,8 +163,49 @@ bool Window::ReceiveMessage(HWND aHwnd, UINT aMessage, WPARAM aWParam, LPARAM aL
 		break;
 
 	case WM_CLOSE:
-		Close();
+		event.type = WindowEventType::Close;
 		break;
+
+	case WM_ENTERSIZEMOVE:
+		myIsInResizeMode = true;
+		break;
+
+	case WM_EXITSIZEMOVE:
+		if (myIsInResizeMode)
+		{
+			if (myScheduledNewWidth > 0 && myScheduledNewHeight > 0)
+			{
+				event.type = WindowEventType::Resize;
+				event.data.resize.newWidth = myScheduledNewWidth;
+				event.data.resize.newHeight = myScheduledNewHeight;
+			}
+
+			myScheduledNewWidth = 0;
+			myScheduledNewHeight = 0;
+
+			myIsInResizeMode = false;
+		}
+		break;
+
+	case WM_SIZE:
+		if (myIsInResizeMode)
+		{
+			myScheduledNewWidth = LOWORD(aLParam);
+			myScheduledNewHeight = HIWORD(aLParam);
+		}
+		else
+		{
+			event.type = WindowEventType::Resize;
+			event.data.resize.newWidth = LOWORD(aLParam);
+			event.data.resize.newHeight = HIWORD(aLParam);
+		}
+		break;
+
+	}
+
+	if (event.type != WindowEventType::None)
+	{
+		queuedEvents.Add(event);
 	}
 
 	return false;

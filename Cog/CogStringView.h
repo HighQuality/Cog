@@ -69,6 +69,20 @@ public:
 		return false;
 	}
 
+	std::string ToStdString() const
+	{
+		std::string str;
+		str.resize(GetLength());
+		for (i32 i = 0; i < myLength; ++i)
+			str[i] = static_cast<char>(myData[i]);
+		return str;
+	}
+
+	std::wstring ToStdWString() const
+	{
+		return GetData();
+	}
+
 	DECLARE_ARRAY_SLICE_FUNCTIONS(StringView);
 
 

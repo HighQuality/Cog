@@ -9,14 +9,12 @@ public:
 	using Base = FactoryChunk<T>;
 
 	ComponentFactoryChunk(const u16 aSize)
-		: Base(aSize)
+		: Base(aSize), BaseComponentFactoryChunk(aSize)
 	{
-		myGeneration.Resize(aSize);
+		BaseComponentFactoryChunk::SetBasePointer(this->GetData());
+
 		myReceiveTicks.Resize(aSize);
 		myIsVisible.Resize(aSize);
-
-		for (u16& generation : myGeneration)
-			generation = 1;
 
 		for (bool& tick : myReceiveTicks)
 			tick = false;
@@ -32,7 +30,7 @@ public:
 
 		const u16 index = this->IndexOf(object);
 
-		myGeneration[index]++;
+		IncrementGeneration(index);
 		myReceiveTicks[index] = true;
 		myIsVisible[index] = true;
 
@@ -45,14 +43,9 @@ public:
 
 		Base::Return(aObject);
 
-		myGeneration[index]++;
+		IncrementGeneration(index);
 		myReceiveTicks[index] = false;
 		myIsVisible[index] = false;
-	}
-
-	u16 FindGeneration(Component& aComponent) override
-	{
-		return myGeneration[this->IndexOf(aComponent)];
 	}
 
 	void DispatchTick(const Time aDeltaTime) override
@@ -116,7 +109,6 @@ protected:
 	}
 
 private:
-	Array<u16> myGeneration;
 	Array<bool> myReceiveTicks;
 	Array<bool> myIsVisible;
 };

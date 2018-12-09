@@ -129,6 +129,11 @@ protected:
 			aCallback(i);
 	}
 
+	FORCEINLINE const T* GetData() const
+	{
+		return myObjectsData;
+	}
+
 private:
 	Array<bool> myOccupiedSlots;
 	T* myObjectsData;

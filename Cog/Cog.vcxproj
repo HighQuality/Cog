@@ -108,6 +108,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,6 +126,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -143,6 +145,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -165,6 +168,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -184,6 +188,7 @@
     <ClInclude Include="Bitfield.h" />
     <ClInclude Include="Bitset.h" />
     <ClInclude Include="BitsetForEachTables.h" />
+    <ClInclude Include="Buffer.h" />
     <ClInclude Include="CityHash\city.h" />
     <ClInclude Include="CityHash\citycrc.h" />
     <ClInclude Include="CityHash\config.h" />
@@ -209,7 +214,9 @@
     <ClInclude Include="GameWorld.h" />
     <ClInclude Include="Hashing.h" />
     <ClInclude Include="HeapAllocator.h" />
+    <ClInclude Include="InputLayout.h" />
     <ClInclude Include="json.h" />
+    <ClInclude Include="LinearColor.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MemoryBlock.h" />
@@ -219,11 +226,17 @@
     <ClInclude Include="pcg32.h" />
     <ClInclude Include="pcg32_8.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PixelShader.h" />
     <ClInclude Include="Pointer.h" />
     <ClInclude Include="Random.h" />
+    <ClInclude Include="RenderEngine.h" />
+    <ClInclude Include="RenderingMode.h" />
+    <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="Semaphore.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="StackAllocator.h" />
     <ClInclude Include="StackAllocatorBlock.h" />
+    <ClInclude Include="StandardVertex.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="CogTime.h" />
@@ -231,11 +244,15 @@
     <ClInclude Include="Types.h" />
     <ClInclude Include="TypeTraits.h" />
     <ClInclude Include="Vec2.h" />
+    <ClInclude Include="Vec4.h" />
+    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="VertexShader.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="WindowEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AwaitableWorkItem.cpp" />
-    <ClCompile Include="BaseComponentFactoryChunk.cpp" />
+    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="CityHash\city.cc" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Convert.cpp" />
@@ -246,6 +263,8 @@
     <ClCompile Include="FilesystemEntry.cpp" />
     <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="HeapAllocator.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
+    <ClCompile Include="LinearColor.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="pch.cpp">
@@ -254,11 +273,18 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="RenderEngine.cpp" />
+    <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
     <ClCompile Include="StackAllocatorBlock.cpp" />
     <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="Vec2.cpp" />
+    <ClCompile Include="Vec4.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="VertexShader.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>

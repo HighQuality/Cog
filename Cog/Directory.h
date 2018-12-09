@@ -30,7 +30,7 @@ public:
 
 	template <typename TPredicate>
 	Directory * SelectFirstDirectory(const TPredicate & aPredicate, const bool aIncludeSubDirectories = false);
-
+	
 private:
 	static File * CastToFile(FileSystemEntry * aPointer);
 	static String ToLower(StringView aString);

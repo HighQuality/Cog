@@ -61,6 +61,19 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="Pointer.h" />
     <ClInclude Include="ObjectFactory.h" />
+    <ClInclude Include="RenderEngine.h" />
+    <ClInclude Include="RenderingMode.h" />
+    <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="LinearColor.h" />
+    <ClInclude Include="WindowEvent.h" />
+    <ClInclude Include="Buffer.h" />
+    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="StandardVertex.h" />
+    <ClInclude Include="Vec4.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="VertexShader.h" />
+    <ClInclude Include="PixelShader.h" />
+    <ClInclude Include="InputLayout.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AwaitableWorkItem.cpp" />
@@ -81,9 +94,18 @@
     <ClCompile Include="CityHash\city.cc" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="Component.cpp" />
-    <ClCompile Include="BaseComponentFactoryChunk.cpp" />
     <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="RenderEngine.cpp" />
+    <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="LinearColor.cpp" />
+    <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="Vec4.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="VertexShader.cpp" />
+    <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

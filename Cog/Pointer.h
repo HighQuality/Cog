@@ -61,11 +61,17 @@ private:
 
 		if constexpr (IsDerivedFrom<T, Component>)
 		{
-			return reinterpret_cast<Component*>(myPointer)->myChunk->FindGeneration(*reinterpret_cast<Component*>(myPointer));
+			auto chunk = reinterpret_cast<Component*>(myPointer)->myChunk;
+			if (!chunk)
+				return 0;
+			return chunk->FindGeneration(*reinterpret_cast<Component*>(myPointer));
 		}
 		else if constexpr (IsDerivedFrom<T, Object>)
 		{
-			return reinterpret_cast<Object*>(myPointer)->myChunk->FindGeneration(*reinterpret_cast<Object*>(myPointer));
+			auto chunk = chunk = reinterpret_cast<Object*>(myPointer)->myChunk;
+			if (!chunk)
+				return 0;
+			return chunk->FindGeneration(*reinterpret_cast<Object*>(myPointer));
 		}
 		else
 		{

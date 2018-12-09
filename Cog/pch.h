@@ -2,6 +2,16 @@
 
 #pragma warning ( disable : 4065 )
 
+// These are wrapped in ifndef so they can be overriden via compiler settings
+
+#ifndef PRODUCTION
+#define PRODUCTION 0
+#endif
+
+#ifndef ARRAY_BOUNDSCHECK
+#define ARRAY_BOUNDSCHECK 1
+#endif
+
 #include <iostream>
 #include <string>
 #include <new>
@@ -32,9 +42,14 @@
 #define ALIGNED(x) __attribute__ ((aligned(x)))
 #endif
 
-#define ARRAY_BOUNDSCHECK 1
-
 #include <Windows.h>
+
+#include <d3d11_1.h>
+#include <d3d11.h>
+#include <dxgi.h>
+#include <wrl/client.h>
+
+using Microsoft::WRL::ComPtr;
 
 #undef GetObject
 
@@ -58,7 +73,14 @@
 
 #include "Map.h"
 
+#include "Vec2.h"
+#include "Vec4.h"
+
 #include "CogTime.h"
+
+#include "LinearColor.h"
+
+void SetResourceDebugName(ID3D11DeviceChild* resource, StringView aDebugName);
 
 // 0 = unassigned, 1 = game thread
 inline u16 gThreadID = 0;

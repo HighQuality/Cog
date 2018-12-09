@@ -62,13 +62,24 @@ public:
 		AwaitableBarrier()->Wait();
 	}
 
+	static void Create()
+	{
+		ourThreadPool = std::make_unique<ThreadPool>();
+	}
+
+	static void Destroy()
+	{
+		ourThreadPool.reset();
+	}
+
 	static ThreadPool& Get()
 	{
-		static ThreadPool instance;
-		return instance;
+		return *ourThreadPool;
 	}
 
 private:
+	static std::unique_ptr<ThreadPool> ourThreadPool;
+	
 	void Worker(i32 aThreadId);
 
 	template <typename TWork>

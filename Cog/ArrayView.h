@@ -45,6 +45,19 @@ public:
 		this->myLength = aLength;
 	}
 
+	FORCEINLINE ArrayView(std::initializer_list<T> aData)
+	{
+		this->myData = const_cast<T*>(aData.begin());
+		this->myLength = static_cast<i32>(aData.size());
+	}
+
+	template <i32 TLength>
+	FORCEINLINE ArrayView(const T (&aArray)[TLength])
+	{
+		this->myData = const_cast<T*>(aArray);
+		this->myLength = TLength;
+	}
+
 	FORCEINLINE ArrayView(const ArrayView& aCopy)
 	{
 		*this = aCopy;
@@ -55,14 +68,14 @@ public:
 	template <typename TAllocator, bool ZeroOnePastEnd>
 	ArrayView& operator=(Array<T, TAllocator, ZeroOnePastEnd>&&) = delete;
 
-	FORCEINLINE ArrayView & operator=(const ArrayView& aCopy)
+	FORCEINLINE ArrayView& operator=(const ArrayView& aCopy)
 	{
 		this->myData = aCopy.myData;
 		this->myLength = aCopy.myLength;
 		return *this;
 	}
 	
-	FORCEINLINE const T * GetData() const
+	FORCEINLINE const T* GetData() const
 	{
 		return this->myData;
 	}

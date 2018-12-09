@@ -22,7 +22,16 @@ public:
 	template <typename TAllocator, bool ZeroOnePastEnd>
 	ArraySlice& operator=(Array<T, TAllocator, ZeroOnePastEnd>&&) = delete;
 
-	FORCEINLINE T& operator[](const i32 aIndex) const
+	FORCEINLINE T& operator[](const i32 aIndex)
+	{
+#if ARRAY_BOUNDSCHECK
+		if (aIndex < 0 || aIndex >= this->myLength)
+			this->OutOfBounds();
+#endif
+		return this->myData[aIndex];
+	}
+
+	FORCEINLINE const T& operator[](const i32 aIndex) const
 	{
 #if ARRAY_BOUNDSCHECK
 		if (aIndex < 0 || aIndex >= this->myLength)

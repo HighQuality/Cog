@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "ThreadPool.h"
 
+std::unique_ptr<ThreadPool> ThreadPool::ourThreadPool;
+
 ThreadPool::ThreadPool()
 {
 	const i32 numThreads = std::thread::hardware_concurrency();
