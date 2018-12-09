@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Array&lt;*, *&gt;">
+    <DisplayString>{"$T1",sb}[{myLength}] {myData,[myLength]na}</DisplayString>
+
+    <Expand>
+      <Item Name="[Capacity]">myCapacity</Item>
+      <Item Name="[Length]">myLength</Item>
+      <ArrayItems>
+        <Size>myLength</Size>
+        <ValuePointer>($T1*)myData</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="ArraySlice&lt;*&gt;">
+    <DisplayString>{"$T1",sb}[{myLength}] {myData,[myLength]na}</DisplayString>
+
+    <Expand>
+      <Item Name="[Length]">myLength</Item>
+      <ArrayItems>
+        <Size>myLength</Size>
+        <ValuePointer>($T1*)myData</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="ArrayView&lt;*&gt;">
+    <DisplayString>{"$T1",sb}[{myLength}] {myData,[myLength]na}</DisplayString>
+
+    <Expand>
+      <Item Name="[Length]">myLength</Item>
+      <ArrayItems>
+        <Size>myLength</Size>
+        <ValuePointer>($T1*)myData</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="String">
+    <DisplayString>"{myData,[myLength]sub}" [{myLength}]</DisplayString>
+    <StringView>myData,[myLength]sub</StringView>
+
+    <Expand>
+      <Item Name="[Length]">myLength</Item>
+      <Item Name="[Capacity]">myCapacity</Item>
+      <Synthetic Name="[Characters]">
+        <Expand>
+          <ArrayItems>
+            <Size>myLength</Size>
+            <ValuePointer>myData</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <Type Name="StringSlice">
+    <DisplayString>"{myData,[myLength]sub}" [{myLength}]</DisplayString>
+    <StringView>myData,[myLength]sub</StringView>
+
+    <Expand>
+      <Item Name="[Length]">myLength</Item>
+
+      <Synthetic Name="[Characters]">
+        <Expand>
+          <ArrayItems>
+            <Size>myLength</Size>
+            <ValuePointer>myData</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+
+    </Expand>
+  </Type>
+
+  <Type Name="StringView">
+    <DisplayString>"{myData,[myLength]sub}" [{myLength}]</DisplayString>
+    <StringView>myData,[myLength]sub</StringView>
+
+    <Expand>
+      <Item Name="[Length]">myLength</Item>
+
+      <Synthetic Name="[Characters]">
+        <Expand>
+          <ArrayItems>
+            <Size>myLength</Size>
+            <ValuePointer>myData</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+
+    </Expand>
+  </Type>
+</AutoVisualizer>
