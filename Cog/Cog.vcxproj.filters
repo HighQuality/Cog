@@ -77,6 +77,8 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="ByteColor.h" />
+    <ClInclude Include="DrawCall.h" />
+    <ClInclude Include="Material.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AwaitableWorkItem.cpp" />
@@ -112,6 +114,8 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="ByteColor.cpp" />
+    <ClCompile Include="DrawCall.cpp" />
+    <ClCompile Include="Material.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

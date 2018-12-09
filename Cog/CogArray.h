@@ -176,6 +176,26 @@ public:
 		return removedElement;
 	}
 
+	FORCEINLINE bool RemoveSwap(const T& aValue, bool bOnlyOne = true)
+	{
+		bool removedElement = false;
+
+		for (i32 i = 0; i < this->myLength; ++i)
+		{
+			if ((*this)[i] == aValue)
+			{
+				RemoveAtSwap(i);
+				--i;
+				removedElement = true;
+
+				if (bOnlyOne)
+					break;
+			}
+		}
+
+		return removedElement;
+	}
+
 	FORCEINLINE void RemoveAtSwap(const i32 aIndex)
 	{
 		if (aIndex < 0 || aIndex >= this->myLength)

@@ -21,6 +21,9 @@
 #include <fstream>
 #include <malloc.h>
 #include <immintrin.h>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 #ifdef _MSC_VER
 #define FORCEINLINE __forceinline
