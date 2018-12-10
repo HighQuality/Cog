@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "ClientCogGame.h"
 #include "Window.h"
-#include "Stopwatch.h"
 #include "RenderEngine.h"
 #include "Texture.h"
 #include "PixelShader.h"

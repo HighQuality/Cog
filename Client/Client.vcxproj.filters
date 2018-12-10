@@ -3,9 +3,36 @@
   <ItemGroup>
     <ClCompile Include="ClientCogGame.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="DrawCall.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="RenderEngine.cpp" />
+    <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="VertexShader.cpp" />
+    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientCogGame.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Buffer.h" />
+    <ClInclude Include="DrawCall.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="PixelShader.h" />
+    <ClInclude Include="RenderEngine.h" />
+    <ClInclude Include="RenderingMode.h" />
+    <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="StandardVertex.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="VertexShader.h" />
+    <ClInclude Include="Window.h" />
+    <ClInclude Include="WindowEvent.h" />
+    <ClInclude Include="InputLayout.h" />
   </ItemGroup>
 </Project>

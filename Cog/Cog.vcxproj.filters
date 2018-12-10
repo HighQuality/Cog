@@ -51,7 +51,6 @@
     <ClInclude Include="Factory.h" />
     <ClInclude Include="FactoryChunk.h" />
     <ClInclude Include="ComponentFactory.h" />
-    <ClInclude Include="Window.h" />
     <ClInclude Include="ComponentFactoryChunk.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="BaseComponentFactory.h" />
@@ -61,24 +60,10 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="Pointer.h" />
     <ClInclude Include="ObjectFactory.h" />
-    <ClInclude Include="RenderEngine.h" />
-    <ClInclude Include="RenderingMode.h" />
-    <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="LinearColor.h" />
-    <ClInclude Include="WindowEvent.h" />
-    <ClInclude Include="Buffer.h" />
-    <ClInclude Include="VertexBuffer.h" />
-    <ClInclude Include="StandardVertex.h" />
     <ClInclude Include="Vec4.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="VertexShader.h" />
-    <ClInclude Include="PixelShader.h" />
-    <ClInclude Include="InputLayout.h" />
-    <ClInclude Include="Texture.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="ByteColor.h" />
-    <ClInclude Include="DrawCall.h" />
-    <ClInclude Include="Material.h" />
     <ClInclude Include="EventListBase.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="CogGame.h" />
@@ -100,24 +85,12 @@
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="Vec2.cpp" />
     <ClCompile Include="CityHash\city.cc" />
-    <ClCompile Include="Window.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="RenderEngine.cpp" />
-    <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="LinearColor.cpp" />
-    <ClCompile Include="Buffer.cpp" />
-    <ClCompile Include="VertexBuffer.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="VertexShader.cpp" />
-    <ClCompile Include="PixelShader.cpp" />
-    <ClCompile Include="InputLayout.cpp" />
-    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="ByteColor.cpp" />
-    <ClCompile Include="DrawCall.cpp" />
-    <ClCompile Include="Material.cpp" />
     <ClCompile Include="CogGame.cpp" />
   </ItemGroup>
   <ItemGroup>

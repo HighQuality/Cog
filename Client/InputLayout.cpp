@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "InputLayout.h"
+
 InputLayout::InputLayout()
 {
 	myPerVertexCount = 0;

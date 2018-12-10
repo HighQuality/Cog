@@ -47,13 +47,6 @@
 
 #include <Windows.h>
 
-#include <d3d11_1.h>
-#include <d3d11.h>
-#include <dxgi.h>
-#include <wrl/client.h>
-
-using Microsoft::WRL::ComPtr;
-
 #undef GetObject
 
 #include "CityHash/city.h"
@@ -82,8 +75,6 @@ using Microsoft::WRL::ComPtr;
 #include "CogTime.h"
 
 #include "LinearColor.h"
-
-void SetResourceDebugName(ID3D11DeviceChild* resource, StringView aDebugName);
 
 // 0 = unassigned, 1 = game thread
 inline u16 gThreadID = 0;

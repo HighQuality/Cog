@@ -1,6 +1,6 @@
 #include "pch.h"
+#include <Image.h>
 #include "Texture.h"
-#include "Image.h"
 #include "RenderEngine.h"
 
 Texture::Texture(RenderEngine& aRenderer, const StringView& aFileName)

@@ -103,15 +103,42 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="ClientCogGame.cpp" />
+    <ClCompile Include="DrawCall.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="RenderEngine.cpp" />
+    <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="VertexShader.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Buffer.h" />
     <ClInclude Include="ClientCogGame.h" />
+    <ClInclude Include="DrawCall.h" />
+    <ClInclude Include="InputLayout.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PixelShader.h" />
+    <ClInclude Include="RenderEngine.h" />
+    <ClInclude Include="RenderingMode.h" />
+    <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="StandardVertex.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="VertexShader.h" />
+    <ClInclude Include="Window.h" />
+    <ClInclude Include="WindowEvent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
