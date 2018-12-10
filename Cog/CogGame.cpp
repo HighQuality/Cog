@@ -2,11 +2,15 @@
 #include "CogGame.h"
 #include "ThreadPool.h"
 #include "Stopwatch.h"
+#include "BinaryData.h"
 
 CogGame::CogGame()
 {
 	CHECK(gThreadID == 0 || gThreadID == 1);
 	gThreadID = 1;
+
+	BinaryData b;
+	b.Compress();
 
 	myThreadPool = new ThreadPool();
 }

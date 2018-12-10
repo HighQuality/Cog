@@ -18,4 +18,3 @@ protected:
 private:
 	ThreadPool* myThreadPool;
 };
-

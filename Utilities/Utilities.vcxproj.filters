@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Vec4.h" />
+    <ClInclude Include="ThreadPool.h" />
+    <ClInclude Include="TypeID.h" />
+    <ClInclude Include="Types.h" />
+    <ClInclude Include="TypeTraits.h" />
+    <ClInclude Include="Vec2.h" />
+    <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="Semaphore.h" />
+    <ClInclude Include="StackAllocator.h" />
+    <ClInclude Include="StackAllocatorBlock.h" />
+    <ClInclude Include="Random.h" />
+    <ClInclude Include="pcg32_8.h" />
+    <ClInclude Include="pcg32.h" />
+    <ClInclude Include="Optional.h" />
+    <ClInclude Include="MemoryBlock.h" />
+    <ClInclude Include="Map.h" />
+    <ClInclude Include="lodepng.h" />
+    <ClInclude Include="LinearColor.h" />
+    <ClInclude Include="Hashing.h" />
+    <ClInclude Include="HeapAllocator.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="json.h" />
+    <ClInclude Include="FunctionView.h" />
+    <ClInclude Include="Function.h" />
+    <ClInclude Include="Format.h" />
+    <ClInclude Include="FilesystemEntry.h" />
+    <ClInclude Include="File.h" />
+    <ClInclude Include="FactoryChunk.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="Directory.h" />
+    <ClInclude Include="DebugAsserts.h" />
+    <ClInclude Include="Convert.h" />
+    <ClInclude Include="CogTime.h" />
+    <ClInclude Include="CogMath.h" />
+    <ClInclude Include="CogStack.h" />
+    <ClInclude Include="CogString.h" />
+    <ClInclude Include="CogStringSlice.h" />
+    <ClInclude Include="CogStringView.h" />
+    <ClInclude Include="CogArray.h" />
+    <ClInclude Include="BinaryData.h" />
+    <ClInclude Include="Bitfield.h" />
+    <ClInclude Include="Bitset.h" />
+    <ClInclude Include="BitsetForEachTables.h" />
+    <ClInclude Include="ByteColor.h" />
+    <ClInclude Include="Barrier.h" />
+    <ClInclude Include="ArraySlice.h" />
+    <ClInclude Include="ArrayView.h" />
+    <ClInclude Include="AwaitableWorkItem.h" />
+    <ClInclude Include="Angle.h" />
+    <ClInclude Include="Append.h" />
+    <ClInclude Include="CityHash\city.h" />
+    <ClInclude Include="CityHash\citycrc.h" />
+    <ClInclude Include="CityHash\config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
+    <ClCompile Include="Vec2.cpp" />
+    <ClCompile Include="Stopwatch.cpp" />
+    <ClCompile Include="StackAllocator.cpp" />
+    <ClCompile Include="StackAllocatorBlock.cpp" />
+    <ClCompile Include="lodepng.cpp" />
+    <ClCompile Include="HeapAllocator.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="LinearColor.cpp" />
+    <ClCompile Include="FilesystemEntry.cpp" />
+    <ClCompile Include="Filesystem.cpp" />
+    <ClCompile Include="File.cpp" />
+    <ClCompile Include="Directory.cpp" />
+    <ClCompile Include="DebugAsserts.cpp" />
+    <ClCompile Include="Convert.cpp" />
+    <ClCompile Include="ByteColor.cpp" />
+    <ClCompile Include="AwaitableWorkItem.cpp" />
+    <ClCompile Include="CityHash\city.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
+  </ItemGroup>
+</Project>

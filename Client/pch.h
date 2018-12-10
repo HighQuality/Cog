@@ -10,3 +10,5 @@
 using Microsoft::WRL::ComPtr;
 
 void SetResourceDebugName(ID3D11DeviceChild* resource, StringView aDebugName);
+
+#define CheckDXError(e) do { HRESULT _res = e; if (FAILED(_res)) { FATAL(L"D3D11 Expression Failed:\n%", L"" #e); } } while (false)
