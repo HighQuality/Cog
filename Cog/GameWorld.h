@@ -22,6 +22,9 @@ public:
 
 	Object& CreateObject();
 
+	// TODO: Remove
+	void RemoveObject(const Object& object);
+
 	template <typename T>
 	T& CreateComponent(Object& aObject)
 	{

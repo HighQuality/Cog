@@ -20,7 +20,7 @@ void DrawCall::Submit()
 
 Array<DrawCall> DrawCallList::GatherDrawCalls()
 {
-	std::lock_guard<std::mutex> lck(ourInstancesMutex);
+	std::unique_lock<std::mutex> lck(ourInstancesMutex);
 
 	Array<DrawCall> drawCalls;
 

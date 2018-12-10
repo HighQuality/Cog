@@ -34,13 +34,13 @@ class DrawCallList : public Array<DrawCall>
 public:
 	DrawCallList()
 	{
-		std::lock_guard<std::mutex> lck(ourInstancesMutex);
+		std::unique_lock<std::mutex> lck(ourInstancesMutex);
 		ourInstances.Add(this);
 	}
 
 	~DrawCallList()
 	{
-		std::lock_guard<std::mutex> lck(ourInstancesMutex);
+		std::unique_lock<std::mutex> lck(ourInstancesMutex);
 		ourInstances.RemoveSwap(this, true);
 	}
 

@@ -79,6 +79,9 @@
     <ClInclude Include="ByteColor.h" />
     <ClInclude Include="DrawCall.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="EventListBase.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="CogGame.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AwaitableWorkItem.cpp" />
@@ -106,7 +109,6 @@
     <ClCompile Include="LinearColor.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
-    <ClCompile Include="Vec4.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="VertexShader.cpp" />
     <ClCompile Include="PixelShader.cpp" />
@@ -116,6 +118,7 @@
     <ClCompile Include="ByteColor.cpp" />
     <ClCompile Include="DrawCall.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="CogGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

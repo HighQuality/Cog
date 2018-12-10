@@ -16,6 +16,11 @@ public:
 
 	FORCEINLINE bool IsInitialized() const { return myIsInitialized; }
 
+	void CallbackTest(String obj) const
+	{
+		Println(L"Callback received: ", obj);
+	}
+
 	template <typename T>
 	const T& Get() const
 	{
@@ -66,4 +71,3 @@ private:
 
 	bool myIsInitialized = false;
 };
-

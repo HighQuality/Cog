@@ -103,6 +103,8 @@ public:
 
 		myOccupiedSlots[index] = false;
 
+		--myAllocatedObjects;
+
 		while (myMaxOccupiedIndex > 0 && !myOccupiedSlots[myMaxOccupiedIndex - 1])
 			--myMaxOccupiedIndex;
 	}

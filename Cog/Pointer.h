@@ -35,7 +35,7 @@ public:
 		{
 			if (myGeneration == ResolveGeneration())
 				return true;
-			*this = Ptr();
+			*const_cast<Ptr*>(this) = Ptr();
 		}
 
 		return false;
@@ -68,7 +68,7 @@ private:
 		}
 		else if constexpr (IsDerivedFrom<T, Object>)
 		{
-			auto chunk = chunk = reinterpret_cast<Object*>(myPointer)->myChunk;
+			auto chunk = reinterpret_cast<Object*>(myPointer)->myChunk;
 			if (!chunk)
 				return 0;
 			return chunk->FindGeneration(*reinterpret_cast<Object*>(myPointer));

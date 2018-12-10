@@ -28,6 +28,11 @@ Object& GameWorld::CreateObject()
 	return object;
 }
 
+void GameWorld::RemoveObject(const Object& object)
+{
+	myObjectFactory->Return(object);
+}
+
 Component& GameWorld::CreateComponentOnObjectFromFactory(BaseComponentFactory& aComponentFactory, Object& aObject)
 {
 	// Can't add components to already initialized objects
