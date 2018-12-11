@@ -14,6 +14,11 @@
 #define ARRAY_BOUNDSCHECK 1
 #endif
 
+#include "Casts.h"
+#include "Object.h"
+#include "Component.h"
+#include "Pointer.h"
+
 // 0 = unassigned, 1 = game thread
 inline u16 gThreadID = 0;
 

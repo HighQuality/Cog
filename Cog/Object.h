@@ -1,73 +1,98 @@
 #pragma once
 #include "TypeID.h"
 
+class BaseComponentFactory;
 class GameWorld;
+class CogGameWorld;
 class Component;
 class ObjectFactoryChunk;
 
-class Object
+template <typename T>
+class ComponentFactory;
+
+class Object final
 {
 public:
 	Object();
 	~Object();
 
-	FORCEINLINE GameWorld& GetWorld() { return *myWorld; }
-	FORCEINLINE const GameWorld& GetWorld() const { return *myWorld; }
+	Object(const Object&) = delete;
+	Object(Object&&) = delete;
+
+	Object& operator=(const Object&) = delete;
+	Object& operator=(Object&&) = delete;
+
+	// TODO: Should these return const references if we are const?
+	FORCEINLINE GameWorld& GetWorld() const { return *myWorld; }
+	FORCEINLINE CogGameWorld& GetCogWorld() const { return *reinterpret_cast<CogGameWorld*>(myWorld); }
 
 	FORCEINLINE bool IsInitialized() const { return myIsInitialized; }
 
-	void CallbackTest(String obj) const
+	template <typename T>
+	const T& GetComponent() const
 	{
-		Println(L"Callback received: ", obj);
+		return const_cast<Object*>(this)->GetComponent<T>();
 	}
 
 	template <typename T>
-	const T& Get() const
+	T& GetComponent()
 	{
-		return const_cast<Object*>(this)->Get<T>();
-	}
-
-	template <typename T>
-	T& Get()
-	{
-		T* component = TryGet<T>();
+		T* component = TryGetComponent<T>();
 		CHECK(component);
 		return *component;
 	}
 
 	template <typename T>
-	const T* TryGet() const
+	const T* TryGetComponent() const
 	{
-		return const_cast<Object*>(this)->TryGet<T>();
+		return const_cast<Object*>(this)->TryGetComponent<T>();
 	}
 
 	template <typename T>
-	T* TryGet()
+	T* TryGetComponent()
 	{
 		const u16 index = TypeID<Component>::Resolve<T>().GetUnderlyingInteger();
 
-		if (!myComponents.IsValidIndex(index) || myComponents[index].GetLength() == 0)
+		if (!myComponentTypes.IsValidIndex(index) || myComponentTypes[index].GetLength() == 0)
 			return nullptr;
 
-		return myComponents[index][0];
+		return myComponentTypes[index][0];
 	}
 
+protected:
+	friend class ObjectInitializer;
+
+	void ResolveDependencies();
+	void Initialize();
+
 private:
-	friend GameWorld;
+	friend CogGameWorld;
 	friend ObjectFactoryChunk;
 
 	template <typename T>
 	friend class Ptr;
 
+	template <typename TComponentType>
+	static BaseComponentFactory* CreateComponentFactory()
+	{
+		return new ComponentFactory<TComponentType>(TypeID<Component>::Resolve<TComponentType>());
+	}
+
+	// NOTE: Should only be used by ObjectInitializer class
+	template <typename TComponentType>
+	TComponentType& AddComponent()
+	{
+		return CastChecked<TComponentType>(AddComponent(TypeID<Component>::Resolve<TComponentType>(), &CreateComponentFactory<TComponentType>));
+	}
+
+	// NOTE: Should only be used from Component::AddComponent<TComponentType>
+	Component& AddComponent(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)());
+
 	GameWorld* myWorld;
 	ObjectFactoryChunk* myChunk;
-	Array<Array<Component*>> myComponents;
 
-	void RegisterComponent(Component& aComponent, TypeID<Component> typeID)
-	{
-		myComponents.Resize(TypeID<Component>::MaxUnderlyingInteger());
-		myComponents[typeID.GetUnderlyingInteger()].Add(&aComponent);
-	}
+	// TODO: Change inner array to store at least 1 pointer on the "stack"
+	Array<Array<Component*>> myComponentTypes;
 
 	bool myIsInitialized = false;
 };

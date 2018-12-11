@@ -5,6 +5,7 @@
 #include "BaseComponentFactoryChunk.h"
 #include "Object.h"
 #include "ObjectFactory.h"
+#include "ObjectInitializer.h"
 
 CogGameWorld::CogGameWorld()
 {
@@ -21,11 +22,11 @@ CogGameWorld::~CogGameWorld()
 	myObjectFactory = nullptr;
 }
 
-Object& CogGameWorld::CreateObject()
+ObjectInitializer CogGameWorld::CreateObject()
 {
 	Object& object = myObjectFactory->Allocate();
-	object.myWorld = this;
-	return object;
+	object.myWorld = GetSubPointer();
+	return ObjectInitializer(object);
 }
 
 void CogGameWorld::RemoveObject(const Object& object)
@@ -33,15 +34,14 @@ void CogGameWorld::RemoveObject(const Object& object)
 	myObjectFactory->Return(object);
 }
 
-Component& CogGameWorld::CreateComponentOnObjectFromFactory(BaseComponentFactory& aComponentFactory, Object& aObject)
+BaseComponentFactory& CogGameWorld::FindOrCreateComponentFactory(const TypeID<Component> aComponentType, BaseComponentFactory*(*aFactoryCreator)())
 {
-	// Can't add components to already initialized objects
-	CHECK(!aObject.IsInitialized());
+	myComponentFactories.Resize(TypeID<Component>::MaxUnderlyingInteger());
 
-	Component& component = aComponentFactory.AllocateGeneric();
-	component.myObject = &aObject;
-	aObject.RegisterComponent(component, aComponentFactory.GetTypeID());
-	return component;
+	BaseComponentFactory*& factory = myComponentFactories[aComponentType.GetUnderlyingInteger()];
+	if (factory == nullptr)
+		factory = aFactoryCreator();
+	return *factory;
 }
 
 void CogGameWorld::DispatchTick(Time aDeltaTime)

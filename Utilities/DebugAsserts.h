@@ -20,7 +20,7 @@ void EnsureLog(const char* aCondition);
 #define ENSURE(condition) (!!(condition) || ((IsDebuggerPresent() && ::TrueOnFirstCallOnly([]{})) && (::EnsureLog(#condition), true) && (DebugBreak(), false)))
 #define CHECK(condition) do { if (!(condition)) FATAL(L"Condition \"" #condition L"\" failed"); } while (false)
 
-#define PRINT_ERROR(format, ...) do { String message = Format(StringView(L"%:%:\n" format L"\n"), __FILE__, __LINE__, __VA_ARGS__); OutputDebugStringW(message.GetData()); std::wcout << message; } while (false)
+#define PRINT_ERROR(format, ...) do { String message = Format(StringView(L"%:% (%):\n" format L"\n"), __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__); OutputDebugStringW(message.GetData()); std::wcout << message; } while (false)
 
 // #ifdef _DEBUG
 #define FATAL(format, ...) do { PRINT_ERROR(format, __VA_ARGS__); DebugBreak(); abort(); } while (false)
@@ -31,7 +31,7 @@ void EnsureLog(const char* aCondition);
 #ifdef _MSC_VER
 
 #ifdef _DEBUG
-#define ASSUME(e) do { if (!(e)) FATAL(L"Assumption \"%\" failed", #e); } while(false)
+#define ASSUME(e) do { if (!(e)) FATAL(L"Assumption \"%\" failed", #e); } while (false)
 #define ASSUME_UNREACHABLE() FATAL(L"Unreachable assumption failed")
 #else
 #define ASSUME(e) __assume(e)

@@ -29,3 +29,7 @@ void Component::SetIsVisible(bool aIsVisible)
 {
 	myChunk->SetIsVisible(*this, aIsVisible);
 }
+
+void Component::ResolveDependencies()
+{
+}
