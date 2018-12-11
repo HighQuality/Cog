@@ -42,6 +42,14 @@ public:
 		return myObject->AddComponent<TComponentType>();
 	}
 
+	Object& Initialize()
+	{
+		Object& obj = *myObject;
+		InitializeObject();
+		wasMoved = true;
+		return obj;
+	}
+
 private:
 	void InitializeObject();
 

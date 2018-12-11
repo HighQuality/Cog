@@ -6,8 +6,6 @@
 ClientGame::ClientGame()
 {
 	myWorld = new GameWorld();
-
-	auto object = myWorld->CreateObject();
 }
 
 ClientGame::~ClientGame()
