@@ -11,11 +11,11 @@ class ObjectFactory;
 template <typename T, typename TChunkType = FactoryChunk<T>>
 class Factory;
 
-class GameWorld
+class CogGameWorld
 {
 public:
-	GameWorld();
-	~GameWorld();
+	CogGameWorld();
+	~CogGameWorld();
 
 	void DispatchTick(Time aDeltaTime);
 	void DispatchDraw(RenderTarget& aRenderTarget);

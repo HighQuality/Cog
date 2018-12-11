@@ -1,7 +1,7 @@
 #pragma once
-#include <ServerCogGame.h>
+#include <CogServerGame.h>
 
-class ServerGame final : public ServerCogGame
+class ServerGame final : public CogServerGame
 {
 public:
 	ServerGame();

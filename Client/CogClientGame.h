@@ -1,16 +1,16 @@
 #pragma once
-#include <CogGame.h>
+#include <Game.h>
 
 class Window;
 class RenderEngine;
 
-class ClientCogGame : public CogGame
+class CogClientGame : public Game
 {
 public:
 	using Base = CogGame;
 
-	ClientCogGame();
-	~ClientCogGame();
+	CogClientGame();
+	~CogClientGame();
 
 	bool ShouldKeepRunning() const override;
 

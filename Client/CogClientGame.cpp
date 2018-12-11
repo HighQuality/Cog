@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ClientCogGame.h"
+#include "CogClientGame.h"
 #include "Window.h"
 #include "RenderEngine.h"
 #include "Texture.h"
@@ -9,13 +9,13 @@
 #include "VertexBuffer.h"
 #include "InputLayout.h"
 
-ClientCogGame::ClientCogGame()
+CogClientGame::CogClientGame()
 {
 	myWindow = new Window();
 	myRenderer = nullptr;
 }
 
-ClientCogGame::~ClientCogGame()
+CogClientGame::~CogClientGame()
 {
 	delete myWindow;
 	myWindow = nullptr;
@@ -24,12 +24,12 @@ ClientCogGame::~ClientCogGame()
 	myRenderer = nullptr;
 }
 
-bool ClientCogGame::ShouldKeepRunning() const
+bool CogClientGame::ShouldKeepRunning() const
 {
 	return myWindow && myWindow->IsOpen();
 }
 
-void ClientCogGame::Run()
+void CogClientGame::Run()
 {
 	myWindow->Open();
 
@@ -74,7 +74,7 @@ void ClientCogGame::Run()
 	Base::Run();
 }
 
-void ClientCogGame::Tick(const Time& aDeltaTime)
+void CogClientGame::Tick(const Time& aDeltaTime)
 {
 	myWindow->ProcessMessages();
 

@@ -7,19 +7,19 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="BaseComponentFactory.h" />
     <ClInclude Include="BaseComponentFactoryChunk.h" />
-    <ClInclude Include="GameWorld.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Pointer.h" />
     <ClInclude Include="ObjectFactory.h" />
     <ClInclude Include="EventListBase.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="CogGame.h" />
+    <ClInclude Include="CogGameWorld.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Component.cpp" />
-    <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="CogGame.cpp" />
+    <ClCompile Include="CogGameWorld.cpp" />
   </ItemGroup>
 </Project>

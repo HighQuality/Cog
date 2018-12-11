@@ -1,17 +1,17 @@
 #include "pch.h"
-#include "GameWorld.h"
+#include "CogGameWorld.h"
 #include "Component.h"
 #include "BaseComponentFactory.h"
 #include "BaseComponentFactoryChunk.h"
 #include "Object.h"
 #include "ObjectFactory.h"
 
-GameWorld::GameWorld()
+CogGameWorld::CogGameWorld()
 {
 	myObjectFactory = new ObjectFactory();
 }
 
-GameWorld::~GameWorld()
+CogGameWorld::~CogGameWorld()
 {
 	for (BaseComponentFactory* factory : myComponentFactories)
 		delete factory;
@@ -21,19 +21,19 @@ GameWorld::~GameWorld()
 	myObjectFactory = nullptr;
 }
 
-Object& GameWorld::CreateObject()
+Object& CogGameWorld::CreateObject()
 {
 	Object& object = myObjectFactory->Allocate();
 	object.myWorld = this;
 	return object;
 }
 
-void GameWorld::RemoveObject(const Object& object)
+void CogGameWorld::RemoveObject(const Object& object)
 {
 	myObjectFactory->Return(object);
 }
 
-Component& GameWorld::CreateComponentOnObjectFromFactory(BaseComponentFactory& aComponentFactory, Object& aObject)
+Component& CogGameWorld::CreateComponentOnObjectFromFactory(BaseComponentFactory& aComponentFactory, Object& aObject)
 {
 	// Can't add components to already initialized objects
 	CHECK(!aObject.IsInitialized());
@@ -44,7 +44,7 @@ Component& GameWorld::CreateComponentOnObjectFromFactory(BaseComponentFactory& a
 	return component;
 }
 
-void GameWorld::DispatchTick(Time aDeltaTime)
+void CogGameWorld::DispatchTick(Time aDeltaTime)
 {
 	for (BaseComponentFactory* factory : myComponentFactories)
 	{
@@ -55,7 +55,7 @@ void GameWorld::DispatchTick(Time aDeltaTime)
 	}
 }
 
-void GameWorld::DispatchDraw(RenderTarget& aRenderTarget)
+void CogGameWorld::DispatchDraw(RenderTarget& aRenderTarget)
 {
 	for (BaseComponentFactory* factory : myComponentFactories)
 	{

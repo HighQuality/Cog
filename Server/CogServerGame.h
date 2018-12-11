@@ -1,11 +1,11 @@
 #pragma once
-#include <CogGame.h>
+#include <Game.h>
 
-class ServerCogGame : public CogGame
+class CogServerGame : public Game
 {
 public:
-	ServerCogGame();
-	~ServerCogGame();
+	CogServerGame();
+	~CogServerGame();
 	
 	bool ShouldKeepRunning() const override;
 

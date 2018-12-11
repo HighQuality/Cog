@@ -1,11 +1,11 @@
 #include "pch.h"
-#include <ClientCogGame.h>
+#include <CogClientGame.h>
 
 int main()
 {
 	gThreadID = 1;
 
-	ClientCogGame game;
+	CogClientGame game;
 	game.Run();
 
 	return 0;

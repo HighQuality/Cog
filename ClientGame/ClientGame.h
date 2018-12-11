@@ -1,7 +1,7 @@
 #pragma once
-#include <ClientCogGame.h>
+#include <CogClientGame.h>
 
-class ClientGame final : public ClientCogGame
+class ClientGame final : public CogClientGame
 {
 public:
 	ClientGame();

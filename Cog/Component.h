@@ -1,6 +1,6 @@
 #pragma once
 
-class GameWorld;
+class CogGameWorld;
 class RenderTarget;
 class BaseComponentFactoryChunk;
 class Object;
@@ -35,7 +35,7 @@ private:
 	template <typename T>
 	friend class Ptr;
 
-	friend GameWorld;
+	friend CogGameWorld;
 
 	BaseComponentFactoryChunk* myChunk;
 	Object* myObject;

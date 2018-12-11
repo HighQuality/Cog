@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include "Object.h"
 #include "Component.h"
-#include "GameWorld.h"
 #include "ObjectFactory.h"
+#include "BaseComponentFactoryChunk.h"
 
 template <typename T>
 class Ptr

@@ -104,7 +104,7 @@
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventListBase.h" />
     <ClInclude Include="CogGame.h" />
-    <ClInclude Include="GameWorld.h" />
+    <ClInclude Include="CogGameWorld.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectFactory.h" />
     <ClInclude Include="pch.h" />
@@ -113,7 +113,7 @@
   <ItemGroup>
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="CogGame.cpp" />
-    <ClCompile Include="GameWorld.cpp" />
+    <ClCompile Include="CogGameWorld.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
