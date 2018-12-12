@@ -3,7 +3,7 @@
 #include "ThreadPool.h"
 #include "Stopwatch.h"
 #include "BinaryData.h"
-#include "CogGameWorld.h"
+#include "CogScene.h"
 #include <Semaphore.h>
 
 CogGame* CogGame::ourGame;
@@ -91,7 +91,7 @@ void CogGame::Tick(const Time& aDeltaTime)
 	// Println(L"Tick % FPS", 1.f / aDeltaTime.Seconds());
 }
 
-void CogGame::AddWorld(CogGameWorld& aWorld)
+void CogGame::AddScene(CogScene& aWorld)
 {
 	CHECK(IsInGameThread());
 	myWorlds.Add(&aWorld);

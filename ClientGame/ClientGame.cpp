@@ -1,17 +1,17 @@
 #include "pch.h"
 #include "ClientGame.h"
-#include <GameWorld.h>
+#include <Scene.h>
 #include <ObjectInitializer.h>
 
 ClientGame::ClientGame()
 {
-	myWorld = new GameWorld();
+	myScene = new Scene();
 
-	AddWorld(*myWorld);
+	AddScene(*myScene);
 }
 
 ClientGame::~ClientGame()
 {
-	delete myWorld;
-	myWorld = nullptr;
+	delete myScene;
+	myScene = nullptr;
 }

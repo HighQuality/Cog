@@ -1,6 +1,6 @@
 #pragma once
 
-class CogGameWorld;
+class CogScene;
 class RenderTarget;
 class BaseComponentFactoryChunk;
 class Object;
@@ -22,7 +22,7 @@ public:
 
 	// TODO: Should these return const references if we are const?
 	FORCEINLINE Object& GetObject() const { return *myObject; }
-	FORCEINLINE GameWorld& GetGameWorld() const { return GetObject().GetWorld(); }
+	FORCEINLINE Scene& GetScene() const { return GetObject().GetScene(); }
 
 protected:
 	Component();
@@ -46,7 +46,7 @@ private:
 	template <typename T>
 	friend class Ptr;
 
-	friend CogGameWorld;
+	friend CogScene;
 
 	BaseComponentFactoryChunk* myChunk;
 	Object* myObject;

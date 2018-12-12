@@ -105,7 +105,7 @@
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventListBase.h" />
     <ClInclude Include="CogGame.h" />
-    <ClInclude Include="CogGameWorld.h" />
+    <ClInclude Include="CogScene.h" />
     <ClInclude Include="GameThreadCallback.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectFactory.h" />
@@ -117,7 +117,7 @@
   <ItemGroup>
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="CogGame.cpp" />
-    <ClCompile Include="CogGameWorld.cpp" />
+    <ClCompile Include="CogScene.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjectInitializer.cpp" />
     <ClCompile Include="pch.cpp">

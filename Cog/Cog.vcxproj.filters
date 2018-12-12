@@ -13,18 +13,18 @@
     <ClInclude Include="EventListBase.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="CogGame.h" />
-    <ClInclude Include="CogGameWorld.h" />
     <ClInclude Include="ObjectInitializer.h" />
     <ClInclude Include="Casts.h" />
     <ClInclude Include="ObjectFunctionView.h" />
     <ClInclude Include="GameThreadCallback.h" />
+    <ClInclude Include="CogScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="CogGame.cpp" />
-    <ClCompile Include="CogGameWorld.cpp" />
     <ClCompile Include="ObjectInitializer.cpp" />
+    <ClCompile Include="CogScene.cpp" />
   </ItemGroup>
 </Project>

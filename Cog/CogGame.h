@@ -31,12 +31,12 @@ public:
 protected:
 	virtual void Tick(const Time& aDeltaTime);
 
-	void AddWorld(CogGameWorld& aWorld);
+	void AddScene(CogScene& aWorld);
 
 private:
 	EventListBase<BaseObjectFunctionView<void()>*> mySynchronizedCallbacks;
 	ThreadPool& myThreadPool;
-	Array<CogGameWorld*> myWorlds;
+	Array<CogScene*> myWorlds;
 	const ThreadID& myGameThreadID;
 
 	static CogGame* ourGame;

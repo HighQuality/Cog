@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Object.h"
 #include "Component.h"
-#include "CogGameWorld.h"
+#include "CogScene.h"
 
 Object::Object()
 {
@@ -48,7 +48,7 @@ void Object::Initialize()
 
 Component& Object::CreateComponentByID(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)())
 {
-	BaseComponentFactory& factory = GetCogWorld().FindOrCreateComponentFactory(aComponentID, aFactoryCreator);
+	BaseComponentFactory& factory = GetCogScene().FindOrCreateComponentFactory(aComponentID, aFactoryCreator);
 	Component& component = factory.AllocateGeneric();
 
 	myComponentTypes.Resize(TypeID<Component>::MaxUnderlyingInteger());

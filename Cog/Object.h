@@ -2,8 +2,8 @@
 #include "TypeID.h"
 
 class BaseComponentFactory;
-class GameWorld;
-class CogGameWorld;
+class Scene;
+class CogScene;
 class Component;
 class ObjectFactoryChunk;
 class ObjectInitializer;
@@ -24,8 +24,8 @@ public:
 	Object& operator=(Object&&) = delete;
 
 	// TODO: Should these return const references if we are const?
-	FORCEINLINE GameWorld& GetWorld() const { return *myWorld; }
-	FORCEINLINE CogGameWorld& GetCogWorld() const { return *reinterpret_cast<CogGameWorld*>(myWorld); }
+	FORCEINLINE Scene& GetScene() const { return *myScene; }
+	FORCEINLINE CogScene& GetCogScene() const { return *reinterpret_cast<CogScene*>(myScene); }
 
 	template <typename T>
 	const T& GetComponent() const
@@ -65,7 +65,7 @@ protected:
 	void Initialize();
 
 private:
-	friend CogGameWorld;
+	friend CogScene;
 	friend ObjectFactoryChunk;
 
 	template <typename T>
@@ -74,7 +74,7 @@ private:
 	// NOTE: Should only be used from Component::AddComponent<TComponentType>
 	Component& CreateComponentByID(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)());
 
-	GameWorld* myWorld;
+	Scene* myScene;
 	ObjectFactoryChunk* myChunk;
 
 	// TODO: Change inner array to store at least 1 pointer on the "stack"

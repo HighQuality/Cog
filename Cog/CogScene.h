@@ -2,7 +2,7 @@
 #include "TypeID.h"
 #include "ComponentFactory.h"
 
-class GameWorld;
+class Scene;
 
 class RenderTarget;
 class Object;
@@ -14,11 +14,11 @@ class ObjectInitializer;
 template <typename T, typename TChunkType = FactoryChunk<T>>
 class Factory;
 
-class CogGameWorld
+class CogScene
 {
 public:
-	CogGameWorld();
-	virtual ~CogGameWorld();
+	CogScene();
+	virtual ~CogScene();
 
 	void DispatchTick(Time aDeltaTime);
 	void DispatchDraw(RenderTarget& aRenderTarget);
@@ -32,8 +32,8 @@ public:
 	BaseComponentFactory& FindOrCreateComponentFactory(TypeID<Component> aComponentType, BaseComponentFactory*(*aFactoryCreator)());
 
 protected:
-	virtual GameWorld* GetSubPointer() = 0;
-	virtual const GameWorld* GetSubPointer() const = 0;
+	virtual Scene* GetSubPointer() = 0;
+	virtual const Scene* GetSubPointer() const = 0;
 
 private:
 	ObjectFactory* myObjectFactory;

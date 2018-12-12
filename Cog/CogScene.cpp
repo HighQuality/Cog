@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "CogGameWorld.h"
+#include "CogScene.h"
 #include "Component.h"
 #include "BaseComponentFactory.h"
 #include "BaseComponentFactoryChunk.h"
@@ -7,12 +7,12 @@
 #include "ObjectFactory.h"
 #include "ObjectInitializer.h"
 
-CogGameWorld::CogGameWorld()
+CogScene::CogScene()
 {
 	myObjectFactory = new ObjectFactory();
 }
 
-CogGameWorld::~CogGameWorld()
+CogScene::~CogScene()
 {
 	for (BaseComponentFactory* factory : myComponentFactories)
 		delete factory;
@@ -22,21 +22,21 @@ CogGameWorld::~CogGameWorld()
 	myObjectFactory = nullptr;
 }
 
-ObjectInitializer CogGameWorld::CreateObject()
+ObjectInitializer CogScene::CreateObject()
 {
 	CHECK(IsInGameThread());
 
 	Object& object = myObjectFactory->Allocate();
-	object.myWorld = GetSubPointer();
+	object.myScene = GetSubPointer();
 	return ObjectInitializer(object);
 }
 
-void CogGameWorld::RemoveObject(const Object& object)
+void CogScene::RemoveObject(const Object& object)
 {
 	myObjectFactory->Return(object);
 }
 
-BaseComponentFactory& CogGameWorld::FindOrCreateComponentFactory(const TypeID<Component> aComponentType, BaseComponentFactory*(*aFactoryCreator)())
+BaseComponentFactory& CogScene::FindOrCreateComponentFactory(const TypeID<Component> aComponentType, BaseComponentFactory*(*aFactoryCreator)())
 {
 	myComponentFactories.Resize(TypeID<Component>::MaxUnderlyingInteger());
 
@@ -46,7 +46,7 @@ BaseComponentFactory& CogGameWorld::FindOrCreateComponentFactory(const TypeID<Co
 	return *factory;
 }
 
-void CogGameWorld::DispatchTick(Time aDeltaTime)
+void CogScene::DispatchTick(Time aDeltaTime)
 {
 	for (BaseComponentFactory* factory : myComponentFactories)
 	{
@@ -57,7 +57,7 @@ void CogGameWorld::DispatchTick(Time aDeltaTime)
 	}
 }
 
-void CogGameWorld::DispatchDraw(RenderTarget& aRenderTarget)
+void CogScene::DispatchDraw(RenderTarget& aRenderTarget)
 {
 	for (BaseComponentFactory* factory : myComponentFactories)
 	{
