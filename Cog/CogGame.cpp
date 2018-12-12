@@ -3,6 +3,7 @@
 #include "ThreadPool.h"
 #include "Stopwatch.h"
 #include "BinaryData.h"
+#include "CogGameWorld.h"
 
 CogGame::CogGame()
 {
@@ -43,5 +44,24 @@ void CogGame::Run()
 
 		Tick(deltaTime);
 	}
+}
+
+void CogGame::Tick(const Time& aDeltaTime)
+{
+	for (auto world : myWorlds)
+		world->DispatchTick(aDeltaTime);
+
+	for (;;)
+	{
+		// Wait for work to finish
+		myThreadPool->Barrier();
+
+
+	}
+}
+
+void CogGame::AddWorld(CogGameWorld& aWorld)
+{
+	myWorlds.Add(&aWorld);
 }
 

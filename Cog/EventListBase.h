@@ -1,20 +1,21 @@
 ﻿#pragma once
+#include <ThreadID.h>
 
 template <typename T>
 class EventListBase
 {
 public:
-	static void Submit(T&& aElement)
+	void Submit(T&& aElement)
 	{
-		ourLocalElements.Add(Move(aElement));
+		FindLocalList().Add(Move(aElement));
 	}
 
-	static void Submit(const T& aElement)
+	void Submit(const T& aElement)
 	{
 		Submit(T(aElement));
 	}
 
-	static Array<T> Gather()
+	Array<T> Gather()
 	{
 		std::unique_lock<std::mutex> lck(ourElementListsMutex);
 
@@ -50,7 +51,12 @@ private:
 		ourElementLists.RemoveSwap(this);
 	}
 
-	static thread_local Array<T> ourLocalElements;
-	static Array<EventListBase*> ourElementLists;
-	static std::mutex ourElementListsMutex;
+	Array<T>& FindLocalList()
+	{
+		return ourLocalElements[ThreadID::Get().GetInteger()];
+	}
+
+	std::array<Array<T>, 256> ourLocalElements;
+	Array<EventListBase*> ourElementLists;
+	std::mutex ourElementListsMutex;
 };

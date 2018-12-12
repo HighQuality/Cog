@@ -26,8 +26,6 @@ public:
 	FORCEINLINE GameWorld& GetWorld() const { return *myWorld; }
 	FORCEINLINE CogGameWorld& GetCogWorld() const { return *reinterpret_cast<CogGameWorld*>(myWorld); }
 
-	FORCEINLINE bool IsInitialized() const { return myIsInitialized; }
-
 	template <typename T>
 	const T& GetComponent() const
 	{
@@ -93,6 +91,4 @@ private:
 
 	// TODO: Change inner array to store at least 1 pointer on the "stack"
 	Array<Array<Component*>> myComponentTypes;
-
-	bool myIsInitialized = false;
 };

@@ -98,6 +98,7 @@
   <ItemGroup>
     <ClInclude Include="BaseComponentFactory.h" />
     <ClInclude Include="BaseComponentFactoryChunk.h" />
+    <ClInclude Include="Callback.h" />
     <ClInclude Include="Casts.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentFactory.h" />
@@ -106,8 +107,10 @@
     <ClInclude Include="EventListBase.h" />
     <ClInclude Include="CogGame.h" />
     <ClInclude Include="CogGameWorld.h" />
+    <ClInclude Include="GameThreadCallback.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectFactory.h" />
+    <ClInclude Include="ObjectFunctionView.h" />
     <ClInclude Include="ObjectInitializer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Pointer.h" />

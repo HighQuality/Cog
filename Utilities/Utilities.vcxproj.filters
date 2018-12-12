@@ -55,6 +55,7 @@
     <ClInclude Include="CityHash\city.h" />
     <ClInclude Include="CityHash\citycrc.h" />
     <ClInclude Include="CityHash\config.h" />
+    <ClInclude Include="ThreadID.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -76,6 +77,7 @@
     <ClCompile Include="ByteColor.cpp" />
     <ClCompile Include="AwaitableWorkItem.cpp" />
     <ClCompile Include="CityHash\city.cc" />
+    <ClCompile Include="ThreadID.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

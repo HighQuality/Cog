@@ -142,6 +142,7 @@
     <ClInclude Include="StackAllocator.h" />
     <ClInclude Include="StackAllocatorBlock.h" />
     <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="ThreadID.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TypeID.h" />
     <ClInclude Include="Types.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="StackAllocator.cpp" />
     <ClCompile Include="StackAllocatorBlock.cpp" />
     <ClCompile Include="Stopwatch.cpp" />
+    <ClCompile Include="ThreadID.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="Vec2.cpp" />
   </ItemGroup>

@@ -18,7 +18,7 @@ class CogGameWorld
 {
 public:
 	CogGameWorld();
-	~CogGameWorld();
+	virtual ~CogGameWorld();
 
 	void DispatchTick(Time aDeltaTime);
 	void DispatchDraw(RenderTarget& aRenderTarget);

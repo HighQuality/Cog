@@ -12,7 +12,7 @@ template <typename T>
 class ArrayView
 {
 public:
-	using iterator = T * ;
+	using iterator = T *;
 	using const_iterator = const T*;
 
 	FORCEINLINE iterator begin()
@@ -74,7 +74,7 @@ public:
 		this->myLength = aCopy.myLength;
 		return *this;
 	}
-	
+
 	FORCEINLINE const T* GetData() const
 	{
 		return this->myData;
@@ -97,7 +97,7 @@ public:
 #endif
 		return operator[](Clamp(aIndex, 0, myLength));
 	}
-	
+
 	FORCEINLINE T* TryGet(const i32 aIndex)
 	{
 		if (aIndex < 0 || aIndex >= this->myLength)
@@ -124,7 +124,7 @@ public:
 		return TryGet(aIndex, T());
 	}
 
-	FORCEINLINE const T & operator[](const i32 aIndex) const
+	FORCEINLINE const T& operator[](const i32 aIndex) const
 	{
 #if ARRAY_BOUNDSCHECK
 		if (aIndex < 0 || aIndex >= this->myLength)
@@ -133,7 +133,7 @@ public:
 		return this->myData[aIndex];
 	}
 
-	FORCEINLINE const T & First() const
+	FORCEINLINE const T& First() const
 	{
 #if ARRAY_BOUNDSCHECK
 		if (this->myLength == 0)
@@ -142,7 +142,7 @@ public:
 		return this->myData[0];
 	}
 
-	FORCEINLINE const T & Last() const
+	FORCEINLINE const T& Last() const
 	{
 #if ARRAY_BOUNDSCHECK
 		if (this->myLength == 0)
@@ -161,7 +161,7 @@ public:
 		if (this->myLength == 0)
 			return true;
 
-		for (i32 i=0; i<this->myLength - 1; ++i)
+		for (i32 i = 0; i < this->myLength - 1; ++i)
 		{
 			if (this->myData[i] > this->myData[i + 1])
 				return false;
@@ -223,7 +223,18 @@ public:
 		return aIndex >= 0 && aIndex < myLength;
 	}
 
-	bool operator==(const ArrayView & aString) const
+	i32 Find(const T& aElement) const
+	{
+		for (i32 i = 0; i < myLength; ++i)
+		{
+			if (myData[i] == aElement)
+				return i;
+		}
+
+		return -1;
+	}
+
+	bool operator==(const ArrayView& aString) const
 	{
 		if (myLength != aString.myLength)
 			return false;
@@ -233,7 +244,7 @@ public:
 		return true;
 	}
 
-	bool operator!=(const ArrayView & aString) const
+	bool operator!=(const ArrayView& aString) const
 	{
 		return !(*this == aString);
 	}
@@ -251,12 +262,12 @@ protected:
 	}
 #endif
 
-	T * myData = nullptr;
+	T* myData = nullptr;
 	i32 myLength = 0;
 };
 
 template <typename T>
-FORCEINLINE::std::wostream & operator<<(::std::wostream & aOut, const ArrayView<T>& aArray)
+FORCEINLINE ::std::wostream& operator<<(::std::wostream& aOut, const ArrayView<T>& aArray)
 {
 	aOut << typeid(T).name() << L"[" << aArray.GetLength() << L"] { ";
 

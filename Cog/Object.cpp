@@ -44,9 +44,6 @@ void Object::ResolveDependencies()
 
 void Object::Initialize()
 {
-	CHECK(!myIsInitialized);
-
-	myIsInitialized = true;
 }
 
 Component& Object::AddComponent(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)())

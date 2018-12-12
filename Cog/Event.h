@@ -83,16 +83,14 @@ private:
 
 		EventCallResult Call(TArgs ... aArgs) override
 		{
-			if (myObject.IsValid())
-			{
-				if constexpr (IsSame<decltype(((*myObject).*myFunction)(aArgs...)), EventCallResult>)
-					return ((*myObject).*myFunction)(aArgs...);
+			if (!myObject.IsValid())
+				return EventCallResult::RemoveSubscription;
 
-				((*myObject).*myFunction)(aArgs...);
-				return EventCallResult::KeepSubscription;
-			}
+			if constexpr (IsSame<decltype(((*myObject).*myFunction)(aArgs...)), EventCallResult>)
+				return ((*myObject).*myFunction)(aArgs...);
 
-			return EventCallResult::RemoveSubscription;
+			((*myObject).*myFunction)(aArgs...);
+			return EventCallResult::KeepSubscription;
 		}
 	};
 

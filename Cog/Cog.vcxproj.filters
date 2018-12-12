@@ -16,6 +16,9 @@
     <ClInclude Include="CogGameWorld.h" />
     <ClInclude Include="ObjectInitializer.h" />
     <ClInclude Include="Casts.h" />
+    <ClInclude Include="ObjectFunctionView.h" />
+    <ClInclude Include="GameThreadCallback.h" />
+    <ClInclude Include="Callback.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

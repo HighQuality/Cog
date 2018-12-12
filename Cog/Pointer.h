@@ -29,6 +29,8 @@ public:
 	{
 	}
 
+	explicit operator bool() const { return IsValid(); }
+
 	bool IsValid() const
 	{
 		if (myPointer)
