@@ -1,6 +1,5 @@
 #pragma once
 #include "Types.h"
-#include <mutex>
 
 class Barrier
 {

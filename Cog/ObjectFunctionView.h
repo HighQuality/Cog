@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 template <typename TType>
-class BaseFunctionView;
+class BaseObjectFunctionView;
 
 template <typename TReturn, typename ...TArgs>
-class BaseFunctionView<TReturn(TArgs...)>
+class BaseObjectFunctionView<TReturn(TArgs...)>
 {
 public:
-	virtual ~BaseFunctionView() = default;
+	virtual ~BaseObjectFunctionView() = default;
 	
 	virtual TReturn Call(TArgs ...aArgs) const = 0;
 };
@@ -16,7 +16,7 @@ template <typename TType, typename TFunc>
 class ObjectFunctionView;
 
 template <typename TObject, typename TReturn, typename ...TArgs>
-class ObjectFunctionView<TObject, TReturn(TArgs...)> final : public BaseFunctionView<TReturn(TArgs...)>
+class ObjectFunctionView<TObject, TReturn(TArgs...)> final : public BaseObjectFunctionView<TReturn(TArgs...)>
 {
 public:
 	ObjectFunctionView() = default;

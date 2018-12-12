@@ -5,9 +5,21 @@ template <typename T>
 class EventListBase
 {
 public:
+	EventListBase()
+	{
+		for (auto& listPointer : myNonEmptyArrays)
+			listPointer = nullptr;
+		myNextEmptyArrayIndex.store(0);
+	}
+
 	void Submit(T&& aElement)
 	{
-		FindLocalList().Add(Move(aElement));
+		Array<T>& list = FindLocalList();
+
+		if (list.GetLength() == 0)
+			myNonEmptyArrays[myNextEmptyArrayIndex.fetch_add(1)] = &list;
+
+		list.Add(Move(aElement));
 	}
 
 	void Submit(const T& aElement)
@@ -17,46 +29,53 @@ public:
 
 	Array<T> Gather()
 	{
-		std::unique_lock<std::mutex> lck(ourElementListsMutex);
+		std::unique_lock<std::mutex> lck(myMutex);
 
 		Array<T> elements;
 
 		i32 count = 0;
 
-		for (Array<T>* list : ourElementLists)
+		for (Array<T>* list : myNonEmptyArrays)
+		{
+			if (list == nullptr)
+				break;
+
 			count += list->GetLength();
+		}
 
 		elements.PrepareAdd(count);
 
-		for (Array<T>* list : ourElementLists)
+		for (Array<T>* list : myNonEmptyArrays)
 		{
+			if (list == nullptr)
+				break;
+
 			for (T& drawCall : *list)
 				elements.Add(Move(drawCall));
 			list->Clear();
 		}
 
+		for (auto& listPointer : myNonEmptyArrays)
+		{
+			if (listPointer == nullptr)
+				break;
+
+			listPointer = nullptr;
+		}
+
+		myNextEmptyArrayIndex.store(0);
+
 		return elements;
 	}
 
 private:
-	EventListBase()
-	{
-		std::unique_lock<std::mutex> lck(ourElementListsMutex);
-		ourElementLists.Add(this);
-	}
-
-	~EventListBase()
-	{
-		std::unique_lock<std::mutex> lck(ourElementListsMutex);
-		ourElementLists.RemoveSwap(this);
-	}
-
 	Array<T>& FindLocalList()
 	{
-		return ourLocalElements[ThreadID::Get().GetInteger()];
+		return myLocalElements[ThreadID::Get().GetInteger()];
 	}
 
-	std::array<Array<T>, 256> ourLocalElements;
-	Array<EventListBase*> ourElementLists;
-	std::mutex ourElementListsMutex;
+	std::array<Array<T>, 256> myLocalElements;
+	std::array<Array<T>*, 256> myNonEmptyArrays;
+	std::atomic_int32_t myNextEmptyArrayIndex;
+	std::mutex myMutex;
 };

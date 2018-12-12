@@ -15,7 +15,7 @@ static thread_local Array<Component*> newComponents;
 static thread_local Array<i32> lengths;
 static thread_local bool isResolvingDependencies = false;
 
-void Object::ResolveDependencies()
+void Object::ResolveDependencies(ObjectInitializer& aInitializer)
 {
 	// Recursion is not supported here
 	CHECK(!isResolvingDependencies);
@@ -33,7 +33,7 @@ void Object::ResolveDependencies()
 		const i32 end = newComponents.GetLength();
 
 		for (i32 i = start; i < end; ++i)
-			newComponents[i]->ResolveDependencies();
+			newComponents[i]->ResolveDependencies(aInitializer);
 
 		oldLength = end;
 	} while (newComponents.GetLength() > oldLength);
@@ -46,7 +46,7 @@ void Object::Initialize()
 {
 }
 
-Component& Object::AddComponent(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)())
+Component& Object::CreateComponentByID(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)())
 {
 	BaseComponentFactory& factory = GetCogWorld().FindOrCreateComponentFactory(aComponentID, aFactoryCreator);
 	Component& component = factory.AllocateGeneric();

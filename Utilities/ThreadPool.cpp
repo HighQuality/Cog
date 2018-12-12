@@ -1,13 +1,19 @@
 ﻿#include "pch.h"
 #include "ThreadPool.h"
+#include "Semaphore.h"
 
 std::unique_ptr<ThreadPool> ThreadPool::ourThreadPool;
 
 ThreadPool::ThreadPool()
+	: ThreadPool(CastBoundsChecked<i32>(std::thread::hardware_concurrency()))
 {
-	const i32 numThreads = std::thread::hardware_concurrency();
+}
 
-	for (i32 i = 0; i < numThreads; ++i)
+ThreadPool::ThreadPool(const i32 aNumWorkers)
+{
+	Println(L"Starting thread pool with % workers...", aNumWorkers);
+
+	for (i32 i = 0; i < aNumWorkers; ++i)
 		myWorkers.Emplace(std::thread(&ThreadPool::Worker, this, i));
 }
 
@@ -86,4 +92,24 @@ std::shared_ptr<AwaitableBarrierWorkItem> ThreadPool::AwaitableBarrier()
 	lk.unlock();
 	myWorkNotify.notify_all();
 	return result;
+}
+
+void ThreadPool::Pause(Semaphore& aResume, Semaphore& aDoneWithResume)
+{
+	std::unique_lock<std::mutex> lk(myWorkMutex);
+
+	auto awaitableBarrier = std::make_shared<AwaitableBarrierWorkItem>(static_cast<u32>(myWorkers.GetLength()));
+	myWorkQueue.Add(awaitableBarrier);
+
+	// Make one thread wait for the semaphore to be notified
+	QueueSingleImpl([&aResume, &aDoneWithResume] { aResume.Wait(); aDoneWithResume.Notify(); });
+
+	// Wait for the semaphore to be notified
+	myWorkQueue.Emplace(std::make_shared<BarrierWorkItem>(static_cast<u32>(myWorkers.GetLength())));
+
+	lk.unlock();
+	myWorkNotify.notify_all();
+
+	// Wait for current work to finish before returning
+	awaitableBarrier->Wait();
 }

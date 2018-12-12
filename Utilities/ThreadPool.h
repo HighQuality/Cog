@@ -1,13 +1,14 @@
 ﻿#pragma once
-#include <thread>
-#include <mutex>
-#include <condition_variable>
 #include "AwaitableWorkItem.h"
+
+class Semaphore;
 
 class ThreadPool
 {
 public:
 	ThreadPool();
+	explicit ThreadPool(i32 aNumWorkers);
+
 	~ThreadPool();
 
 	template <typename TWork>
@@ -61,6 +62,9 @@ public:
 	{
 		AwaitableBarrier()->Wait();
 	}
+
+	// Wait for all work to finish and then pause all threads until the given semaphore is notified
+	void Pause(Semaphore& aResume, Semaphore& aDoneWithResume);
 
 	static void Create()
 	{

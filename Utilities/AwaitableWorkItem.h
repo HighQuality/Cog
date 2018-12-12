@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <mutex>
 #include "Barrier.h"
 
 class WorkItemBase
@@ -11,7 +10,7 @@ public:
 protected:
 	friend class ThreadPool;
 	virtual void DoWork() = 0;
-	
+
 	bool myIsBarrier = false;
 };
 
@@ -50,69 +49,53 @@ protected:
 };
 
 template <typename TLambda>
-class AwaitableLambdaWorkItem : public AwaitableWorkItem<std::invoke_result_t<TLambda>>
+class AwaitableLambdaWorkItem : public AwaitableWorkItem<decltype(TLambda::operator())>, TLambda
 {
 public:
-	using ReturnType = std::invoke_result_t<TLambda>;
+	using ReturnType = decltype(TLambda::operator());
 	using Base = AwaitableWorkItem<ReturnType>;
 
 	AwaitableLambdaWorkItem(TLambda aLambda)
+		: TLambda(Move(aLambda))
 	{
-		new (static_cast<void*>(&myLambda)) TLambda(Move(aLambda));
-	}
-
-	~AwaitableLambdaWorkItem()
-	{
-		reinterpret_cast<TLambda&>(myLambda).~TLambda();
 	}
 
 protected:
 	void DoWork() override
 	{
 		if constexpr (!IsSame<ReturnType, void>)
-			this->myResult = reinterpret_cast<TLambda&>(myLambda)();
+			this->myResult = TLambda::operator()();
 		else
-			reinterpret_cast<TLambda&>(myLambda)();
-		
+			TLambda::operator()();
+
 		// Marks worker as done
 		Base::DoWork();
 	}
-	
-private:
-	std::aligned_storage<sizeof(TLambda), alignof(TLambda)> myLambda;
 };
 
 template <typename TLambda>
-class LambdaWorkItem : public WorkItemBase
+class LambdaWorkItem : public WorkItemBase, TLambda
 {
 public:
 	using Base = WorkItemBase;
 
 	LambdaWorkItem(TLambda aLambda)
+		: TLambda(Move(aLambda))
 	{
-		new (static_cast<void*>(&myLambda)) TLambda(Move(aLambda));
-	}
-
-	~LambdaWorkItem()
-	{
-		reinterpret_cast<TLambda&>(myLambda).~TLambda();
 	}
 
 protected:
 	void DoWork() override
 	{
-		reinterpret_cast<TLambda&>(myLambda)();
+		TLambda::operator()();
 	}
-
-private:
-	std::aligned_storage<sizeof(TLambda), alignof(TLambda)> myLambda;
 };
 
 class BarrierWorkItem : public WorkItemBase
 {
 public:
 	using Base = WorkItemBase;
-	
+
 	BarrierWorkItem(const u32 aNumThreads)
 		: myBarrier(aNumThreads)
 	{

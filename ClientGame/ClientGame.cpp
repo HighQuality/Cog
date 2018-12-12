@@ -6,6 +6,8 @@
 ClientGame::ClientGame()
 {
 	myWorld = new GameWorld();
+
+	AddWorld(*myWorld);
 }
 
 ClientGame::~ClientGame()

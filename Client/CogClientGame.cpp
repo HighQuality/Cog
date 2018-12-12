@@ -97,6 +97,8 @@ void CogClientGame::Tick(const Time& aDeltaTime)
 		}
 	}
 
+	Base::Tick(aDeltaTime);
+
 	myRenderer->ClearBackbuffer();
 
 	myRenderer->Draw();

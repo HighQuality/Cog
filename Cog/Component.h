@@ -4,6 +4,7 @@ class CogGameWorld;
 class RenderTarget;
 class BaseComponentFactoryChunk;
 class Object;
+class ObjectInitializer;
 
 class Component
 {
@@ -32,7 +33,7 @@ protected:
 	virtual void Initialize() {  }
 
 	friend Object;
-	virtual void ResolveDependencies();
+	virtual void ResolveDependencies(ObjectInitializer& aInitializer);
 
 	virtual void Tick(Time aDeltaTime) {  }
 	virtual void Draw2D(RenderTarget& aRenderTarget) const {  }

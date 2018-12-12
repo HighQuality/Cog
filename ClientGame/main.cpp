@@ -3,8 +3,6 @@
 
 int main()
 {
-	gThreadID = 1;
-
 	ClientGame game;
 	game.Run();
 

@@ -4,6 +4,10 @@
 
 void ObjectInitializer::InitializeObject()
 {
-	myObject->ResolveDependencies();
+	// Double initialization
+	CHECK(!wasInitialized);
+	wasInitialized = true;
+
+	myObject->ResolveDependencies(*this);
 	myObject->Initialize();
 }

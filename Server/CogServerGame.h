@@ -4,6 +4,8 @@
 class CogServerGame : public Game
 {
 public:
+	using Base = Game;
+
 	CogServerGame();
 	~CogServerGame();
 	

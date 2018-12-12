@@ -14,15 +14,10 @@
 #define ARRAY_BOUNDSCHECK 1
 #endif
 
+bool IsInGameThread();
+
 #include "Casts.h"
 #include "Object.h"
+#include "ObjectInitializer.h"
 #include "Component.h"
 #include "Pointer.h"
-
-// 0 = unassigned, 1 = game thread
-inline u16 gThreadID = 0;
-
-FORCEINLINE bool IsInGameThread()
-{
-	return gThreadID == 1;
-}

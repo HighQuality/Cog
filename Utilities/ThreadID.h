@@ -13,6 +13,16 @@ public:
 		return ourThreadID;
 	}
 
+	bool operator==(const ThreadID& aOther) const
+	{
+		return myID == aOther.myID;
+	}
+
+	bool operator!=(const ThreadID& aOther) const
+	{
+		return myID != aOther.myID;
+	}
+
 private:
 	ThreadID()
 	{

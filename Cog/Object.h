@@ -6,6 +6,7 @@ class GameWorld;
 class CogGameWorld;
 class Component;
 class ObjectFactoryChunk;
+class ObjectInitializer;
 
 template <typename T>
 class ComponentFactory;
@@ -58,9 +59,9 @@ public:
 	}
 
 protected:
-	friend class ObjectInitializer;
+	friend ObjectInitializer;
 
-	void ResolveDependencies();
+	void ResolveDependencies(ObjectInitializer& aInitializer);
 	void Initialize();
 
 private:
@@ -70,21 +71,8 @@ private:
 	template <typename T>
 	friend class Ptr;
 
-	template <typename TComponentType>
-	static BaseComponentFactory* CreateComponentFactory()
-	{
-		return new ComponentFactory<TComponentType>(TypeID<Component>::Resolve<TComponentType>());
-	}
-
-	// NOTE: Should only be used by ObjectInitializer class
-	template <typename TComponentType>
-	TComponentType& AddComponent()
-	{
-		return CastChecked<TComponentType>(AddComponent(TypeID<Component>::Resolve<TComponentType>(), &CreateComponentFactory<TComponentType>));
-	}
-
 	// NOTE: Should only be used from Component::AddComponent<TComponentType>
-	Component& AddComponent(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)());
+	Component& CreateComponentByID(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)());
 
 	GameWorld* myWorld;
 	ObjectFactoryChunk* myChunk;

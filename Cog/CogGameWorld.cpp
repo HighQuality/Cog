@@ -24,6 +24,8 @@ CogGameWorld::~CogGameWorld()
 
 ObjectInitializer CogGameWorld::CreateObject()
 {
+	CHECK(IsInGameThread());
+
 	Object& object = myObjectFactory->Allocate();
 	object.myWorld = GetSubPointer();
 	return ObjectInitializer(object);

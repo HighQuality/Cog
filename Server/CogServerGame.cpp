@@ -16,5 +16,5 @@ bool CogServerGame::ShouldKeepRunning() const
 
 void CogServerGame::Tick(const Time& aDeltaTime)
 {
-	
+	Base::Tick(aDeltaTime);
 }

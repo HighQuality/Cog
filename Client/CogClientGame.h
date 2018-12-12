@@ -7,7 +7,7 @@ class RenderEngine;
 class CogClientGame : public Game
 {
 public:
-	using Base = CogGame;
+	using Base = Game;
 
 	CogClientGame();
 	~CogClientGame();

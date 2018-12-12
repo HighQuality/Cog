@@ -98,7 +98,6 @@
   <ItemGroup>
     <ClInclude Include="BaseComponentFactory.h" />
     <ClInclude Include="BaseComponentFactoryChunk.h" />
-    <ClInclude Include="Callback.h" />
     <ClInclude Include="Casts.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentFactory.h" />

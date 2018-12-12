@@ -12,6 +12,7 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include <atomic>
 
 #ifdef _MSC_VER
 #define FORCEINLINE __forceinline

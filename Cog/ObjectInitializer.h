@@ -1,6 +1,10 @@
 ﻿#pragma once
+#include "Object.h"
 
-class Object;
+template <typename t>
+class ComponentFactory;
+class BaseComponentFactory;
+class Component;
 
 class ObjectInitializer
 {
@@ -16,6 +20,8 @@ public:
 
 	ObjectInitializer(ObjectInitializer&& aOther)
 	{
+		// Moved after initialization, this is probably not intended as the receiver would have no use for it.
+		ENSURE(!wasInitialized);
 		*this = Move(aOther);
 	}
 
@@ -23,6 +29,7 @@ public:
 	{
 		CHECK(!aOther.wasMoved);
 		wasMoved = false;
+		wasInitialized = aOther.wasInitialized;
 		myObject = aOther.myObject;
 		aOther.wasMoved = true;
 		return *this;
@@ -39,7 +46,7 @@ public:
 	template <typename TComponentType>
 	TComponentType& AddComponent()
 	{
-		return myObject->AddComponent<TComponentType>();
+		return CastChecked<TComponentType>(myObject->CreateComponentByID(TypeID<Component>::Resolve<TComponentType>(), &CreateComponentFactory<TComponentType>));
 	}
 
 	Object& Initialize()
@@ -51,8 +58,15 @@ public:
 	}
 
 private:
+	template <typename TComponentType>
+	static BaseComponentFactory* CreateComponentFactory()
+	{
+		return new ComponentFactory<TComponentType>(TypeID<Component>::Resolve<TComponentType>());
+	}
+
 	void InitializeObject();
 
 	Object* myObject;
 	bool wasMoved = false;
+	bool wasInitialized = false;
 };

@@ -4,21 +4,29 @@
 #include "Stopwatch.h"
 #include "BinaryData.h"
 #include "CogGameWorld.h"
+#include <Semaphore.h>
+
+CogGame* CogGame::ourGame;
+
+bool IsInGameThread()
+{
+	return CogGame::Get().IsInGameThread();
+}
 
 CogGame::CogGame()
+	: myThreadPool(*new ThreadPool(8)),
+	myGameThreadID(ThreadID::Get())
 {
-	CHECK(gThreadID == 0 || gThreadID == 1);
-	gThreadID = 1;
-
-	BinaryData b;
-	b.Compress();
-
-	myThreadPool = new ThreadPool();
+	// Multiple game instances are not allowed under 1 process
+	CHECK(!ourGame);
+	ourGame = this;
 }
 
 CogGame::~CogGame()
 {
-	delete myThreadPool;
+	delete &myThreadPool;
+
+	ourGame = nullptr;
 }
 
 void CogGame::Run()
@@ -48,20 +56,43 @@ void CogGame::Run()
 
 void CogGame::Tick(const Time& aDeltaTime)
 {
+	Semaphore doneWithSemaphore;
+	Semaphore resume;
+	myThreadPool.Pause(resume, doneWithSemaphore);
+
 	for (auto world : myWorlds)
 		world->DispatchTick(aDeltaTime);
-
+	
+	// Resume the thread pool
+	resume.Notify();
+	doneWithSemaphore.Wait();
+	
 	for (;;)
 	{
-		// Wait for work to finish
-		myThreadPool->Barrier();
+		myThreadPool.Pause(resume, doneWithSemaphore);
+	
+		auto synchronizedCallback = mySynchronizedCallbacks.Gather();
+	
+		for (auto synchronizedWork : synchronizedCallback)
+		{
+			synchronizedWork->Call();
+			delete synchronizedWork;
+		}
 
-
+		// Resume the thread pool
+		resume.Notify();
+		doneWithSemaphore.Wait();
+	
+		// Stop iterating if we did no work
+		if (synchronizedCallback.GetLength() == 0)
+			break;
 	}
+
+	// Println(L"Tick % FPS", 1.f / aDeltaTime.Seconds());
 }
 
 void CogGame::AddWorld(CogGameWorld& aWorld)
 {
+	CHECK(IsInGameThread());
 	myWorlds.Add(&aWorld);
 }
-
