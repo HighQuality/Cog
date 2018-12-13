@@ -328,6 +328,13 @@ public:
 		return FindOrAdd(aKey);
 	}
 
+	FORCEINLINE const TValue& operator[](FindType aKey) const
+	{
+		const TValue* value = Find(aKey);
+		CHECK(value);
+		return *value;
+	}
+
 	FORCEINLINE bool ContainsKey(const FindType& aKey) const
 	{
 		return Find(aKey) != nullptr;

@@ -104,6 +104,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="ClientComponentList.cpp" />
+    <ClCompile Include="ClientTestComponent.cpp" />
     <ClCompile Include="CogClientGame.cpp" />
     <ClCompile Include="DrawCall.cpp" />
     <ClCompile Include="InputLayout.cpp" />
@@ -123,6 +125,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="ClientComponentList.h" />
+    <ClInclude Include="ClientTestComponent.h" />
     <ClInclude Include="CogClientGame.h" />
     <ClInclude Include="DrawCall.h" />
     <ClInclude Include="InputLayout.h" />

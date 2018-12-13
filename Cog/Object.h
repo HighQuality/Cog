@@ -2,8 +2,6 @@
 #include "TypeID.h"
 
 class BaseComponentFactory;
-class Scene;
-class CogScene;
 class Component;
 class ObjectFactoryChunk;
 class ObjectInitializer;
@@ -24,8 +22,12 @@ public:
 	Object& operator=(Object&&) = delete;
 
 	// TODO: Should these return const references if we are const?
-	FORCEINLINE Scene& GetScene() const { return *myScene; }
-	FORCEINLINE CogScene& GetCogScene() const { return *reinterpret_cast<CogScene*>(myScene); }
+	FORCEINLINE Object& GetParent() const { return *myParent; }
+	FORCEINLINE Object* TryGetParent() const { return myParent; }
+	FORCEINLINE bool HasParent() const { return myParent != nullptr; }
+
+	ObjectInitializer CreateChild();
+	void Destroy();
 
 	template <typename T>
 	const T& GetComponent() const
@@ -55,7 +57,7 @@ public:
 		if (!myComponentTypes.IsValidIndex(index) || myComponentTypes[index].GetLength() == 0)
 			return nullptr;
 
-		return myComponentTypes[index][0];
+		return myComponentTypes[index][0].component;
 	}
 
 	template <typename T, typename TCallback>
@@ -66,8 +68,8 @@ public:
 		if (componentID >= myComponentTypes.GetLength())
 			return;
 
-		for (Component* component : myComponentTypes[componentID])
-			aCallback(reinterpret_cast<T&>(*component));
+		for (const ComponentContainer& componentContainer : myComponentTypes[componentID])
+			aCallback(reinterpret_cast<T&>(*componentContainer.component));
 	}
 
 	template <typename T, typename TCallback>
@@ -78,8 +80,8 @@ public:
 		if (componentID >= myComponentTypes.GetLength())
 			return;
 
-		for (Component* component : myComponentTypes[componentID])
-			aCallback(reinterpret_cast<const T&>(*component));
+		for (const ComponentContainer& componentContainer : myComponentTypes[componentID])
+			aCallback(reinterpret_cast<const T&>(*componentContainer.component));
 	}
 
 protected:
@@ -95,12 +97,18 @@ private:
 	template <typename T>
 	friend class Ptr;
 
-	// NOTE: Should only be used from Component::AddComponent<TComponentType>
-	Component& CreateComponentByID(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)());
+	// NOTE: Should only be used from ObjectInitializer::AddComponent<TComponentType>
+	Component& CreateComponentByID(TypeID<Component> aComponentID);
 
-	Scene* myScene;
-	ObjectFactoryChunk* myChunk;
+	Object* myParent = nullptr;
+	ObjectFactoryChunk* myChunk = nullptr;
+
+	struct ComponentContainer
+	{
+		Component* component = nullptr;
+		bool isInitialRegistration = false;
+	};
 
 	// TODO: Change inner array to store at least 1 pointer on the "stack"
-	Array<Array<Component*>> myComponentTypes;
+	Array<Array<ComponentContainer>> myComponentTypes;
 };

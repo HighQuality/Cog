@@ -114,6 +114,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="ServerGame.h" />
+    <ClInclude Include="ServerGameComponentList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -122,6 +123,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ServerGame.cpp" />
+    <ClCompile Include="ServerGameComponentList.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

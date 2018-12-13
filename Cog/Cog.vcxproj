@@ -100,13 +100,16 @@
     <ClInclude Include="BaseComponentFactoryChunk.h" />
     <ClInclude Include="Casts.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="ComponentData.h" />
     <ClInclude Include="ComponentFactory.h" />
     <ClInclude Include="ComponentFactoryChunk.h" />
+    <ClInclude Include="ComponentList.h" />
+    <ClInclude Include="EngineComponentList.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventListBase.h" />
     <ClInclude Include="CogGame.h" />
-    <ClInclude Include="CogScene.h" />
     <ClInclude Include="GameThreadCallback.h" />
+    <ClInclude Include="InheritComponent.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectFactory.h" />
     <ClInclude Include="ObjectFunctionView.h" />
@@ -118,7 +121,8 @@
   <ItemGroup>
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="CogGame.cpp" />
-    <ClCompile Include="CogScene.cpp" />
+    <ClCompile Include="ComponentList.cpp" />
+    <ClCompile Include="EngineComponentList.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjectInitializer.cpp" />
     <ClCompile Include="pch.cpp">

@@ -1,8 +1,9 @@
 #pragma once
 #include "BaseComponentFactoryChunk.h"
 #include "CogGame.h"
+#include "InheritComponent.h"
+#include <FunctionView.h>
 
-class CogScene;
 class RenderTarget;
 class BaseComponentFactoryChunk;
 class Object;
@@ -19,21 +20,24 @@ public:
 
 	Component& operator=(const Component&) = delete;
 	Component& operator=(Component&&) = delete;
-
+	
 	FORCEINLINE bool IsTickEnabled() const { return myChunk->IsTickEnabled(myChunkIndex); }
 	FORCEINLINE bool IsVisible() const { return myChunk->IsVisible(myChunkIndex); }
 
 	// TODO: Should these return const references if we are const?
 	FORCEINLINE Object& GetObject() const { return myChunk->FindObject(myChunkIndex); }
-	FORCEINLINE Scene& GetScene() const { return GetObject().GetScene(); }
-	FORCEINLINE CogScene& GetCogScene() const { return GetObject().GetCogScene(); }
-	CogGame& GetCogGame() const;
-
+	
+	FORCEINLINE Object& GetParent() const { return GetObject().GetParent(); }
+	FORCEINLINE Object* TryGetParent() const { return GetObject().TryGetParent(); }
+	FORCEINLINE bool HasParent() const { return GetObject().HasParent(); }
+	
 	template <typename TType, typename ...TArgs>
 	void Synchronize(TType& aObject, void(TType::*aFunction)(TArgs...))
 	{
-		GetCogGame().Synchronize(aObject, aFunction);
+		GetGame().Synchronize(aObject, aFunction);
 	}
+
+	FORCEINLINE virtual void GetBaseClasses(const FunctionView<void(const TypeID<Component>&)>& aFunction) const { }
 
 	// TODO: These are only public since ComponentFactoryChunk needs to access them in order to compare them to this base function
 	virtual void Tick(Time aDeltaTime) {  }
@@ -43,8 +47,8 @@ public:
 protected:
 	Component() = default;
 	
-	void SetTickEnabled(const bool aShouldTick) { myChunk->SetTickEnabled(myChunkIndex, aShouldTick); }
-	void SetIsVisible(const bool aIsVisible) { myChunk->SetIsVisible(myChunkIndex, aIsVisible); }
+	void SetTickEnabled(const bool aShouldTick);
+	void SetIsVisible(const bool aIsVisible);
 
 	virtual void Initialize() {  }
 
@@ -59,8 +63,7 @@ private:
 	friend class Ptr;
 
 	friend Object;
-	friend CogScene;
-
+	
 	BaseComponentFactoryChunk* myChunk;
 	u16 myChunkIndex;
 };

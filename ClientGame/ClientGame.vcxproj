@@ -113,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientGame.cpp" />
+    <ClCompile Include="ClientGameComponentList.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -121,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientGame.h" />
+    <ClInclude Include="ClientGameComponentList.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

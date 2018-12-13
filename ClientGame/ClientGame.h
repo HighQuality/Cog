@@ -1,8 +1,6 @@
 #pragma once
 #include <CogClientGame.h>
 
-class Scene;
-
 class ClientGame final : public CogClientGame
 {
 public:
@@ -10,7 +8,4 @@ public:
 
 	ClientGame();
 	~ClientGame();
-
-private:
-	Scene* myScene = nullptr;
 };

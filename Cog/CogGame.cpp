@@ -2,19 +2,25 @@
 #include "CogGame.h"
 #include "ThreadPool.h"
 #include "Stopwatch.h"
-#include "CogScene.h"
+#include "Component.h"
+#include "BaseComponentFactory.h"
+#include "BaseComponentFactoryChunk.h"
+#include "Object.h"
+#include "ObjectFactory.h"
 #include <Semaphore.h>
+#include "ComponentList.h"
 
 CogGame* CogGame::ourGame;
 
 bool IsInGameThread()
 {
-	return CogGame::Get().IsInGameThread();
+	return GetGame().IsInGameThread();
 }
 
 CogGame::CogGame()
 	: myThreadPool(*new ThreadPool(8)),
-	myGameThreadID(ThreadID::Get())
+	myGameThreadID(ThreadID::Get()),
+	myObjectFactory(*new ObjectFactory())
 {
 	// Multiple game instances are not allowed under 1 process
 	CHECK(!ourGame);
@@ -23,7 +29,17 @@ CogGame::CogGame()
 
 CogGame::~CogGame()
 {
+	myObjectFactory.ReturnAll();
+
+	for (BaseComponentFactory* factory : myComponentFactories)
+		delete factory;
+	myComponentFactories.Clear();
+
+	delete &myObjectFactory;
+
 	delete &myThreadPool;
+
+	delete myComponentList;
 
 	ourGame = nullptr;
 }
@@ -59,8 +75,7 @@ void CogGame::Tick(const Time& aDeltaTime)
 	Semaphore resume;
 	myThreadPool.Pause(resume, doneWithSemaphore);
 
-	for (auto world : myWorlds)
-		world->DispatchTick(aDeltaTime);
+	DispatchTick(aDeltaTime);
 	
 	// Resume the thread pool
 	resume.Notify();
@@ -87,8 +102,77 @@ void CogGame::Tick(const Time& aDeltaTime)
 	// Println(L"Tick % FPS", 1.f / aDeltaTime.Seconds());
 }
 
-void CogGame::AddScene(CogScene& aWorld)
+BaseComponentFactory& CogGame::FindOrCreateComponentFactory(const TypeID<Component> aComponentType)
+{
+	myComponentFactories.Resize(TypeID<Component>::MaxUnderlyingInteger());
+
+	BaseComponentFactory*& factory = myComponentFactories[aComponentType.GetUnderlyingInteger()];
+	
+	if (factory == nullptr)
+	{
+		const ComponentData& componentData = myComponentList->GetComponentData(aComponentType);
+		
+		if (const ComponentData* specializationData = componentData.GetSpecialization())
+			factory = specializationData->AllocateFactory();
+		else
+			factory = componentData.AllocateFactory();
+	}
+
+	return *factory;
+}
+
+void CogGame::DispatchTick(Time aDeltaTime)
+{
+	for (BaseComponentFactory* factory : myComponentFactories)
+	{
+		if (!factory)
+			continue;
+
+		factory->IterateChunks([aDeltaTime](BaseComponentFactoryChunk& aChunk)
+		{
+			aChunk.DispatchTick(aDeltaTime);
+		});
+	}
+}
+
+void CogGame::DispatchDraw(RenderTarget& aRenderTarget)
+{
+	for (BaseComponentFactory* factory : myComponentFactories)
+	{
+		if (!factory)
+			continue;
+
+		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
+		{
+			aChunk.DispatchDraw3D(aRenderTarget);
+		});
+	}
+
+	for (BaseComponentFactory* factory : myComponentFactories)
+	{
+		if (!factory)
+			continue;
+
+		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
+		{
+			aChunk.DispatchDraw2D(aRenderTarget);
+		});
+	}
+}
+
+ObjectInitializer CogGame::CreateObject()
 {
 	CHECK(IsInGameThread());
-	myWorlds.Add(&aWorld);
+	return ObjectInitializer(AllocateObject());
+}
+
+Object& CogGame::AllocateObject()
+{
+	CHECK(IsInGameThread());
+	return myObjectFactory.Allocate();
+}
+
+void CogGame::AssignComponentList(const ComponentList& aComponents)
+{
+	myComponentList = &aComponents;
 }

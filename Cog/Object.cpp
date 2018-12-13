@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Object.h"
 #include "Component.h"
-#include "CogScene.h"
+#include "BaseComponentFactory.h"
 
 Object::Object()
 {
@@ -11,9 +11,11 @@ Object::~Object()
 {
 	for (auto& componentList : myComponentTypes)
 	{
-		for (auto& component : componentList)
+		for (const ComponentContainer& container : componentList)
 		{
-			component->myChunk->ReturnByID(component->myChunkIndex);
+			if (!container.isInitialRegistration)
+				continue;
+			container.component->myChunk->ReturnByID(container.component->myChunkIndex);
 		}
 		componentList.Clear();
 	}
@@ -31,17 +33,25 @@ void Object::ResolveDependencies(ObjectInitializer& aInitializer)
 
 	isResolvingDependencies = true;
 
-	for (const Array<Component*>& components : myComponentTypes)
-		newComponents.Append(components);
+	for (const Array<ComponentContainer>& components : myComponentTypes)
+	{
+		newComponents.PrepareAdd(components.GetLength());
+
+		for (const ComponentContainer& container : components)
+		{
+			if (!container.isInitialRegistration)
+				continue;
+			newComponents.Add(container.component);
+		}
+	}
 
 	i32 oldLength = 0;
 
 	do
 	{
-		const i32 start = oldLength;
 		const i32 end = newComponents.GetLength();
 
-		for (i32 i = start; i < end; ++i)
+		for (i32 i = oldLength; i < end; ++i)
 			newComponents[i]->ResolveDependencies(aInitializer);
 
 		oldLength = end;
@@ -55,19 +65,50 @@ void Object::Initialize()
 {
 }
 
-Component& Object::CreateComponentByID(TypeID<Component> aComponentID, BaseComponentFactory*(*aFactoryCreator)())
+Component& Object::CreateComponentByID(TypeID<Component> aComponentID)
 {
-	BaseComponentFactory& factory = GetCogScene().FindOrCreateComponentFactory(aComponentID, aFactoryCreator);
+	BaseComponentFactory& factory = GetGame().FindOrCreateComponentFactory(aComponentID);
 	Component& component = factory.AllocateGeneric();
 	component.myChunk->AssignObject(component.myChunkIndex, *this);
 
 	myComponentTypes.Resize(TypeID<Component>::MaxUnderlyingInteger());
-	myComponentTypes[aComponentID.GetUnderlyingInteger()].Add(&component);
+
+	ComponentContainer container;
+	container.component = &component;
+	container.isInitialRegistration = true;
+
+	myComponentTypes[aComponentID.GetUnderlyingInteger()].Add(container);
 
 	if (isResolvingDependencies)
 	{
 		newComponents.Add(&component);
 	}
 
+	component.GetBaseClasses([this, &component](const TypeID<Component>& aType)
+	{
+		const u16 typeIndex = aType.GetUnderlyingInteger();
+		if (typeIndex >= myComponentTypes.GetLength())
+			myComponentTypes.Resize(typeIndex + 1);
+
+		ComponentContainer container;
+		container.component = &component;
+		container.isInitialRegistration = false;
+		myComponentTypes[typeIndex].Add(Move(container));
+	});
+
 	return component;
+}
+
+ObjectInitializer Object::CreateChild()
+{
+	Object& obj = GetGame().AllocateObject();
+	obj.myParent = this;
+	return ObjectInitializer(obj);
+}
+
+void Object::Destroy()
+{
+	CHECK(IsInGameThread());
+
+	myChunk->Return(*this);
 }

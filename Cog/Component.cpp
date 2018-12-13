@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "Component.h"
-#include "CogScene.h"
 
-CogGame& Component::GetCogGame() const
+void Component::SetTickEnabled(const bool aShouldTick)
 {
-	Object& object = GetObject();
-	CogScene& scene = object.GetCogScene();
-	return scene.GetCogGame();
+	myChunk->SetTickEnabled(myChunkIndex, aShouldTick);
+}
+
+void Component::SetIsVisible(const bool aIsVisible)
+{
+	myChunk->SetIsVisible(myChunkIndex, aIsVisible);
 }

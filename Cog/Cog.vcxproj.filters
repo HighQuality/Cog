@@ -17,8 +17,11 @@
     <ClInclude Include="Casts.h" />
     <ClInclude Include="ObjectFunctionView.h" />
     <ClInclude Include="GameThreadCallback.h" />
-    <ClInclude Include="CogScene.h" />
     <ClInclude Include="TestComponent.h" />
+    <ClInclude Include="InheritComponent.h" />
+    <ClInclude Include="ComponentList.h" />
+    <ClInclude Include="ComponentData.h" />
+    <ClInclude Include="EngineComponentList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -26,7 +29,8 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="CogGame.cpp" />
     <ClCompile Include="ObjectInitializer.cpp" />
-    <ClCompile Include="CogScene.cpp" />
     <ClCompile Include="TestComponent.cpp" />
+    <ClCompile Include="ComponentList.cpp" />
+    <ClCompile Include="EngineComponentList.cpp" />
   </ItemGroup>
 </Project>

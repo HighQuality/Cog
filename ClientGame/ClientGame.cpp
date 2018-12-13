@@ -1,20 +1,15 @@
 #include "pch.h"
 #include "ClientGame.h"
-#include <Scene.h>
+#include "ClientGameComponentList.h"
 #include <TestComponent.h>
 
 ClientGame::ClientGame()
 {
-	myScene = new Scene(*this);
-	
-	AddScene(*myScene);
+	RegisterComponents<ClientGameComponentList>();
 
-	auto obj = myScene->CreateObject();
-	obj.AddComponent<TestComponent>();
+	CreateObject().AddComponent<TestComponent>();
 }
 
 ClientGame::~ClientGame()
 {
-	delete myScene;
-	myScene = nullptr;
 }

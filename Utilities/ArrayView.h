@@ -102,14 +102,14 @@ public:
 	{
 		if (aIndex < 0 || aIndex >= this->myLength)
 			return nullptr;
-		return this->myData[aIndex];
+		return &this->myData[aIndex];
 	}
 
 	FORCEINLINE const T* TryGet(const i32 aIndex) const
 	{
 		if (aIndex < 0 || aIndex >= this->myLength)
 			return nullptr;
-		return this->myData[aIndex];
+		return &this->myData[aIndex];
 	}
 
 	FORCEINLINE const T& TryGet(const i32 aIndex, const T& aDefaultValue) const

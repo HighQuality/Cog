@@ -46,7 +46,7 @@ public:
 	template <typename TComponentType>
 	TComponentType& AddComponent()
 	{
-		return CastChecked<TComponentType>(myObject->CreateComponentByID(TypeID<Component>::Resolve<TComponentType>(), &CreateComponentFactory<TComponentType>));
+		return CastChecked<TComponentType>(myObject->CreateComponentByID(TypeID<Component>::Resolve<TComponentType>()));
 	}
 
 	Object& Initialize()
@@ -58,12 +58,6 @@ public:
 	}
 
 private:
-	template <typename TComponentType>
-	static BaseComponentFactory* CreateComponentFactory()
-	{
-		return new ComponentFactory<TComponentType>(TypeID<Component>::Resolve<TComponentType>());
-	}
-
 	void InitializeObject();
 
 	Object* myObject;

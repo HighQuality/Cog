@@ -28,6 +28,8 @@ void EnsureLog(const char* aCondition);
 // #define FATAL(format, ...) abort()
 // #endif
 
+#define TODO FATAL(L"Function not implemented");
+
 #ifdef _MSC_VER
 
 #ifdef _DEBUG

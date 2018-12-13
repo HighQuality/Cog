@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="CogServerGame.h" />
+    <ClInclude Include="ServerComponentList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="CogServerGame.cpp" />
+    <ClCompile Include="ServerComponentList.cpp" />
   </ItemGroup>
 </Project>

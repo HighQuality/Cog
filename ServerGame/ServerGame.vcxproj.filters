@@ -3,10 +3,12 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="ServerGame.h" />
+    <ClInclude Include="ServerGameComponentList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ServerGame.cpp" />
+    <ClCompile Include="ServerGameComponentList.cpp" />
   </ItemGroup>
 </Project>

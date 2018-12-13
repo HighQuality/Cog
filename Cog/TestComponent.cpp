@@ -8,5 +8,5 @@ void TestComponent::Tick(Time aDeltaTime)
 
 void TestComponent::Callback()
 {
-	Println(L"Callback!");
+	// Println(L"Callback!");
 }

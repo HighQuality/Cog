@@ -4,6 +4,11 @@
 #include "ThreadID.h"
 
 class ThreadPool;
+class ObjectFactory;
+class BaseComponentFactory;
+class Component;
+class Object;
+class ComponentList;
 
 class CogGame
 {
@@ -23,7 +28,11 @@ public:
 
 	FORCEINLINE bool IsInGameThread() const { return myGameThreadID == ThreadID::Get(); }
 
-	static CogGame& Get()
+	BaseComponentFactory& FindOrCreateComponentFactory(TypeID<Component> aComponentType);
+
+	ObjectInitializer CreateObject();
+
+	static CogGame& GetCogGame()
 	{
 		return *ourGame;
 	}
@@ -31,13 +40,39 @@ public:
 protected:
 	virtual void Tick(const Time& aDeltaTime);
 
-	void AddScene(CogScene& aWorld);
+	template <typename T>
+	void RegisterComponents()
+	{
+		T* list = new T();
+		list->BuildList();
+		AssignComponentList(*list);
+	}
 
 private:
+	void AssignComponentList(const ComponentList& aComponents);
+	
+	void DispatchTick(Time aDeltaTime);
+	void DispatchDraw(RenderTarget& aRenderTarget);
+
+	friend Object;
+
+	// Only to be used by Object::CreateChild, use CreateObject instead
+	Object& AllocateObject();
+
+	ObjectFactory& myObjectFactory;
+	Array<BaseComponentFactory*> myComponentFactories;
+
 	EventListBase<ObjectFunctionView<void()>> mySynchronizedCallbacks;
 	ThreadPool& myThreadPool;
-	Array<CogScene*> myWorlds;
 	const ThreadID& myGameThreadID;
+
+	const ComponentList* myComponentList = nullptr;
 
 	static CogGame* ourGame;
 };
+
+template <typename TGameType = CogGame>
+static TGameType& GetGame()
+{
+	return CastChecked<TGameType>(CogGame::GetCogGame());
+}

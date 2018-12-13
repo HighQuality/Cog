@@ -1,11 +1,11 @@
 #pragma once
 
-class TestComponent : public Component
+class TestComponent : public InheritComponent<Component>
 {
 public:
 	void Tick(Time aDeltaTime) override;
 
 private:
-	void Callback();
+	virtual void Callback();
 };
 
