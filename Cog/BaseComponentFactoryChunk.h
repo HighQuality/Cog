@@ -1,14 +1,23 @@
 #pragma once
-#include "Component.h"
 
 class RenderTarget;
+class Object;
+class Component;
 
 class BaseComponentFactoryChunk
 {
 public:
 	BaseComponentFactoryChunk(const u16 aSize)
 	{
+		myReceiveTicks.Resize(aSize);
+		myIsVisible.Resize(aSize);
 		myGeneration.Resize(aSize);
+
+		for (bool& tick : myReceiveTicks)
+			tick = false;
+
+		for (bool& visible : myIsVisible)
+			visible = false;
 
 		for (u16& generation : myGeneration)
 			generation = 1;
@@ -20,31 +29,64 @@ public:
 	virtual void DispatchDraw2D(RenderTarget& aRenderTarget) = 0;
 	virtual void DispatchDraw3D(RenderTarget& aRenderTarget) = 0;
 
-	FORCEINLINE u16 FindGeneration(const Component& aComponent) const
+	FORCEINLINE u16 FindGeneration(const u16 aIndex) const
 	{
-		return myGeneration[static_cast<i32>(&aComponent - myBasePointer)];
+		return myGeneration[aIndex];
+	}
+
+	FORCEINLINE Object& FindObject(const u16 aIndex) const
+	{
+		return *myObjects[aIndex];
 	}
 	
 protected:
-	friend Component;
-
-	virtual void SetTickEnabled(const Component& aComponent, bool aTickEnabled) = 0;
-	virtual bool IsTickEnabled(const Component& aComponent) const = 0;
-
-	virtual void SetIsVisible(const Component& aComponent, bool aIsVisible) = 0;
-	virtual bool IsVisible(const Component& aComponent) const = 0;
-
-	void SetBasePointer(const Component* aBasePointer)
+	void InitializeSOAProperties(const u16 aIndex)
 	{
-		myBasePointer = aBasePointer;
+		myObjects[aIndex] = nullptr;
+		myGeneration[aIndex]++;
+		myReceiveTicks[aIndex] = true;
+		myIsVisible[aIndex] = true;
 	}
 
-	FORCEINLINE void IncrementGeneration(u16 aIndex)
+	void DestroySOAProperties(const u16 aIndex)
 	{
+		myObjects[aIndex] = nullptr;
 		myGeneration[aIndex]++;
+		myReceiveTicks[aIndex] = false;
+		myIsVisible[aIndex] = false;
+	}
+
+	friend Component;
+	friend Object;
+	
+	FORCEINLINE void AssignObject(const u16 aIndex, Object& aObject)
+	{
+		myObjects[aIndex] = nullptr;
+	}
+
+	FORCEINLINE void SetTickEnabled(const u16 aIndex, const bool aTickEnabled)
+	{
+		myReceiveTicks[aIndex] = aTickEnabled;
+	}
+
+	FORCEINLINE bool IsTickEnabled(const u16 aIndex) const
+	{
+		return myReceiveTicks[aIndex];
+	}
+
+	FORCEINLINE void SetIsVisible(const u16 aIndex, const bool aIsVisible)
+	{
+		myIsVisible[aIndex] = aIsVisible;
+	}
+
+	FORCEINLINE bool IsVisible(const u16 aIndex) const
+	{
+		return myIsVisible[aIndex];
 	}
 
 private:
-	const Component* myBasePointer;
+	Array<Object*> myObjects;
 	Array<u16> myGeneration;
+	Array<bool> myReceiveTicks;
+	Array<bool> myIsVisible;
 };

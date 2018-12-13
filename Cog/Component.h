@@ -1,4 +1,5 @@
 #pragma once
+#include "BaseComponentFactoryChunk.h"
 
 class CogScene;
 class RenderTarget;
@@ -17,23 +18,23 @@ public:
 	Component& operator=(const Component&) = delete;
 	Component& operator=(Component&&) = delete;
 
-	bool ShouldTick() const;
-	bool IsVisible() const;
+	FORCEINLINE bool IsTickEnabled() const { return myChunk->IsTickEnabled(myChunkIndex); }
+	FORCEINLINE bool IsVisible() const { return myChunk->IsVisible(myChunkIndex); }
 
 	// TODO: Should these return const references if we are const?
-	FORCEINLINE Object& GetObject() const { return *myObject; }
+	FORCEINLINE Object& GetObject() const { return myChunk->FindObject(myChunkIndex); }
 	FORCEINLINE Scene& GetScene() const { return GetObject().GetScene(); }
 
 protected:
 	Component();
 	
-	void SetShouldTick(bool aShouldTick);
-	void SetIsVisible(bool aIsVisible);
+	void SetTickEnabled(const bool aShouldTick) { myChunk->SetTickEnabled(myChunkIndex, aShouldTick); }
+	void SetIsVisible(const bool aIsVisible) { myChunk->SetIsVisible(myChunkIndex, aIsVisible); }
 
 	virtual void Initialize() {  }
 
 	friend Object;
-	virtual void ResolveDependencies(ObjectInitializer& aInitializer);
+	virtual void ResolveDependencies(ObjectInitializer& aInitializer) {  }
 
 	virtual void Tick(Time aDeltaTime) {  }
 	virtual void Draw2D(RenderTarget& aRenderTarget) const {  }
@@ -46,8 +47,9 @@ private:
 	template <typename T>
 	friend class Ptr;
 
+	friend Object;
 	friend CogScene;
 
 	BaseComponentFactoryChunk* myChunk;
-	Object* myObject;
+	u16 myChunkIndex;
 };

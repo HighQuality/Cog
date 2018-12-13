@@ -19,17 +19,17 @@ public:
 		for (ComponentFactoryChunk<T>* chunk : this->myChunks)
 			aCallback(*chunk);
 	}
-
+	
 protected:
 	Component& AllocateGeneric() override
 	{
-		return Base::Allocate();
+		return this->Allocate();
 	}
 
 	void ReturnGeneric(const Component& aComponent) override
 	{
 		CHECK(dynamic_cast<T*>(&aComponent));
 
-		Base::Return(aComponent);
+		this->Return(aComponent);
 	}
 };

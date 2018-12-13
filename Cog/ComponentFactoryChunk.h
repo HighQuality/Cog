@@ -11,28 +11,15 @@ public:
 	ComponentFactoryChunk(const u16 aSize)
 		: Base(aSize), BaseComponentFactoryChunk(aSize)
 	{
-		BaseComponentFactoryChunk::SetBasePointer(this->GetData());
-
-		myReceiveTicks.Resize(aSize);
-		myIsVisible.Resize(aSize);
-
-		for (bool& tick : myReceiveTicks)
-			tick = false;
-
-		for (bool& visible : myIsVisible)
-			visible = false;
 	}
 
 	T& Allocate() override
 	{
 		T& object = Base::Allocate();
 		object.myChunk = this;
+		object.myChunkIndex = this->IndexOf(object);
 
-		const u16 index = this->IndexOf(object);
-
-		IncrementGeneration(index);
-		myReceiveTicks[index] = true;
-		myIsVisible[index] = true;
+		InitializeSOAProperties(object.myChunkIndex);
 
 		return object;
 	}
@@ -43,9 +30,7 @@ public:
 
 		Base::Return(aObject);
 
-		IncrementGeneration(index);
-		myReceiveTicks[index] = false;
-		myIsVisible[index] = false;
+		DestroySOAProperties(index);
 	}
 
 	void DispatchTick(const Time aDeltaTime) override
@@ -56,7 +41,7 @@ public:
 
 		this->IteratePotentialIndices([this, aDeltaTime](const u16 aIndex)
 		{
-			if (myReceiveTicks[aIndex])
+			if (IsTickEnabled(aIndex))
 				static_cast<T&>(this->myObjectData[aIndex])->T::Tick(aDeltaTime);
 		});
 	}
@@ -69,8 +54,8 @@ public:
 
 		this->IteratePotentialIndices([this, &aRenderTarget](const u16 aIndex)
 		{
-			if (myIsVisible[aIndex])
-				static_cast<T&>(this->myObjectData[aIndex])->T::Draw2D(aRenderTarget);
+			if (IsVisible(aIndex))
+				static_cast<T&>(this->myObjectData[aIndex])-> T::Draw2D(aRenderTarget);
 		});
 	}
 
@@ -82,33 +67,8 @@ public:
 
 		this->IteratePotentialIndices([this, &aRenderTarget](const u16 aIndex)
 		{
-			if (myIsVisible[aIndex])
+			if (IsVisible(aIndex))
 				static_cast<T&>(this->myObjectData[aIndex])->T::Draw3D(aRenderTarget);
 		});
 	}
-
-protected:
-	void SetIsVisible(const Component& aComponent, const bool aIsVisible) override
-	{
-		myIsVisible[this->IndexOf(static_cast<const T&>(aComponent))] = aIsVisible;
-	}
-
-	bool IsVisible(const Component& aComponent) const override
-	{
-		return myIsVisible[this->IndexOf(static_cast<const T&>(aComponent))];
-	}
-
-	void SetTickEnabled(const Component& aComponent, const bool aTickEnabled) override
-	{
-		myReceiveTicks[this->IndexOf(static_cast<const T&>(aComponent))] = aTickEnabled;
-	}
-
-	bool IsTickEnabled(const Component& aComponent) const override
-	{
-		return myReceiveTicks[this->IndexOf(static_cast<const T&>(aComponent))];
-	}
-
-private:
-	Array<bool> myReceiveTicks;
-	Array<bool> myIsVisible;
 };

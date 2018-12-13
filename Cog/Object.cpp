@@ -50,6 +50,7 @@ Component& Object::CreateComponentByID(TypeID<Component> aComponentID, BaseCompo
 {
 	BaseComponentFactory& factory = GetCogScene().FindOrCreateComponentFactory(aComponentID, aFactoryCreator);
 	Component& component = factory.AllocateGeneric();
+	component.myChunk->AssignObject(component.myChunkIndex, *this);
 
 	myComponentTypes.Resize(TypeID<Component>::MaxUnderlyingInteger());
 	myComponentTypes[aComponentID.GetUnderlyingInteger()].Add(&component);

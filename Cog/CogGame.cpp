@@ -2,7 +2,6 @@
 #include "CogGame.h"
 #include "ThreadPool.h"
 #include "Stopwatch.h"
-#include "BinaryData.h"
 #include "CogScene.h"
 #include <Semaphore.h>
 
