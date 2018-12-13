@@ -91,7 +91,6 @@ protected:
 	void Initialize();
 
 private:
-	friend CogScene;
 	friend ObjectFactoryChunk;
 
 	template <typename T>
