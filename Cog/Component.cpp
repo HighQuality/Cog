@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "Component.h"
+#include "CogScene.h"
 
-Component::Component()
+CogGame& Component::GetCogGame() const
 {
-}
-
-Component::~Component()
-{
+	Object& object = GetObject();
+	CogScene& scene = object.GetCogScene();
+	return scene.GetCogGame();
 }

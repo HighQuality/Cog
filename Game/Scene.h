@@ -4,7 +4,7 @@
 class Scene : public CogScene
 {
 public:
-	Scene();
+	Scene(CogGame& aGame);
 	~Scene();
 
 protected:

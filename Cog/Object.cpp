@@ -9,6 +9,15 @@ Object::Object()
 
 Object::~Object()
 {
+	for (auto& componentList : myComponentTypes)
+	{
+		for (auto& component : componentList)
+		{
+			component->myChunk->ReturnByID(component->myChunkIndex);
+		}
+		componentList.Clear();
+	}
+	myComponentTypes.Clear();
 }
 
 static thread_local Array<Component*> newComponents;

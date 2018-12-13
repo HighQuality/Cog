@@ -9,9 +9,13 @@ class BaseComponentFactoryChunk
 public:
 	BaseComponentFactoryChunk(const u16 aSize)
 	{
+		myObjects.Resize(aSize);
+		myGeneration.Resize(aSize);
 		myReceiveTicks.Resize(aSize);
 		myIsVisible.Resize(aSize);
-		myGeneration.Resize(aSize);
+
+		for (auto& object : myObjects)
+			object = nullptr;
 
 		for (bool& tick : myReceiveTicks)
 			tick = false;
@@ -28,6 +32,8 @@ public:
 	virtual void DispatchTick(Time aDeltaTime) = 0;
 	virtual void DispatchDraw2D(RenderTarget& aRenderTarget) = 0;
 	virtual void DispatchDraw3D(RenderTarget& aRenderTarget) = 0;
+
+	virtual void ReturnByID(u16 aIndex) = 0;
 
 	FORCEINLINE u16 FindGeneration(const u16 aIndex) const
 	{
@@ -61,7 +67,7 @@ protected:
 	
 	FORCEINLINE void AssignObject(const u16 aIndex, Object& aObject)
 	{
-		myObjects[aIndex] = nullptr;
+		myObjects[aIndex] = &aObject;
 	}
 
 	FORCEINLINE void SetTickEnabled(const u16 aIndex, const bool aTickEnabled)

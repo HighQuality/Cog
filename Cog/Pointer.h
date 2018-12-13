@@ -5,7 +5,7 @@
 #include "BaseComponentFactoryChunk.h"
 
 template <typename T>
-class Ptr
+class Ptr final
 {
 public:
 	Ptr()
@@ -63,17 +63,17 @@ private:
 
 		if constexpr (IsDerivedFrom<T, Component>)
 		{
-			auto chunk = reinterpret_cast<Component*>(myPointer)->myChunk;
-			if (!chunk)
-				return 0;
-			return chunk->FindGeneration(*reinterpret_cast<Component*>(myPointer));
+			const Component& component = *reinterpret_cast<const Component*>(myPointer);
+			if (const auto* chunk = component.myChunk)
+				return chunk->FindGeneration(component.myChunkIndex);
+			return 0;
 		}
 		else if constexpr (IsDerivedFrom<T, Object>)
 		{
-			auto chunk = reinterpret_cast<Object*>(myPointer)->myChunk;
-			if (!chunk)
-				return 0;
-			return chunk->FindGeneration(*reinterpret_cast<Object*>(myPointer));
+			const Object& object = *reinterpret_cast<const Object*>(myPointer);
+			if (const auto* chunk = object.myChunk)
+				return chunk->FindGeneration(object);
+			return 0;
 		}
 		else
 		{

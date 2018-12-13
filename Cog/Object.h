@@ -58,6 +58,30 @@ public:
 		return myComponentTypes[index][0];
 	}
 
+	template <typename T, typename TCallback>
+	void ForEachComponent(const TCallback& aCallback)
+	{
+		const u16 componentID = TypeID<Component>::Resolve<T>().GetUnderlyingInteger();
+
+		if (componentID >= myComponentTypes.GetLength())
+			return;
+
+		for (Component* component : myComponentTypes[componentID])
+			aCallback(reinterpret_cast<T&>(*component));
+	}
+
+	template <typename T, typename TCallback>
+	void ForEachComponent(const TCallback& aCallback) const
+	{
+		const u16 componentID = TypeID<Component>::Resolve<T>().GetUnderlyingInteger();
+
+		if (componentID >= myComponentTypes.GetLength())
+			return;
+
+		for (Component* component : myComponentTypes[componentID])
+			aCallback(reinterpret_cast<const T&>(*component));
+	}
+
 protected:
 	friend ObjectInitializer;
 

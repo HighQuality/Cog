@@ -10,6 +10,7 @@ class Component;
 class BaseComponentFactory;
 class ObjectFactory;
 class ObjectInitializer;
+class CogGame;
 
 template <typename T, typename TChunkType = FactoryChunk<T>>
 class Factory;
@@ -17,12 +18,14 @@ class Factory;
 class CogScene
 {
 public:
-	CogScene();
+	CogScene(CogGame& aGame);
 	virtual ~CogScene();
 
 	void DispatchTick(Time aDeltaTime);
 	void DispatchDraw(RenderTarget& aRenderTarget);
 
+	FORCEINLINE CogGame& GetCogGame() const { return myGame; }
+	
 	[[nodiscard]]
 	ObjectInitializer CreateObject();
 
@@ -36,7 +39,8 @@ protected:
 	virtual const Scene* GetSubPointer() const = 0;
 
 private:
-	ObjectFactory* myObjectFactory;
+	ObjectFactory& myObjectFactory;
+	CogGame& myGame;
 
 	Array<BaseComponentFactory*> myComponentFactories;
 };

@@ -73,10 +73,7 @@ void CogGame::Tick(const Time& aDeltaTime)
 		auto synchronizedCallback = mySynchronizedCallbacks.Gather();
 	
 		for (auto synchronizedWork : synchronizedCallback)
-		{
-			synchronizedWork->Call();
-			delete synchronizedWork;
-		}
+			synchronizedWork.TryCall();
 
 		// Resume the thread pool
 		resume.Notify();

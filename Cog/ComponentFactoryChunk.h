@@ -33,6 +33,11 @@ public:
 		DestroySOAProperties(index);
 	}
 
+	void ReturnByID(u16 aIndex) override
+	{
+		Return(this->myObjectsData[aIndex]);
+	}
+
 	void DispatchTick(const Time aDeltaTime) override
 	{
 		// Skip classes that does not override the function
@@ -42,7 +47,7 @@ public:
 		this->IteratePotentialIndices([this, aDeltaTime](const u16 aIndex)
 		{
 			if (IsTickEnabled(aIndex))
-				static_cast<T&>(this->myObjectData[aIndex])->T::Tick(aDeltaTime);
+				this->myObjectsData[aIndex].T::Tick(aDeltaTime);
 		});
 	}
 
@@ -55,7 +60,7 @@ public:
 		this->IteratePotentialIndices([this, &aRenderTarget](const u16 aIndex)
 		{
 			if (IsVisible(aIndex))
-				static_cast<T&>(this->myObjectData[aIndex])-> T::Draw2D(aRenderTarget);
+				this->myObjectsData[aIndex].T::Draw2D(aRenderTarget);
 		});
 	}
 
@@ -68,7 +73,7 @@ public:
 		this->IteratePotentialIndices([this, &aRenderTarget](const u16 aIndex)
 		{
 			if (IsVisible(aIndex))
-				static_cast<T&>(this->myObjectData[aIndex])->T::Draw3D(aRenderTarget);
+				this->myObjectsData[aIndex].T::Draw3D(aRenderTarget);
 		});
 	}
 };

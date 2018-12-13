@@ -18,6 +18,7 @@
     <ClInclude Include="ObjectFunctionView.h" />
     <ClInclude Include="GameThreadCallback.h" />
     <ClInclude Include="CogScene.h" />
+    <ClInclude Include="TestComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -26,5 +27,6 @@
     <ClCompile Include="CogGame.cpp" />
     <ClCompile Include="ObjectInitializer.cpp" />
     <ClCompile Include="CogScene.cpp" />
+    <ClCompile Include="TestComponent.cpp" />
   </ItemGroup>
 </Project>

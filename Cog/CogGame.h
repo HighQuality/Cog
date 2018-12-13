@@ -18,7 +18,7 @@ public:
 	template <typename TType, typename ...TArgs>
 	void Synchronize(TType& aObject, void(TType::*aFunction)(TArgs...))
 	{
-		mySynchronizedCallbacks.Submit(new ObjectFunctionView(aObject, aFunction));
+		mySynchronizedCallbacks.Submit(ObjectFunctionView<void(TArgs...)>(aObject, aFunction));
 	}
 
 	FORCEINLINE bool IsInGameThread() const { return myGameThreadID == ThreadID::Get(); }
@@ -34,7 +34,7 @@ protected:
 	void AddScene(CogScene& aWorld);
 
 private:
-	EventListBase<BaseObjectFunctionView<void()>*> mySynchronizedCallbacks;
+	EventListBase<ObjectFunctionView<void()>> mySynchronizedCallbacks;
 	ThreadPool& myThreadPool;
 	Array<CogScene*> myWorlds;
 	const ThreadID& myGameThreadID;

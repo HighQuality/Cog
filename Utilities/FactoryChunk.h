@@ -42,7 +42,7 @@ public:
 
 		if (!IsFull())
 		{
-			for (u16 i = 0; i < mySize; ++i)
+			for (u16 i = 0; i < myMaxOccupiedIndex; ++i)
 			{
 				if (myOccupiedSlots[i])
 					callback(myObjectsData[i]);
@@ -91,6 +91,14 @@ public:
 		return myAllocatedObjects >= mySize;
 	}
 
+	void ReturnAll()
+	{
+		ForEach([this](const T& aObject)
+		{
+			Return(aObject);
+		});
+	}
+
 	virtual void Return(const T& aObject)
 	{
 		const u16 index = IndexOf(aObject);
@@ -131,12 +139,6 @@ protected:
 			aCallback(i);
 	}
 
-	FORCEINLINE const T* GetData() const
-	{
-		return myObjectsData;
-	}
-
-private:
 	Array<bool> myOccupiedSlots;
 	T* myObjectsData;
 	u16 mySize;

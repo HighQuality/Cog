@@ -28,8 +28,6 @@ protected:
 
 	void ReturnGeneric(const Component& aComponent) override
 	{
-		CHECK(dynamic_cast<T*>(&aComponent));
-
-		this->Return(aComponent);
+		this->Return(CastChecked<T>(aComponent));
 	}
 };

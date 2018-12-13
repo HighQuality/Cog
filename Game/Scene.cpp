@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "Scene.h"
 
-Scene::Scene()
+Scene::Scene(CogGame& aGame)
+	: CogScene(aGame)
 {
 }
 

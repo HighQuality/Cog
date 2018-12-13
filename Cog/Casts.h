@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-
 template <typename TTo, typename TFrom>
 FORCEINLINE TTo* Cast(TFrom* aFrom)
 {
@@ -10,25 +9,25 @@ FORCEINLINE TTo* Cast(TFrom* aFrom)
 template <typename TTo, typename TFrom>
 FORCEINLINE const TTo* Cast(const TFrom* aFrom)
 {
-	return Cast(const_cast<TFrom*>(aFrom));
+	return Cast<const TTo>(const_cast<TFrom*>(aFrom));
 }
 
 template <typename TTo, typename TFrom>
 FORCEINLINE TTo* Cast(TFrom& aFrom)
 {
-	return Cast(&aFrom);
+	return Cast<TTo>(&aFrom);
 }
 
 template <typename TTo, typename TFrom>
 FORCEINLINE const TTo* Cast(const TFrom& aFrom)
 {
-	return Cast(const_cast<TFrom*>(&aFrom));
+	return Cast<const TTo>(const_cast<TFrom*>(&aFrom));
 }
 
 template <typename TTo, typename TFrom>
 FORCEINLINE TTo& CastChecked(TFrom& aFrom)
 {
-	TTo* castedObject = Cast<TTo*>(&aFrom);
+	TTo* castedObject = Cast<TTo>(&aFrom);
 	CHECK(castedObject);
 	return *castedObject;
 }
@@ -36,5 +35,5 @@ FORCEINLINE TTo& CastChecked(TFrom& aFrom)
 template <typename TTo, typename TFrom>
 FORCEINLINE const TTo& CastChecked(const TFrom& aFrom)
 {
-	return CastChecked(const_cast<TFrom&>(&aFrom));
+	return CastChecked<const TTo>(const_cast<TFrom&>(aFrom));
 }

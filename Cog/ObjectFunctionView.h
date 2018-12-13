@@ -1,46 +1,88 @@
 ﻿#pragma once
+#include "Pointer.h"
 
-template <typename TType>
-class BaseObjectFunctionView;
-
-template <typename TReturn, typename ...TArgs>
-class BaseObjectFunctionView<TReturn(TArgs...)>
-{
-public:
-	virtual ~BaseObjectFunctionView() = default;
-	
-	virtual TReturn Call(TArgs ...aArgs) const = 0;
-};
-
-template <typename TType, typename TFunc>
+template <typename TFunc>
 class ObjectFunctionView;
 
-template <typename TObject, typename TReturn, typename ...TArgs>
-class ObjectFunctionView<TObject, TReturn(TArgs...)> final : public BaseObjectFunctionView<TReturn(TArgs...)>
+template <typename TReturn, typename ...TArgs>
+class ObjectFunctionView<TReturn(TArgs ...)>
 {
 public:
 	ObjectFunctionView() = default;
 
-	ObjectFunctionView(TObject& aObject, TReturn (TObject::*aFunction)(TArgs ...))
+	template <typename TObject>
+	ObjectFunctionView(TObject& aObject, TReturn(TObject::*aFunction)(const TArgs& ...))
 	{
-		myObject = aObject;
-		myFunction = aFunction;
+		Initialize<TObject, decltype(aFunction)>(aObject, aFunction);
+	}
+
+	template <typename TObject>
+	ObjectFunctionView(const TObject& aObject, TReturn(TObject::*aFunction)(const TArgs& ...) const)
+	{
+		Initialize<const TObject, decltype(aFunction)>(aObject, aFunction);
 	}
 
 	explicit operator bool() const { return IsValid(); }
 
 	bool IsValid() const
 	{
-		return myObject.IsValid() && myFunction;
+		if (!myIsValid)
+			return false;
+		return myIsValid(*this);
 	}
 
-	TReturn Call(TArgs ...aArgs) const final
+	template <typename TCallRet = TReturn>
+	EnableIf<!IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs, TCallRet& aReturnValue) const
+	{
+		if (!IsValid())
+			return false;
+		aReturnValue = (*myFunctionCaller)(&this, aArgs...);
+		return true;
+	}
+
+	template <typename TCallRet = TReturn>
+	EnableIf<IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs) const
+	{
+		if (!IsValid())
+			return false;
+		(*myFunctionCaller)(*this, aArgs...);
+		return true;
+	}
+
+	TReturn Call(const TArgs& ...aArgs) const
 	{
 		CHECK(IsValid());
-		return ((*myObject).*myFunction)(aArgs...);
+		return (*myFunctionCaller)(*this, aArgs...);
 	}
 
 private:
-	Ptr<TObject> myObject;
-	TReturn (TObject::*myFunction)(TArgs ...) = nullptr;
+	template <typename TObject, typename TMemberFunction>
+	void Initialize(TObject& aObject, TMemberFunction aMemberFunction)
+	{
+		new (static_cast<void*>(&myPointer)) Ptr<TObject>(aObject);
+
+		auto lambda = [aMemberFunction](TObject& aObject, const TArgs&... aArgs)
+		{
+			return (aObject.*aMemberFunction)(aArgs...);
+		};
+
+		myFunctionCaller = [](const ObjectFunctionView& aSelf, const TArgs& ...aArgs)
+		{
+			const Ptr<TObject>& ptr = *reinterpret_cast<const Ptr<TObject>*>(&aSelf.myPointer);
+			return reinterpret_cast<const decltype(lambda)*>(&aSelf.myFunctionStorage)->operator()(*ptr, aArgs...);
+		};
+
+		myIsValid = [](const ObjectFunctionView& aSelf)
+		{
+			const Ptr<TObject>& ptr = *reinterpret_cast<const Ptr<TObject>*>(&aSelf.myPointer);
+			return ptr.IsValid();
+		};
+
+		new(static_cast<void*>(&myFunctionStorage)) decltype(lambda)(Move(lambda));
+	}
+
+	std::aligned_storage_t<sizeof(Ptr<Object>), alignof(Ptr<Object>)> myPointer;
+	std::aligned_storage_t<8> myFunctionStorage;
+	TReturn (*myFunctionCaller)(const ObjectFunctionView&, const TArgs& ...) = nullptr;
+	bool (*myIsValid)(const ObjectFunctionView&) = nullptr;
 };

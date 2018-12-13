@@ -18,6 +18,12 @@ public:
 		for (Chunk* chunk : myChunks)
 			chunk->ForEach(callback);
 	}
+
+	void ReturnAll()
+	{
+		for (Chunk* chunk : myChunks)
+			chunk->ReturnAll();
+	}
 	
 	virtual T& Allocate()
 	{
