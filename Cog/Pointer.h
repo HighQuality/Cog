@@ -1,8 +1,11 @@
 ﻿#pragma once
 #include "Object.h"
 #include "Component.h"
+#include "Widget.h"
 #include "ObjectFactory.h"
 #include "BaseComponentFactoryChunk.h"
+#include "BaseWidgetFactoryChunk.h"
+#include "ObjectFactory.h"
 
 template <typename T>
 class Ptr final
@@ -27,6 +30,16 @@ public:
 	Ptr(T& aPointer)
 		: Ptr(&aPointer)
 	{
+	}
+
+	FORCEINLINE bool operator==(const Ptr& aOther) const
+	{
+		return myPointer == aOther.myPointer;
+	}
+
+	FORCEINLINE bool operator!=(const Ptr& aOther) const
+	{
+		return myPointer != aOther.myPointer;
 	}
 
 	explicit operator bool() const { return IsValid(); }
@@ -73,6 +86,13 @@ private:
 			const Object& object = *reinterpret_cast<const Object*>(myPointer);
 			if (const auto* chunk = object.myChunk)
 				return chunk->FindGeneration(object);
+			return 0;
+		}
+		else if constexpr (IsDerivedFrom<T, Widget>)
+		{
+			const Widget& widget = *reinterpret_cast<const Widget*>(myPointer);
+			if (const auto* chunk = widget.myChunk)
+				return chunk->FindGeneration(widget.myChunkIndex);
 			return 0;
 		}
 		else

@@ -2,6 +2,7 @@
 #include "EventListBase.h"
 #include "ObjectFunctionView.h"
 #include "ThreadID.h"
+#include "WidgetFactory.h"
 
 class ThreadPool;
 class ObjectFactory;
@@ -32,6 +33,14 @@ public:
 
 	ObjectInitializer CreateObject();
 
+	template <typename T>
+	T& CreateWidget()
+	{
+		const auto widgetTypeID = TypeID<Widget>::Resolve<T>();
+		BaseWidgetFactory& factory = FindOrCreateWidgetFactory(widgetTypeID, [&widgetTypeID]() { return new WidgetFactory<T>(widgetTypeID); });
+		return CastChecked<T>(factory.AllocateGeneric());
+	}
+
 	static CogGame& GetCogGame()
 	{
 		return *ourGame;
@@ -39,6 +48,9 @@ public:
 
 protected:
 	virtual void Tick(const Time& aDeltaTime);
+
+	virtual void DispatchWork(const Time& aDeltaTime);
+	virtual void DispatchTick(const Time& aDeltaTime);
 
 	template <typename T>
 	void RegisterComponents()
@@ -48,22 +60,22 @@ protected:
 		AssignComponentList(*list);
 	}
 
+	virtual BaseWidgetFactory& FindOrCreateWidgetFactory(const TypeID<Widget>& aWidgetType, const FunctionView<BaseWidgetFactory*()>& aFactoryCreator) = 0;
+
+	Array<BaseComponentFactory*> myComponentFactories;
+	ThreadPool& myThreadPool;
+
 private:
 	void AssignComponentList(const ComponentList& aComponents);
 	
-	void DispatchTick(Time aDeltaTime);
-	void DispatchDraw(RenderTarget& aRenderTarget);
-
 	friend Object;
 
 	// Only to be used by Object::CreateChild, use CreateObject instead
 	Object& AllocateObject();
 
 	ObjectFactory& myObjectFactory;
-	Array<BaseComponentFactory*> myComponentFactories;
 
 	EventListBase<ObjectFunctionView<void()>> mySynchronizedCallbacks;
-	ThreadPool& myThreadPool;
 	const ThreadID& myGameThreadID;
 
 	const ComponentList* myComponentList = nullptr;

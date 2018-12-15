@@ -34,7 +34,7 @@ public:
 		myGeneration[index]++;
 	}
 
-	u16 FindGeneration(const Object& aObject) const
+	FORCEINLINE u16 FindGeneration(const Object& aObject) const
 	{
 		return myGeneration[this->IndexOf(aObject)];
 	}

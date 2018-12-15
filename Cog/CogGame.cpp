@@ -75,8 +75,8 @@ void CogGame::Tick(const Time& aDeltaTime)
 	Semaphore resume;
 	myThreadPool.Pause(resume, doneWithSemaphore);
 
-	DispatchTick(aDeltaTime);
-	
+	DispatchWork(aDeltaTime);
+
 	// Resume the thread pool
 	resume.Notify();
 	doneWithSemaphore.Wait();
@@ -102,6 +102,11 @@ void CogGame::Tick(const Time& aDeltaTime)
 	// Println(L"Tick % FPS", 1.f / aDeltaTime.Seconds());
 }
 
+void CogGame::DispatchWork(const Time& aDeltaTime)
+{
+	DispatchTick(aDeltaTime);
+}
+
 BaseComponentFactory& CogGame::FindOrCreateComponentFactory(const TypeID<Component> aComponentType)
 {
 	myComponentFactories.Resize(TypeID<Component>::MaxUnderlyingInteger());
@@ -121,7 +126,7 @@ BaseComponentFactory& CogGame::FindOrCreateComponentFactory(const TypeID<Compone
 	return *factory;
 }
 
-void CogGame::DispatchTick(Time aDeltaTime)
+void CogGame::DispatchTick(const Time& aDeltaTime)
 {
 	for (BaseComponentFactory* factory : myComponentFactories)
 	{
@@ -131,31 +136,6 @@ void CogGame::DispatchTick(Time aDeltaTime)
 		factory->IterateChunks([aDeltaTime](BaseComponentFactoryChunk& aChunk)
 		{
 			aChunk.DispatchTick(aDeltaTime);
-		});
-	}
-}
-
-void CogGame::DispatchDraw(RenderTarget& aRenderTarget)
-{
-	for (BaseComponentFactory* factory : myComponentFactories)
-	{
-		if (!factory)
-			continue;
-
-		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
-		{
-			aChunk.DispatchDraw3D(aRenderTarget);
-		});
-	}
-
-	for (BaseComponentFactory* factory : myComponentFactories)
-	{
-		if (!factory)
-			continue;
-
-		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
-		{
-			aChunk.DispatchDraw2D(aRenderTarget);
 		});
 	}
 }

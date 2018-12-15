@@ -9,6 +9,12 @@ Object::Object()
 
 Object::~Object()
 {
+	for (const Ptr<Widget>& widget : myWidgets)
+	{
+		if (widget)
+			widget->Destroy();
+	}
+
 	for (auto& componentList : myComponentTypes)
 	{
 		for (const ComponentContainer& container : componentList)
@@ -20,10 +26,11 @@ Object::~Object()
 		componentList.Clear();
 	}
 	myComponentTypes.Clear();
+
+	myChunk = nullptr;
 }
 
 static thread_local Array<Component*> newComponents;
-static thread_local Array<i32> lengths;
 static thread_local bool isResolvingDependencies = false;
 
 void Object::ResolveDependencies(ObjectInitializer& aInitializer)
@@ -55,7 +62,8 @@ void Object::ResolveDependencies(ObjectInitializer& aInitializer)
 			newComponents[i]->ResolveDependencies(aInitializer);
 
 		oldLength = end;
-	} while (newComponents.GetLength() > oldLength);
+	}
+	while (newComponents.GetLength() > oldLength);
 
 	newComponents.Clear();
 	isResolvingDependencies = false;
@@ -63,6 +71,20 @@ void Object::ResolveDependencies(ObjectInitializer& aInitializer)
 
 void Object::Initialize()
 {
+	ForEachComponent<Component>([](Component& aComponent)
+	{
+		aComponent.Initialize();
+	});
+}
+
+void Object::RemoveWidget(Widget& aWidget)
+{
+	CHECK(myWidgets.RemoveSwap(aWidget));
+}
+
+CogGame& Object::GetCogGame() const
+{
+	return GetGame();
 }
 
 Component& Object::CreateComponentByID(TypeID<Component> aComponentID)

@@ -5,7 +5,7 @@ class TestComponent : public InheritComponent<Component>
 public:
 	void Tick(Time aDeltaTime) override;
 
-private:
+protected:
 	virtual void Callback();
 };
 

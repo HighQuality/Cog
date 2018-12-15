@@ -3,8 +3,10 @@
 
 class BaseComponentFactory;
 class Component;
+class Widget;
 class ObjectFactoryChunk;
 class ObjectInitializer;
+class CogGame;
 
 template <typename T>
 class ComponentFactory;
@@ -28,7 +30,16 @@ public:
 
 	ObjectInitializer CreateChild();
 	void Destroy();
-
+	
+	template <typename T>
+	T& CreateWidget()
+	{
+		T& widget = GetCogGame().template CreateWidget<T>();
+		widget.OnDestroyed.Subscribe(this, &Object::RemoveWidget);
+		myWidgets.Add(widget);
+		return widget;
+	}
+	
 	template <typename T>
 	const T& GetComponent() const
 	{
@@ -57,7 +68,7 @@ public:
 		if (!myComponentTypes.IsValidIndex(index) || myComponentTypes[index].GetLength() == 0)
 			return nullptr;
 
-		return myComponentTypes[index][0].component;
+		return reinterpret_cast<T*>(myComponentTypes[index][0].component);
 	}
 
 	template <typename T, typename TCallback>
@@ -96,6 +107,10 @@ private:
 	template <typename T>
 	friend class Ptr;
 
+	void RemoveWidget(Widget& aWidget);
+
+	CogGame& GetCogGame() const;
+
 	// NOTE: Should only be used from ObjectInitializer::AddComponent<TComponentType>
 	Component& CreateComponentByID(TypeID<Component> aComponentID);
 
@@ -107,6 +122,8 @@ private:
 		Component* component = nullptr;
 		bool isInitialRegistration = false;
 	};
+
+	Array<Ptr<Widget>> myWidgets;
 
 	// TODO: Change inner array to store at least 1 pointer on the "stack"
 	Array<Array<ComponentContainer>> myComponentTypes;

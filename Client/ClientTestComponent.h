@@ -5,7 +5,9 @@ class ClientTestComponent : public TestComponent
 {
 public:
 
-private:
+protected:
+	void Initialize() override;
 	void Callback() override;
+
 };
 

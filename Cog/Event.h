@@ -2,6 +2,8 @@
 #include "EventListBase.h"
 #include "Pointer.h"
 
+// TODO: Rewrite this entire thing to use ObjectFunctionView
+
 enum class EventCallResult
 {
 	RemoveSubscription,

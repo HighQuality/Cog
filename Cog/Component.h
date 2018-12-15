@@ -13,7 +13,7 @@ class CogGame;
 class Component
 {
 public:
-	virtual ~Component() = default;
+	virtual ~Component();
 
 	Component(const Component&) = delete;
 	Component(Component&&) = delete;
@@ -30,23 +30,25 @@ public:
 	FORCEINLINE Object& GetParent() const { return GetObject().GetParent(); }
 	FORCEINLINE Object* TryGetParent() const { return GetObject().TryGetParent(); }
 	FORCEINLINE bool HasParent() const { return GetObject().HasParent(); }
-	
+
+	template <typename T>
+	FORCEINLINE T& CreateWidget() { return GetObject().CreateWidget<T>(); }
+
 	template <typename TType, typename ...TArgs>
-	void Synchronize(TType& aObject, void(TType::*aFunction)(TArgs...))
+	static void Synchronize(TType& aObject, void(TType::*aFunction)(TArgs...))
 	{
 		GetGame().Synchronize(aObject, aFunction);
 	}
 
 	FORCEINLINE virtual void GetBaseClasses(const FunctionView<void(const TypeID<Component>&)>& aFunction) const { }
 
-	// TODO: These are only public since ComponentFactoryChunk needs to access them in order to compare them to this base function
+protected:
+	Component() = default;
+
 	virtual void Tick(Time aDeltaTime) {  }
 	virtual void Draw2D(RenderTarget& aRenderTarget) const {  }
 	virtual void Draw3D(RenderTarget& aRenderTarget) const {  }
 
-protected:
-	Component() = default;
-	
 	void SetTickEnabled(const bool aShouldTick);
 	void SetIsVisible(const bool aIsVisible);
 
@@ -58,7 +60,7 @@ protected:
 private:
 	template <typename T>
 	friend class ComponentFactoryChunk;
-
+	
 	template <typename T>
 	friend class Ptr;
 

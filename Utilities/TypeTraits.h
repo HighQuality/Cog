@@ -43,6 +43,24 @@ struct IsSameImpl<T, T> { static constexpr bool Value = true; };
 template <typename T1, typename T2>
 constexpr bool IsSame = IsSameImpl<T1, T2>::Value;
 
+template <typename T>
+struct IsCompleteImpl
+{
+	typedef char No;
+	struct Yes { char Dummy[2]; };
+
+	template <typename T2, typename = decltype(sizeof(std::declval<T2>())) >
+	static Yes Check(T2*);
+
+	template <class U>
+	static No Check(...);
+
+	static constexpr bool Value = sizeof(Check<T>(nullptr)) == sizeof(Yes);
+};
+
+template <typename T>
+constexpr bool IsComplete = IsCompleteImpl<T>::Value;
+
 template <bool Condition, typename T1, typename T2>
 struct SelectImpl { using Type = T2; };
 template <typename T1, typename T2>

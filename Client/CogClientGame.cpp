@@ -8,6 +8,9 @@
 #include "StandardVertex.h"
 #include "VertexBuffer.h"
 #include "InputLayout.h"
+#include <BaseComponentFactory.h>
+#include <ThreadPool.h>
+#include "RenderTarget.h"
 
 CogClientGame::CogClientGame()
 {
@@ -41,6 +44,8 @@ void CogClientGame::Run()
 
 	myRenderer = new RenderEngine(myWindow->GetHandle(), renderingMode);
 
+	myCamera = &CreateCamera();
+	
 	myWindow->SetVisible(true);
 	myWindow->RequestFocus();
 
@@ -104,4 +109,83 @@ void CogClientGame::Tick(const Time& aDeltaTime)
 	myRenderer->Draw();
 
 	myRenderer->Present();
+}
+
+void CogClientGame::DispatchWork(const Time& aDeltaTime)
+{
+	myThreadPool.Barrier();
+
+	DispatchDraw(myCamera->GetComponent<RenderTarget>());
+}
+
+Object& CogClientGame::CreateCamera()
+{
+	ObjectInitializer camera = CreateObject();
+
+	camera.AddComponent<RenderTarget>();
+
+	return camera.Initialize();
+}
+
+void CogClientGame::DispatchTick(const Time& aDeltaTime)
+{
+	Base::DispatchTick(aDeltaTime);
+
+	for (BaseWidgetFactory* factory : myWidgetFactories)
+	{
+		if (!factory)
+			continue;
+
+		factory->IterateChunks([aDeltaTime](BaseWidgetFactoryChunk& aChunk)
+		{
+			aChunk.DispatchTick(aDeltaTime);
+		});
+	}
+}
+
+void CogClientGame::DispatchDraw(RenderTarget& aRenderTarget)
+{
+	for (BaseComponentFactory* factory : myComponentFactories)
+	{
+		if (!factory)
+			continue;
+
+		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
+		{
+			aChunk.DispatchDraw3D(aRenderTarget);
+		});
+	}
+
+	for (BaseComponentFactory* factory : myComponentFactories)
+	{
+		if (!factory)
+			continue;
+
+		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
+		{
+			aChunk.DispatchDraw2D(aRenderTarget);
+		});
+	}
+
+	for (BaseWidgetFactory* factory : myWidgetFactories)
+	{
+		if (!factory)
+			continue;
+
+		factory->IterateChunks([&aRenderTarget](BaseWidgetFactoryChunk& aChunk)
+		{
+			aChunk.DispatchDraw(aRenderTarget);
+		});
+	}
+}
+
+BaseWidgetFactory& CogClientGame::FindOrCreateWidgetFactory(const TypeID<Widget>& aWidgetType, const FunctionView<BaseWidgetFactory*()>& aFactoryCreator)
+{
+	CHECK(IsInGameThread());
+	const u16 index = aWidgetType.GetUnderlyingInteger();
+	myWidgetFactories.Resize(TypeID<Widget>::MaxUnderlyingInteger());
+	auto& factory = myWidgetFactories[index];
+	if (!factory)
+		factory = aFactoryCreator();
+	return *factory;
 }

@@ -108,6 +108,7 @@
     <ClCompile Include="ClientTestComponent.cpp" />
     <ClCompile Include="CogClientGame.cpp" />
     <ClCompile Include="DrawCall.cpp" />
+    <ClCompile Include="ImageWidget.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="pch.cpp">
@@ -116,6 +117,7 @@
     </ClCompile>
     <ClCompile Include="PixelShader.cpp" />
     <ClCompile Include="RenderEngine.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -129,12 +131,14 @@
     <ClInclude Include="ClientTestComponent.h" />
     <ClInclude Include="CogClientGame.h" />
     <ClInclude Include="DrawCall.h" />
+    <ClInclude Include="ImageWidget.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PixelShader.h" />
     <ClInclude Include="RenderEngine.h" />
     <ClInclude Include="RenderingMode.h" />
+    <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="StandardVertex.h" />

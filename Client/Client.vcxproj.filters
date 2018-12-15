@@ -17,6 +17,8 @@
     <ClCompile Include="CogClientGame.cpp" />
     <ClCompile Include="ClientTestComponent.cpp" />
     <ClCompile Include="ClientComponentList.cpp" />
+    <ClCompile Include="ImageWidget.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -38,5 +40,7 @@
     <ClInclude Include="CogClientGame.h" />
     <ClInclude Include="ClientTestComponent.h" />
     <ClInclude Include="ClientComponentList.h" />
+    <ClInclude Include="ImageWidget.h" />
+    <ClInclude Include="RenderTarget.h" />
   </ItemGroup>
 </Project>

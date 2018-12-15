@@ -37,6 +37,15 @@
 #include <Windows.h>
 
 #undef GetObject
+#undef CreateWidget
+#undef DrawState
+#undef GetWindowFont
+#undef PlaySound
+#undef CreateWindow
+#undef DrawText
+#undef GetMessage
+#undef assert
+#undef SendMessage
 
 #include "CityHash/city.h"
 #include "Types.h"
