@@ -10,7 +10,6 @@
 #include "InputLayout.h"
 #include <BaseComponentFactory.h>
 #include <ThreadPool.h>
-#include "RenderTarget.h"
 
 CogClientGame::CogClientGame()
 {
@@ -45,7 +44,7 @@ void CogClientGame::Run()
 	myRenderer = new RenderEngine(myWindow->GetHandle(), renderingMode);
 
 	myCamera = &CreateCamera();
-	
+
 	myWindow->SetVisible(true);
 	myWindow->RequestFocus();
 

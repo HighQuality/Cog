@@ -26,7 +26,7 @@ LRESULT CALLBACK WindowProc(HWND aHwnd, UINT aMessage, WPARAM aWParam, LPARAM aL
 		break;
 	}
 
-	return DefWindowProc(aHwnd, aMessage, aWParam, aLParam);
+	return DefWindowProcW(aHwnd, aMessage, aWParam, aLParam);
 }
 
 Window::Window()
@@ -61,10 +61,10 @@ void Window::ProcessMessages()
 
 	MSG msg = { 0 };
 
-	while (PeekMessage(&msg, myHandle, 0, 0, PM_REMOVE))
+	while (PeekMessageW(&msg, myHandle, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		DispatchMessageW(&msg);
 		LateParseMessage(myHandle, msg.message, msg.wParam, msg.lParam);
 	}
 }
@@ -121,7 +121,7 @@ void Window::Open()
 
 	myIsOpen = true;
 
-	SetWindowLongPtr(myHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+	SetWindowLongPtrW(myHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
 
 void Window::Close()

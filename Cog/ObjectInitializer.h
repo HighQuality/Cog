@@ -46,14 +46,12 @@ public:
 	template <typename TComponentType>
 	TComponentType& AddComponent()
 	{
-		CHECK_COMPONENT_INCLUDED(TComponentType);
-		return CastChecked<TComponentType>(myObject->CreateComponentByID(TypeID<Component>::Resolve<TComponentType>()));
+		return reinterpret_cast<TComponentType&>(myObject->CreateComponentByID(TypeID<Component>::Resolve<TComponentType>()));
 	}
 
 	template <typename TComponentType>
 	TComponentType& FindOrAddComponent()
 	{
-		CHECK_COMPONENT_INCLUDED(TComponentType);
 		if (TComponentType* component = myObject->TryGetComponent<TComponentType>())
 			return *component;
 		return AddComponent<TComponentType>();
