@@ -5,8 +5,8 @@
 #include "Component.h"
 #include "BaseComponentFactory.h"
 #include "BaseComponentFactoryChunk.h"
-#include "Object.h"
-#include "ObjectFactory.h"
+#include "Entity.h"
+#include "EntityFactory.h"
 #include <Semaphore.h>
 #include "ComponentList.h"
 
@@ -20,7 +20,7 @@ bool IsInGameThread()
 CogGame::CogGame()
 	: myThreadPool(*new ThreadPool(8)),
 	myGameThreadID(ThreadID::Get()),
-	myObjectFactory(*new ObjectFactory())
+	myEntityFactory(*new EntityFactory())
 {
 	// Multiple game instances are not allowed under 1 process
 	CHECK(!ourGame);
@@ -29,13 +29,13 @@ CogGame::CogGame()
 
 CogGame::~CogGame()
 {
-	myObjectFactory.ReturnAll();
+	myEntityFactory.ReturnAll();
 
 	for (BaseComponentFactory* factory : myComponentFactories)
 		delete factory;
 	myComponentFactories.Clear();
 
-	delete &myObjectFactory;
+	delete &myEntityFactory;
 
 	delete &myThreadPool;
 
@@ -140,16 +140,16 @@ void CogGame::DispatchTick(const Time& aDeltaTime)
 	}
 }
 
-ObjectInitializer CogGame::CreateObject()
+EntityInitializer CogGame::CreateEntity()
 {
 	CHECK(IsInGameThread());
-	return ObjectInitializer(AllocateObject());
+	return EntityInitializer(AllocateEntity());
 }
 
-Object& CogGame::AllocateObject()
+Entity& CogGame::AllocateEntity()
 {
 	CHECK(IsInGameThread());
-	return myObjectFactory.Allocate();
+	return myEntityFactory.Allocate();
 }
 
 void CogGame::AssignComponentList(const ComponentList& aComponents)

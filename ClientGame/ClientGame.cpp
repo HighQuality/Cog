@@ -7,7 +7,7 @@ ClientGame::ClientGame()
 {
 	RegisterComponents<ClientGameComponentList>();
 
-	CreateObject().AddComponent<TestComponent>();
+	CreateEntity().AddComponent<TestComponent>();
 }
 
 ClientGame::~ClientGame()

@@ -1,74 +1,74 @@
 ﻿#pragma once
-#include "Object.h"
+#include "Entity.h"
 
 template <typename t>
 class ComponentFactory;
 class BaseComponentFactory;
 class Component;
 
-class ObjectInitializer
+class EntityInitializer
 {
 public:
-	explicit ObjectInitializer(Object& aObject)
+	explicit EntityInitializer(Entity& aEntity)
 	{
 		CHECK(IsInGameThread());
-		myObject = &aObject;
+		myEntity = &aEntity;
 	}
 
-	ObjectInitializer(const ObjectInitializer&) = delete;
-	ObjectInitializer& operator=(const ObjectInitializer&) = delete;
+	EntityInitializer(const EntityInitializer&) = delete;
+	EntityInitializer& operator=(const EntityInitializer&) = delete;
 
-	ObjectInitializer(ObjectInitializer&& aOther)
+	EntityInitializer(EntityInitializer&& aOther)
 	{
 		// Moved after initialization, this is probably not intended as the receiver would have no use for it.
 		ENSURE(!wasInitialized);
 		*this = Move(aOther);
 	}
 
-	ObjectInitializer& operator=(ObjectInitializer&& aOther)
+	EntityInitializer& operator=(EntityInitializer&& aOther)
 	{
 		CHECK(!aOther.wasMoved);
 		wasMoved = false;
 		wasInitialized = aOther.wasInitialized;
-		myObject = aOther.myObject;
+		myEntity = aOther.myEntity;
 		aOther.wasMoved = true;
 		return *this;
 	}
 
-	~ObjectInitializer()
+	~EntityInitializer()
 	{
 		if (!wasMoved)
 		{
-			InitializeObject();
+			InitializeEntity();
 		}
 	}
 
 	template <typename TComponentType>
 	TComponentType& AddComponent()
 	{
-		return reinterpret_cast<TComponentType&>(myObject->CreateComponentByID(TypeID<Component>::Resolve<TComponentType>()));
+		return reinterpret_cast<TComponentType&>(myEntity->CreateComponentByID(TypeID<Component>::Resolve<TComponentType>()));
 	}
 
 	template <typename TComponentType>
 	TComponentType& FindOrAddComponent()
 	{
-		if (TComponentType* component = myObject->TryGetComponent<TComponentType>())
+		if (TComponentType* component = myEntity->TryGetComponent<TComponentType>())
 			return *component;
 		return AddComponent<TComponentType>();
 	}
 
-	Object& Initialize()
+	Entity& Initialize()
 	{
-		Object& obj = *myObject;
-		InitializeObject();
+		Entity& entity = *myEntity;
+		InitializeEntity();
 		wasMoved = true;
-		return obj;
+		return entity;
 	}
 
 private:
-	void InitializeObject();
+	void InitializeEntity();
 
-	Object* myObject;
+	Entity* myEntity;
 	bool wasMoved = false;
 	bool wasInitialized = false;
 };

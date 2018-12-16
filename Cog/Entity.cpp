@@ -1,13 +1,13 @@
 #include "pch.h"
-#include "Object.h"
+#include "Entity.h"
 #include "Component.h"
 #include "BaseComponentFactory.h"
 
-Object::Object()
+Entity::Entity()
 {
 }
 
-Object::~Object()
+Entity::~Entity()
 {
 	for (const Ptr<Widget>& widget : myWidgets)
 	{
@@ -33,7 +33,7 @@ Object::~Object()
 static thread_local Array<Component*> newComponents;
 static thread_local bool isResolvingDependencies = false;
 
-void Object::ResolveDependencies(ObjectInitializer& aInitializer)
+void Entity::ResolveDependencies(EntityInitializer& aInitializer)
 {
 	// Recursion is not supported here
 	CHECK(!isResolvingDependencies);
@@ -69,7 +69,7 @@ void Object::ResolveDependencies(ObjectInitializer& aInitializer)
 	isResolvingDependencies = false;
 }
 
-void Object::Initialize()
+void Entity::Initialize()
 {
 	ForEachComponent<Component>([](Component& aComponent)
 	{
@@ -77,21 +77,21 @@ void Object::Initialize()
 	});
 }
 
-void Object::RemoveWidget(Widget& aWidget)
+void Entity::RemoveWidget(Widget& aWidget)
 {
 	CHECK(myWidgets.RemoveSwap(aWidget));
 }
 
-CogGame& Object::GetCogGame() const
+CogGame& Entity::GetCogGame() const
 {
 	return GetGame();
 }
 
-Component& Object::CreateComponentByID(TypeID<Component> aComponentID)
+Component& Entity::CreateComponentByID(TypeID<Component> aComponentID)
 {
 	BaseComponentFactory& factory = GetGame().FindOrCreateComponentFactory(aComponentID);
 	Component& component = factory.AllocateGeneric();
-	component.myChunk->AssignObject(component.myChunkIndex, *this);
+	component.myChunk->AssignEntity(component.myChunkIndex, *this);
 
 	myComponentTypes.Resize(TypeID<Component>::MaxUnderlyingInteger());
 
@@ -121,14 +121,14 @@ Component& Object::CreateComponentByID(TypeID<Component> aComponentID)
 	return component;
 }
 
-ObjectInitializer Object::CreateChild()
+EntityInitializer Entity::CreateChild()
 {
-	Object& obj = GetGame().AllocateObject();
-	obj.myParent = this;
-	return ObjectInitializer(obj);
+	Entity& entity = GetGame().AllocateEntity();
+	entity.myParent = this;
+	return EntityInitializer(entity);
 }
 
-void Object::Destroy()
+void Entity::Destroy()
 {
 	CHECK(IsInGameThread());
 

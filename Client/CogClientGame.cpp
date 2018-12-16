@@ -118,11 +118,11 @@ void CogClientGame::DispatchWork(const Time& aDeltaTime)
 	DispatchDraw(myCamera->GetComponent<RenderTarget>());
 }
 
-Object& CogClientGame::CreateCamera()
+Entity& CogClientGame::CreateCamera()
 {
-	ObjectInitializer camera = CreateObject();
+	EntityInitializer camera = CreateEntity();
 	RenderTarget& renderTarget = camera.AddComponent<RenderTarget>();
-	Object& cameraObject = camera.Initialize();
+	Entity& cameraObject = camera.Initialize();
 
 	myRenderer->OnBackbufferRecreated.Subscribe(renderTarget, &RenderTarget::SetRenderTexture);
 	renderTarget.SetRenderTexture(myRenderer->GetBackbuffer());

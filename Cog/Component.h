@@ -6,8 +6,8 @@
 
 class RenderTarget;
 class BaseComponentFactoryChunk;
-class Object;
-class ObjectInitializer;
+class Entity;
+class EntityInitializer;
 class CogGame;
 
 class Component
@@ -25,14 +25,14 @@ public:
 	FORCEINLINE bool IsVisible() const { return myChunk->IsVisible(myChunkIndex); }
 
 	// TODO: Should these return const references if we are const?
-	FORCEINLINE Object& GetObject() const { return myChunk->FindObject(myChunkIndex); }
+	FORCEINLINE Entity& GetEntity() const { return myChunk->FindEntity(myChunkIndex); }
 	
-	FORCEINLINE Object& GetParent() const { return GetObject().GetParent(); }
-	FORCEINLINE Object* TryGetParent() const { return GetObject().TryGetParent(); }
-	FORCEINLINE bool HasParent() const { return GetObject().HasParent(); }
+	FORCEINLINE Entity& GetParent() const { return GetEntity().GetParent(); }
+	FORCEINLINE Entity* TryGetParent() const { return GetEntity().TryGetParent(); }
+	FORCEINLINE bool HasParent() const { return GetEntity().HasParent(); }
 
 	template <typename T>
-	FORCEINLINE T& CreateWidget() { return GetObject().CreateWidget<T>(); }
+	FORCEINLINE T& CreateWidget() { return GetEntity().CreateWidget<T>(); }
 
 	template <typename TType, typename ...TArgs>
 	static void Synchronize(TType& aObject, void(TType::*aFunction)(TArgs...))
@@ -54,8 +54,8 @@ protected:
 
 	virtual void Initialize() {  }
 
-	friend Object;
-	virtual void ResolveDependencies(ObjectInitializer& aInitializer) {  }
+	friend Entity;
+	virtual void ResolveDependencies(EntityInitializer& aInitializer) {  }
 
 private:
 	template <typename T>
@@ -64,7 +64,7 @@ private:
 	template <typename T>
 	friend class Ptr;
 
-	friend Object;
+	friend Entity;
 	
 	BaseComponentFactoryChunk* myChunk;
 	u16 myChunkIndex;

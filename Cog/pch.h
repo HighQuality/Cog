@@ -19,7 +19,7 @@ bool IsInGameThread();
 #define CHECK_COMPONENT_INCLUDED(Type) do { static_assert(IsComplete<Type>, "Component header must be included"); } while (false)
 
 #include "Casts.h"
-#include "Object.h"
-#include "ObjectInitializer.h"
+#include "Entity.h"
+#include "EntityInitializer.h"
 #include "Component.h"
 #include "Pointer.h"

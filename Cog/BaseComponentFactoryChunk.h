@@ -1,7 +1,7 @@
 #pragma once
 
 class RenderTarget;
-class Object;
+class Entity;
 class Component;
 
 class BaseComponentFactoryChunk
@@ -9,12 +9,12 @@ class BaseComponentFactoryChunk
 public:
 	BaseComponentFactoryChunk(const u16 aSize)
 	{
-		myObjects.Resize(aSize);
+		myEntities.Resize(aSize);
 		myGeneration.Resize(aSize);
 		myReceiveTicks.Resize(aSize);
 		myIsVisible.Resize(aSize);
 
-		for (auto& object : myObjects)
+		for (auto& object : myEntities)
 			object = nullptr;
 
 		for (bool& tick : myReceiveTicks)
@@ -40,15 +40,15 @@ public:
 		return myGeneration[aIndex];
 	}
 
-	FORCEINLINE Object& FindObject(const u16 aIndex) const
+	FORCEINLINE Entity& FindEntity(const u16 aIndex) const
 	{
-		return *myObjects[aIndex];
+		return *myEntities[aIndex];
 	}
 	
 protected:
 	void InitializeSOAProperties(const u16 aIndex)
 	{
-		myObjects[aIndex] = nullptr;
+		myEntities[aIndex] = nullptr;
 		myGeneration[aIndex]++;
 		myReceiveTicks[aIndex] = true;
 		myIsVisible[aIndex] = true;
@@ -56,18 +56,18 @@ protected:
 
 	void DestroySOAProperties(const u16 aIndex)
 	{
-		myObjects[aIndex] = nullptr;
+		myEntities[aIndex] = nullptr;
 		myGeneration[aIndex]++;
 		myReceiveTicks[aIndex] = false;
 		myIsVisible[aIndex] = false;
 	}
 
 	friend Component;
-	friend Object;
+	friend Entity;
 	
-	FORCEINLINE void AssignObject(const u16 aIndex, Object& aObject)
+	FORCEINLINE void AssignEntity(const u16 aIndex, Entity& aEntity)
 	{
-		myObjects[aIndex] = &aObject;
+		myEntities[aIndex] = &aEntity;
 	}
 
 	FORCEINLINE void SetTickEnabled(const u16 aIndex, const bool aTickEnabled)
@@ -91,7 +91,7 @@ protected:
 	}
 
 private:
-	Array<Object*> myObjects;
+	Array<Entity*> myEntities;
 	Array<u16> myGeneration;
 	Array<bool> myReceiveTicks;
 	Array<bool> myIsVisible;

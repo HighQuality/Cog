@@ -4,38 +4,38 @@
 class BaseComponentFactory;
 class Component;
 class Widget;
-class ObjectFactoryChunk;
-class ObjectInitializer;
+class EntityFactoryChunk;
+class EntityInitializer;
 class CogGame;
 
 template <typename T>
 class ComponentFactory;
 
-class Object final
+class Entity final
 {
 public:
-	Object();
-	~Object();
+	Entity();
+	~Entity();
 
-	Object(const Object&) = delete;
-	Object(Object&&) = delete;
+	Entity(const Entity&) = delete;
+	Entity(Entity&&) = delete;
 
-	Object& operator=(const Object&) = delete;
-	Object& operator=(Object&&) = delete;
+	Entity& operator=(const Entity&) = delete;
+	Entity& operator=(Entity&&) = delete;
 
 	// TODO: Should these return const references if we are const?
-	FORCEINLINE Object& GetParent() const { return *myParent; }
-	FORCEINLINE Object* TryGetParent() const { return myParent; }
+	FORCEINLINE Entity& GetParent() const { return *myParent; }
+	FORCEINLINE Entity* TryGetParent() const { return myParent; }
 	FORCEINLINE bool HasParent() const { return myParent != nullptr; }
 
-	ObjectInitializer CreateChild();
+	EntityInitializer CreateChild();
 	void Destroy();
 	
 	template <typename T>
 	T& CreateWidget()
 	{
 		T& widget = GetCogGame().template CreateWidget<T>();
-		widget.OnDestroyed.Subscribe(this, &Object::RemoveWidget);
+		widget.OnDestroyed.Subscribe(this, &Entity::RemoveWidget);
 		myWidgets.Add(widget);
 		return widget;
 	}
@@ -43,7 +43,7 @@ public:
 	template <typename T>
 	const T& GetComponent() const
 	{
-		return const_cast<Object*>(this)->GetComponent<T>();
+		return const_cast<Entity*>(this)->GetComponent<T>();
 	}
 
 	template <typename T>
@@ -57,7 +57,7 @@ public:
 	template <typename T>
 	const T* TryGetComponent() const
 	{
-		return const_cast<Object*>(this)->TryGetComponent<T>();
+		return const_cast<Entity*>(this)->TryGetComponent<T>();
 	}
 
 	template <typename T>
@@ -96,13 +96,13 @@ public:
 	}
 
 protected:
-	friend ObjectInitializer;
+	friend EntityInitializer;
 
-	void ResolveDependencies(ObjectInitializer& aInitializer);
+	void ResolveDependencies(EntityInitializer& aInitializer);
 	void Initialize();
 
 private:
-	friend ObjectFactoryChunk;
+	friend EntityFactoryChunk;
 
 	template <typename T>
 	friend class Ptr;
@@ -111,11 +111,11 @@ private:
 
 	CogGame& GetCogGame() const;
 
-	// NOTE: Should only be used from ObjectInitializer::AddComponent<TComponentType>
+	// NOTE: Should only be used from EntityInitializer::AddComponent<TComponentType>
 	Component& CreateComponentByID(TypeID<Component> aComponentID);
 
-	Object* myParent = nullptr;
-	ObjectFactoryChunk* myChunk = nullptr;
+	Entity* myParent = nullptr;
+	EntityFactoryChunk* myChunk = nullptr;
 
 	struct ComponentContainer
 	{

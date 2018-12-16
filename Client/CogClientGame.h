@@ -28,13 +28,13 @@ protected:
 	void DispatchWork(const Time& aDeltaTime) override;
 
 private:
-	Object& CreateCamera();
+	Entity& CreateCamera();
 
 	Array<BaseWidgetFactory*> myWidgetFactories;
 
 	Window* myWindow = nullptr;
 	RenderEngine* myRenderer = nullptr;
 
-	Ptr<Object> myCamera;
+	Ptr<Entity> myCamera;
 };
 

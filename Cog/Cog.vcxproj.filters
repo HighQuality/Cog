@@ -7,12 +7,9 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="BaseComponentFactory.h" />
     <ClInclude Include="BaseComponentFactoryChunk.h" />
-    <ClInclude Include="Object.h" />
     <ClInclude Include="Pointer.h" />
-    <ClInclude Include="ObjectFactory.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="CogGame.h" />
-    <ClInclude Include="ObjectInitializer.h" />
     <ClInclude Include="Casts.h" />
     <ClInclude Include="ObjectFunctionView.h" />
     <ClInclude Include="GameThreadCallback.h" />
@@ -27,16 +24,19 @@
     <ClInclude Include="WidgetFactoryChunk.h" />
     <ClInclude Include="WidgetFactory.h" />
     <ClInclude Include="EventList.h" />
+    <ClInclude Include="Entity.h" />
+    <ClInclude Include="EntityInitializer.h" />
+    <ClInclude Include="EntityFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Component.cpp" />
-    <ClCompile Include="Object.cpp" />
     <ClCompile Include="CogGame.cpp" />
-    <ClCompile Include="ObjectInitializer.cpp" />
     <ClCompile Include="TestComponent.cpp" />
     <ClCompile Include="ComponentList.cpp" />
     <ClCompile Include="EngineComponentList.cpp" />
     <ClCompile Include="Widget.cpp" />
+    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="EntityInitializer.cpp" />
   </ItemGroup>
 </Project>

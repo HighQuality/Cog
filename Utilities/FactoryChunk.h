@@ -106,7 +106,7 @@ public:
 		aObject.~T();
 		memset(&const_cast<T&>(aObject), 0, sizeof T);
 
-		// Object was returned twice or was never allocated
+		// Entity was returned twice or was never allocated
 		CHECK(myOccupiedSlots[index]);
 
 		myOccupiedSlots[index] = false;

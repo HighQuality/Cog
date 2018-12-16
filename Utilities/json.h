@@ -9327,7 +9327,7 @@ namespace nlohmann
 	@note ObjectType trick from http://stackoverflow.com/a/9860911
 	@endinternal
 
-	@see [RFC 7159: The JavaScript Object Notation (JSON) Data Interchange
+	@see [RFC 7159: The JavaScript Entity Notation (JSON) Data Interchange
 	Format](http://rfc7159.net/rfc7159)
 
 	@since version 1.0.0
@@ -15296,7 +15296,7 @@ namespace nlohmann
 		@brief create a CBOR serialization of a given JSON value
 
 		Serializes a given JSON value @a j to a byte vector using the CBOR (Concise
-		Binary Object Representation) serialization format. CBOR is a binary
+		Binary Entity Representation) serialization format. CBOR is a binary
 		serialization format which aims to be more compact than JSON itself, yet
 		more efficient to parse.
 
@@ -15599,7 +15599,7 @@ namespace nlohmann
 		@brief create a JSON value from an input in CBOR format
 
 		Deserializes a given input @a i to a JSON value using the CBOR (Concise
-		Binary Object Representation) serialization format.
+		Binary Entity Representation) serialization format.
 
 		The library maps CBOR types to JSON value types as follows:
 
@@ -16585,9 +16585,9 @@ namespace nlohmann
 
 		```
 		define MergePatch(Target, Patch):
-		if Patch is an Object:
-		if Target is not an Object:
-		Target = {} // Ignore the contents and set it to an empty Object
+		if Patch is an Entity:
+		if Target is not an Entity:
+		Target = {} // Ignore the contents and set it to an empty Entity
 		for each Name/Value pair in Patch:
 		if Value is null:
 		if Name exists in Target:

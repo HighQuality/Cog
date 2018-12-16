@@ -5,10 +5,10 @@
 #include "WidgetFactory.h"
 
 class ThreadPool;
-class ObjectFactory;
+class EntityFactory;
 class BaseComponentFactory;
 class Component;
-class Object;
+class Entity;
 class ComponentList;
 
 class CogGame
@@ -31,7 +31,7 @@ public:
 
 	BaseComponentFactory& FindOrCreateComponentFactory(TypeID<Component> aComponentType);
 
-	ObjectInitializer CreateObject();
+	EntityInitializer CreateEntity();
 
 	template <typename T>
 	T& CreateWidget()
@@ -68,12 +68,12 @@ protected:
 private:
 	void AssignComponentList(const ComponentList& aComponents);
 	
-	friend Object;
+	friend Entity;
 
-	// Only to be used by Object::CreateChild, use CreateObject instead
-	Object& AllocateObject();
+	// Only to be used by Entity::CreateChild, use CreateEntity instead
+	Entity& AllocateEntity();
 
-	ObjectFactory& myObjectFactory;
+	EntityFactory& myEntityFactory;
 
 	EventList<ObjectFunctionView<void()>> mySynchronizedCallbacks;
 	const ThreadID& myGameThreadID;

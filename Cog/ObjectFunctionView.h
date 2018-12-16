@@ -81,7 +81,7 @@ private:
 		new(static_cast<void*>(&myFunctionStorage)) decltype(lambda)(Move(lambda));
 	}
 
-	std::aligned_storage_t<sizeof(Ptr<Object>), alignof(Ptr<Object>)> myPointer;
+	std::aligned_storage_t<sizeof(Ptr<Entity>), alignof(Ptr<Entity>)> myPointer;
 	std::aligned_storage_t<8> myFunctionStorage;
 	TReturn (*myFunctionCaller)(const ObjectFunctionView&, const TArgs& ...) = nullptr;
 	bool (*myIsValid)(const ObjectFunctionView&) = nullptr;
