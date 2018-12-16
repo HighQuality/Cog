@@ -11,6 +11,7 @@
 #include <BaseComponentFactory.h>
 #include <ThreadPool.h>
 #include "RenderTarget.h"
+#include <Widget.h>
 
 CogClientGame::CogClientGame()
 {
@@ -118,6 +119,11 @@ void CogClientGame::DispatchWork(const Time& aDeltaTime)
 	DispatchDraw(myCamera->GetComponent<RenderTarget>());
 }
 
+void CogClientGame::NewWidgetCreated(Widget& aWidget)
+{
+	myWidgets.Add(aWidget);
+}
+
 Entity& CogClientGame::CreateCamera()
 {
 	EntityInitializer camera = CreateEntity();
@@ -134,21 +140,18 @@ void CogClientGame::DispatchTick(const Time& aDeltaTime)
 {
 	Base::DispatchTick(aDeltaTime);
 
-	//EnumerateObjects<Widget>([](Widget& aWidget)
-	//{
-	//	aWidget.Tick();
-	//});
-	//
-	//for (BaseObjectFactory* factory : myWidgetFactories)
-	//{
-	//	if (!factory)
-	//		continue;
-	//
-	//	factory->IterateChunks([aDeltaTime](BaseObjectFactoryChunk& aChunk)
-	//	{
-	//		aChunk.DispatchTick(aDeltaTime);
-	//	});
-	//}
+	for (i32 i = 0; i < myWidgets.GetLength(); ++i)
+	{
+		if (myWidgets[i])
+		{
+			myWidgets[i]->Tick(aDeltaTime);
+		}
+		else
+		{
+			myWidgets.RemoveAtSwap(i);
+			--i;
+		}
+	}
 }
 
 void CogClientGame::DispatchDraw(RenderTarget& aRenderTarget)
@@ -159,9 +162,9 @@ void CogClientGame::DispatchDraw(RenderTarget& aRenderTarget)
 			continue;
 
 		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
-		{
-			aChunk.DispatchDraw3D(aRenderTarget);
-		});
+			{
+				aChunk.DispatchDraw3D(aRenderTarget);
+			});
 	}
 
 	for (BaseComponentFactory* factory : myComponentFactories)
@@ -170,19 +173,14 @@ void CogClientGame::DispatchDraw(RenderTarget& aRenderTarget)
 			continue;
 
 		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
-		{
-			aChunk.DispatchDraw2D(aRenderTarget);
-		});
+			{
+				aChunk.DispatchDraw2D(aRenderTarget);
+			});
 	}
 
-	// for (BaseObjectFactory* factory : myWidgetFactories)
-	// {
-	// 	if (!factory)
-	// 		continue;
-	// 
-	// 	factory->IterateChunks([&aRenderTarget](BaseObjectFactoryChunk& aChunk)
-	// 	{
-	// 		aChunk.DispatchDraw(aRenderTarget);
-	// 	});
-	// }
+	for (i32 i = 0; i < myWidgets.GetLength(); ++i)
+	{
+		if (myWidgets[i])
+			myWidgets[i]->Draw(aRenderTarget);
+	}
 }

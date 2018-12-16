@@ -10,6 +10,7 @@ class BaseComponentFactory;
 class Component;
 class Entity;
 class ComponentList;
+class Widget;
 
 class CogGame
 {
@@ -37,16 +38,19 @@ public:
 	T& CreateObject()
 	{
 		const auto objectTypeID = TypeID<Object>::Resolve<T>();
+		
 		BaseObjectFactory& factory = FindOrCreateObjectFactory(objectTypeID, [&objectTypeID]() { return new ObjectFactory<T>(objectTypeID); });
-		return CastChecked<T>(factory.AllocateGeneric());
-	}
 
-	template <typename T>
-	void EnumerateObjects()
-	{
-		const auto objectTypeID = TypeID<Object>::Resolve<T>();
-	}
+		T& object = CastChecked<T>(factory.AllocateGeneric());
 
+		if constexpr(IsDerivedFrom<T, Widget>)
+		{
+			NewWidgetCreated(object);
+		}
+
+		return object;
+	}
+	
 	static CogGame& GetCogGame()
 	{
 		return *ourGame;
@@ -57,6 +61,8 @@ protected:
 
 	virtual void DispatchWork(const Time& aDeltaTime);
 	virtual void DispatchTick(const Time& aDeltaTime);
+
+	virtual void NewWidgetCreated(Widget& aWidget) = 0;
 
 	template <typename T>
 	void RegisterComponents()

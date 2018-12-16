@@ -10,15 +10,12 @@ public:
 	using Base = void;
 
 	Object();
-	~Object();
+	virtual ~Object();
 
 	void Destroy();
 
-	Event<Object&> OnDestroyed;
-
 protected:
-	virtual void Tick(const Time& aDeltaTime);
-	virtual void Draw(RenderTarget& aRenderTarget) const;
+	virtual void Destroyed();
 
 private:
 	template <typename T>

@@ -6,8 +6,6 @@ void ClientTestComponent::Initialize()
 {
 	Base::Initialize();
 
-	Println(L"Initializing ClientTestComponent");
-
 	CreateWidget<ImageWidget>();
 }
 

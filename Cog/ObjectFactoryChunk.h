@@ -37,30 +37,4 @@ public:
 	{
 		Return(this->myObjectsData[aIndex]);
 	}
-
-	void DispatchTick(const Time aDeltaTime) override
-	{
-		// Skip classes that does not override the function
-		if (typeid(&Object::Tick) == typeid(&T::Tick))
-			return;
-
-		this->IteratePotentialIndices([this, aDeltaTime](const u16 aIndex)
-		{
-			if (IsTickEnabled(aIndex))
-				this->myObjectsData[aIndex].T::Tick(aDeltaTime);
-		});
-	}
-
-	void DispatchDraw(RenderTarget& aRenderTarget) override
-	{
-		// Skip classes that does not override the function
-		if (typeid(&Object::Draw) == typeid(&T::Draw))
-			return;
-
-		this->IteratePotentialIndices([this, &aRenderTarget](const u16 aIndex)
-		{
-			if (IsVisible(aIndex))
-				this->myObjectsData[aIndex].T::Draw(aRenderTarget);
-		});
-	}
 };

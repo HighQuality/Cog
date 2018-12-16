@@ -11,16 +11,12 @@ Object::~Object()
 	myChunkIndex = 0;
 }
 
-void Object::Tick(const Time& aDeltaTime)
-{
-}
-
-void Object::Draw(RenderTarget& aRenderTarget) const
-{
-}
-
 void Object::Destroy()
 {
-	OnDestroyed.Broadcast(*this);
+	Destroyed();
 	myChunk->ReturnByID(myChunkIndex);
+}
+
+void Object::Destroyed()
+{
 }

@@ -3,7 +3,7 @@
 
 class BaseComponentFactory;
 class Component;
-class Object;
+class Widget;
 class EntityFactoryChunk;
 class EntityInitializer;
 class CogGame;
@@ -107,12 +107,12 @@ private:
 	template <typename T>
 	friend class Ptr;
 
-	void RemoveWidget(Object& aWidget);
+	void RemoveWidget(Widget& aWidget);
 
 	CogGame& GetCogGame() const;
 
 	// NOTE: Should only be used from EntityInitializer::AddComponent<TComponentType>
-	Component& CreateComponentByID(TypeID<Component> aComponentID);
+	Component& CreateComponentByID(TypeID<Component> aRequestedTypeID);
 
 	Entity* myParent = nullptr;
 	EntityFactoryChunk* myChunk = nullptr;
@@ -123,7 +123,7 @@ private:
 		bool isInitialRegistration = false;
 	};
 
-	Array<Ptr<Object>> myWidgets;
+	Array<Ptr<Widget>> myWidgets;
 
 	// TODO: Change inner array to store at least 1 pointer on the "stack"
 	Array<Array<ComponentContainer>> myComponentTypes;

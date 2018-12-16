@@ -83,16 +83,16 @@ private:
 		}
 		else if constexpr (IsDerivedFrom<T, Entity>)
 		{
-			const Entity& object = *reinterpret_cast<const Entity*>(myPointer);
-			if (const auto* chunk = object.myChunk)
-				return chunk->FindGeneration(object);
+			const Entity& entity = *reinterpret_cast<const Entity*>(myPointer);
+			if (const auto* chunk = entity.myChunk)
+				return chunk->FindGeneration(entity);
 			return 0;
 		}
 		else if constexpr (IsDerivedFrom<T, Object>)
 		{
-			const Object& widget = *reinterpret_cast<const Object*>(myPointer);
-			if (const auto* chunk = widget.myChunk)
-				return chunk->FindGeneration(widget.myChunkIndex);
+			const Object& object = *reinterpret_cast<const Object*>(myPointer);
+			if (const auto* chunk = object.myChunk)
+				return chunk->FindGeneration(object.myChunkIndex);
 			return 0;
 		}
 		else

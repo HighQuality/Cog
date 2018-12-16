@@ -25,11 +25,15 @@ protected:
 
 	void DispatchWork(const Time& aDeltaTime) override;
 
+	void NewWidgetCreated(Widget& aWidget) override;
+
 private:
 	Entity& CreateCamera();
 
 	Window* myWindow = nullptr;
 	RenderEngine* myRenderer = nullptr;
+
+	Array<Ptr<Widget>> myWidgets;
 
 	Ptr<Entity> myCamera;
 };

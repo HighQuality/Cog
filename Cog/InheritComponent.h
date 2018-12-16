@@ -10,7 +10,7 @@ public:
 	void GetBaseClasses(const FunctionView<void(const TypeID<Component>&)>& aFunction) const override
 	{
 		aFunction(TypeID<Component>::Resolve<TComponent>());
-	}
 
-private:
+		Base::GetBaseClasses(aFunction);
+	}
 };

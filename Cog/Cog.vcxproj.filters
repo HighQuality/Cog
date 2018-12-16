@@ -27,6 +27,7 @@
     <ClInclude Include="BaseObjectFactoryChunk.h" />
     <ClInclude Include="BaseObjectFactory.h" />
     <ClInclude Include="ObjectFactory.h" />
+    <ClInclude Include="Widget.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -38,5 +39,6 @@
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityInitializer.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Widget.cpp" />
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 #include "Entity.h"
 #include "Component.h"
 #include "BaseComponentFactory.h"
+#include "Widget.h"
 
 Entity::Entity()
 {
@@ -9,7 +10,7 @@ Entity::Entity()
 
 Entity::~Entity()
 {
-	for (const Ptr<Object>& widget : myWidgets)
+	for (const Ptr<Widget>& widget : myWidgets)
 	{
 		if (widget)
 			widget->Destroy();
@@ -77,7 +78,7 @@ void Entity::Initialize()
 	});
 }
 
-void Entity::RemoveWidget(Object& aWidget)
+void Entity::RemoveWidget(Widget& aWidget)
 {
 	CHECK(myWidgets.RemoveSwap(aWidget));
 }
@@ -87,19 +88,21 @@ CogGame& Entity::GetCogGame() const
 	return GetGame();
 }
 
-Component& Entity::CreateComponentByID(TypeID<Component> aComponentID)
+Component& Entity::CreateComponentByID(TypeID<Component> aRequestedTypeID)
 {
-	BaseComponentFactory& factory = GetGame().FindOrCreateComponentFactory(aComponentID);
+	BaseComponentFactory& factory = GetGame().FindOrCreateComponentFactory(aRequestedTypeID);
 	Component& component = factory.AllocateGeneric();
 	component.myChunk->AssignEntity(component.myChunkIndex, *this);
+
+	const TypeID<Component> createdTypeID = factory.GetTypeID();
 
 	myComponentTypes.Resize(TypeID<Component>::MaxUnderlyingInteger());
 
 	ComponentContainer container;
 	container.component = &component;
 	container.isInitialRegistration = true;
-
-	myComponentTypes[aComponentID.GetUnderlyingInteger()].Add(container);
+	
+	myComponentTypes[createdTypeID.GetUnderlyingInteger()].Add(container);
 
 	if (isResolvingDependencies)
 	{

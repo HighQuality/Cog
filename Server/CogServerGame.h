@@ -13,5 +13,6 @@ public:
 
 protected:
 	void Tick(const Time& aDeltaTime) override;
+	void NewWidgetCreated(Widget& aWidget) override;
 };
 
