@@ -3,7 +3,7 @@
 
 class BaseComponentFactory;
 class Component;
-class Widget;
+class Object;
 class EntityFactoryChunk;
 class EntityInitializer;
 class CogGame;
@@ -34,7 +34,7 @@ public:
 	template <typename T>
 	T& CreateWidget()
 	{
-		T& widget = GetCogGame().template CreateWidget<T>();
+		T& widget = GetCogGame().template CreateObject<T>();
 		widget.OnDestroyed.Subscribe(this, &Entity::RemoveWidget);
 		myWidgets.Add(widget);
 		return widget;
@@ -107,7 +107,7 @@ private:
 	template <typename T>
 	friend class Ptr;
 
-	void RemoveWidget(Widget& aWidget);
+	void RemoveWidget(Object& aWidget);
 
 	CogGame& GetCogGame() const;
 
@@ -123,7 +123,7 @@ private:
 		bool isInitialRegistration = false;
 	};
 
-	Array<Ptr<Widget>> myWidgets;
+	Array<Ptr<Object>> myWidgets;
 
 	// TODO: Change inner array to store at least 1 pointer on the "stack"
 	Array<Array<ComponentContainer>> myComponentTypes;

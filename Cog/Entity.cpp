@@ -9,7 +9,7 @@ Entity::Entity()
 
 Entity::~Entity()
 {
-	for (const Ptr<Widget>& widget : myWidgets)
+	for (const Ptr<Object>& widget : myWidgets)
 	{
 		if (widget)
 			widget->Destroy();
@@ -77,7 +77,7 @@ void Entity::Initialize()
 	});
 }
 
-void Entity::RemoveWidget(Widget& aWidget)
+void Entity::RemoveWidget(Object& aWidget)
 {
 	CHECK(myWidgets.RemoveSwap(aWidget));
 }

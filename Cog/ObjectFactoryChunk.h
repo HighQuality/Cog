@@ -1,15 +1,15 @@
 ﻿#pragma once
 #include "FactoryChunk.h"
-#include "BaseWidgetFactoryChunk.h"
+#include "BaseObjectFactoryChunk.h"
 
 template <typename T>
-class WidgetFactoryChunk final : public FactoryChunk<T>, public BaseWidgetFactoryChunk
+class ObjectFactoryChunk final : public FactoryChunk<T>, public BaseObjectFactoryChunk
 {
 public:
 	using Base = FactoryChunk<T>;
 
-	WidgetFactoryChunk(const u16 aSize)
-		: Base(aSize), BaseWidgetFactoryChunk(aSize)
+	ObjectFactoryChunk(const u16 aSize)
+		: Base(aSize), BaseObjectFactoryChunk(aSize)
 	{
 	}
 
@@ -41,7 +41,7 @@ public:
 	void DispatchTick(const Time aDeltaTime) override
 	{
 		// Skip classes that does not override the function
-		if (typeid(&Widget::Tick) == typeid(&T::Tick))
+		if (typeid(&Object::Tick) == typeid(&T::Tick))
 			return;
 
 		this->IteratePotentialIndices([this, aDeltaTime](const u16 aIndex)
@@ -54,7 +54,7 @@ public:
 	void DispatchDraw(RenderTarget& aRenderTarget) override
 	{
 		// Skip classes that does not override the function
-		if (typeid(&Widget::Draw) == typeid(&T::Draw))
+		if (typeid(&Object::Draw) == typeid(&T::Draw))
 			return;
 
 		this->IteratePotentialIndices([this, &aRenderTarget](const u16 aIndex)

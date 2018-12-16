@@ -1,7 +1,7 @@
 #pragma once
 #include <TestComponent.h>
 
-class ClientTestComponent : public TestComponent
+class ClientTestComponent : public InheritComponent<TestComponent>
 {
 public:
 

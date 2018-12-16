@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "Entity.h"
 #include "Component.h"
-#include "Widget.h"
+#include "Object.h"
 #include "EntityFactory.h"
 #include "BaseComponentFactoryChunk.h"
-#include "BaseWidgetFactoryChunk.h"
+#include "BaseObjectFactoryChunk.h"
 #include "EntityFactory.h"
 
 template <typename T>
@@ -88,9 +88,9 @@ private:
 				return chunk->FindGeneration(object);
 			return 0;
 		}
-		else if constexpr (IsDerivedFrom<T, Widget>)
+		else if constexpr (IsDerivedFrom<T, Object>)
 		{
-			const Widget& widget = *reinterpret_cast<const Widget*>(myPointer);
+			const Object& widget = *reinterpret_cast<const Object*>(myPointer);
 			if (const auto* chunk = widget.myChunk)
 				return chunk->FindGeneration(widget.myChunkIndex);
 			return 0;

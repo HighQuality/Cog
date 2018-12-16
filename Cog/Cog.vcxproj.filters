@@ -18,15 +18,15 @@
     <ClInclude Include="ComponentList.h" />
     <ClInclude Include="ComponentData.h" />
     <ClInclude Include="EngineComponentList.h" />
-    <ClInclude Include="Widget.h" />
-    <ClInclude Include="BaseWidgetFactory.h" />
-    <ClInclude Include="BaseWidgetFactoryChunk.h" />
-    <ClInclude Include="WidgetFactoryChunk.h" />
-    <ClInclude Include="WidgetFactory.h" />
     <ClInclude Include="EventList.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityInitializer.h" />
     <ClInclude Include="EntityFactory.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectFactoryChunk.h" />
+    <ClInclude Include="BaseObjectFactoryChunk.h" />
+    <ClInclude Include="BaseObjectFactory.h" />
+    <ClInclude Include="ObjectFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -35,8 +35,8 @@
     <ClCompile Include="TestComponent.cpp" />
     <ClCompile Include="ComponentList.cpp" />
     <ClCompile Include="EngineComponentList.cpp" />
-    <ClCompile Include="Widget.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityInitializer.cpp" />
+    <ClCompile Include="Object.cpp" />
   </ItemGroup>
 </Project>

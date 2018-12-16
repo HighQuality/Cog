@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 class RenderTarget;
-class Widget;
+class Object;
 
-class BaseWidgetFactoryChunk
+class BaseObjectFactoryChunk
 {
 public:
-	BaseWidgetFactoryChunk(const u16 aSize)
+	BaseObjectFactoryChunk(const u16 aSize)
 	{
 		myGeneration.Resize(aSize);
 		myReceiveTicks.Resize(aSize);
@@ -22,7 +22,7 @@ public:
 			generation = 1;
 	}
 
-	virtual ~BaseWidgetFactoryChunk() = default;
+	virtual ~BaseObjectFactoryChunk() = default;
 
 	virtual void DispatchTick(Time aDeltaTime) = 0;
 	virtual void DispatchDraw(RenderTarget& aRenderTarget) = 0;
@@ -49,7 +49,7 @@ protected:
 		myIsVisible[aIndex] = false;
 	}
 
-	friend Widget;
+	friend Object;
 	
 	FORCEINLINE void SetTickEnabled(const u16 aIndex, const bool aTickEnabled)
 	{

@@ -1,18 +1,20 @@
 #pragma once
 #include "Event.h"
 
-class BaseWidgetFactoryChunk;
+class BaseObjectFactoryChunk;
 class RenderTarget;
 
-class Widget
+class Object
 {
 public:
-	Widget();
-	~Widget();
+	using Base = void;
+
+	Object();
+	~Object();
 
 	void Destroy();
 
-	Event<Widget&> OnDestroyed;
+	Event<Object&> OnDestroyed;
 
 protected:
 	virtual void Tick(const Time& aDeltaTime);
@@ -22,8 +24,8 @@ private:
 	template <typename T>
 	friend class Ptr;
 	template <typename T>
-	friend class WidgetFactoryChunk;
+	friend class ObjectFactoryChunk;
 
-	BaseWidgetFactoryChunk* myChunk = nullptr;
+	BaseObjectFactoryChunk* myChunk = nullptr;
 	u16 myChunkIndex = 0;
 };

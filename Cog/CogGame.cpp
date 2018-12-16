@@ -140,6 +140,17 @@ void CogGame::DispatchTick(const Time& aDeltaTime)
 	}
 }
 
+BaseObjectFactory& CogGame::FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseObjectFactory*()>& aFactoryCreator)
+{
+	CHECK(IsInGameThread());
+	const u16 index = aObjectType.GetUnderlyingInteger();
+	myObjectFactories.Resize(TypeID<Object>::MaxUnderlyingInteger());
+	auto& factory = myObjectFactories[index];
+	if (!factory)
+		factory = aFactoryCreator();
+	return *factory;
+}
+
 EntityInitializer CogGame::CreateEntity()
 {
 	CHECK(IsInGameThread());

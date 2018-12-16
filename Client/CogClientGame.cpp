@@ -134,16 +134,21 @@ void CogClientGame::DispatchTick(const Time& aDeltaTime)
 {
 	Base::DispatchTick(aDeltaTime);
 
-	for (BaseWidgetFactory* factory : myWidgetFactories)
-	{
-		if (!factory)
-			continue;
-
-		factory->IterateChunks([aDeltaTime](BaseWidgetFactoryChunk& aChunk)
-		{
-			aChunk.DispatchTick(aDeltaTime);
-		});
-	}
+	//EnumerateObjects<Widget>([](Widget& aWidget)
+	//{
+	//	aWidget.Tick();
+	//});
+	//
+	//for (BaseObjectFactory* factory : myWidgetFactories)
+	//{
+	//	if (!factory)
+	//		continue;
+	//
+	//	factory->IterateChunks([aDeltaTime](BaseObjectFactoryChunk& aChunk)
+	//	{
+	//		aChunk.DispatchTick(aDeltaTime);
+	//	});
+	//}
 }
 
 void CogClientGame::DispatchDraw(RenderTarget& aRenderTarget)
@@ -170,25 +175,14 @@ void CogClientGame::DispatchDraw(RenderTarget& aRenderTarget)
 		});
 	}
 
-	for (BaseWidgetFactory* factory : myWidgetFactories)
-	{
-		if (!factory)
-			continue;
-
-		factory->IterateChunks([&aRenderTarget](BaseWidgetFactoryChunk& aChunk)
-		{
-			aChunk.DispatchDraw(aRenderTarget);
-		});
-	}
-}
-
-BaseWidgetFactory& CogClientGame::FindOrCreateWidgetFactory(const TypeID<Widget>& aWidgetType, const FunctionView<BaseWidgetFactory*()>& aFactoryCreator)
-{
-	CHECK(IsInGameThread());
-	const u16 index = aWidgetType.GetUnderlyingInteger();
-	myWidgetFactories.Resize(TypeID<Widget>::MaxUnderlyingInteger());
-	auto& factory = myWidgetFactories[index];
-	if (!factory)
-		factory = aFactoryCreator();
-	return *factory;
+	// for (BaseObjectFactory* factory : myWidgetFactories)
+	// {
+	// 	if (!factory)
+	// 		continue;
+	// 
+	// 	factory->IterateChunks([&aRenderTarget](BaseObjectFactoryChunk& aChunk)
+	// 	{
+	// 		aChunk.DispatchDraw(aRenderTarget);
+	// 	});
+	// }
 }

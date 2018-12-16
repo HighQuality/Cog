@@ -3,7 +3,7 @@
 
 class Window;
 class RenderEngine;
-class BaseWidgetFactory;
+class BaseObjectFactory;
 
 class CogClientGame : public Game
 {
@@ -23,14 +23,10 @@ protected:
 	void DispatchTick(const Time& aDeltaTime) override;
 	void DispatchDraw(RenderTarget& aRenderTarget);
 
-	BaseWidgetFactory& FindOrCreateWidgetFactory(const TypeID<Widget>& aWidgetType, const FunctionView<BaseWidgetFactory*()>& aFactoryCreator) final;
-
 	void DispatchWork(const Time& aDeltaTime) override;
 
 private:
 	Entity& CreateCamera();
-
-	Array<BaseWidgetFactory*> myWidgetFactories;
 
 	Window* myWindow = nullptr;
 	RenderEngine* myRenderer = nullptr;

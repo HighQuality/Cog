@@ -13,6 +13,8 @@ class CogGame;
 class Component
 {
 public:
+	using Base = void;
+
 	virtual ~Component();
 
 	Component(const Component&) = delete;

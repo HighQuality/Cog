@@ -2,7 +2,7 @@
 #include "EventList.h"
 #include "ObjectFunctionView.h"
 #include "ThreadID.h"
-#include "WidgetFactory.h"
+#include "ObjectFactory.h"
 
 class ThreadPool;
 class EntityFactory;
@@ -34,11 +34,17 @@ public:
 	EntityInitializer CreateEntity();
 
 	template <typename T>
-	T& CreateWidget()
+	T& CreateObject()
 	{
-		const auto widgetTypeID = TypeID<Widget>::Resolve<T>();
-		BaseWidgetFactory& factory = FindOrCreateWidgetFactory(widgetTypeID, [&widgetTypeID]() { return new WidgetFactory<T>(widgetTypeID); });
+		const auto objectTypeID = TypeID<Object>::Resolve<T>();
+		BaseObjectFactory& factory = FindOrCreateObjectFactory(objectTypeID, [&objectTypeID]() { return new ObjectFactory<T>(objectTypeID); });
 		return CastChecked<T>(factory.AllocateGeneric());
+	}
+
+	template <typename T>
+	void EnumerateObjects()
+	{
+		const auto objectTypeID = TypeID<Object>::Resolve<T>();
 	}
 
 	static CogGame& GetCogGame()
@@ -60,7 +66,7 @@ protected:
 		AssignComponentList(*list);
 	}
 
-	virtual BaseWidgetFactory& FindOrCreateWidgetFactory(const TypeID<Widget>& aWidgetType, const FunctionView<BaseWidgetFactory*()>& aFactoryCreator) = 0;
+	BaseObjectFactory& FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseObjectFactory*()>& aFactoryCreator);
 
 	Array<BaseComponentFactory*> myComponentFactories;
 	ThreadPool& myThreadPool;
@@ -74,6 +80,7 @@ private:
 	Entity& AllocateEntity();
 
 	EntityFactory& myEntityFactory;
+	Array<BaseObjectFactory*> myObjectFactories;
 
 	EventList<ObjectFunctionView<void()>> mySynchronizedCallbacks;
 	const ThreadID& myGameThreadID;

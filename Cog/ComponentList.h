@@ -11,8 +11,9 @@ BaseComponentFactory* CreateComponentFactory()
 	return new ComponentFactory<TComponentType>(TypeID<Component>::Resolve<TComponentType>());
 }
 
-#define DECLARE_COMPONENT(TComponent) do { Internal_AddComponent(TypeID<Component>::Resolve<TComponent>().GetUnderlyingInteger(), L"" #TComponent, &CreateComponentFactory<TComponent>, nullptr); } while (false)
-#define DECLARE_COMPONENT_SPECIALIZATION(BaseComponent, Specialization) do { Internal_AddSpecialization(L"" #BaseComponent, TypeID<Component>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateComponentFactory<Specialization>, nullptr); } while (false)
+#define CHECK_BASE_DECLARED(TComponent) do { static_assert(!IsSame<TComponent::Base, TComponent::Base::Base>, "Component " #TComponent " does not declare it's base"); static_assert(IsDerivedFrom<TComponent, TComponent::Base>, #TComponent "::Base is not in inheritance chain."); } while (false)
+#define DECLARE_COMPONENT(TComponent) do { CHECK_BASE_DECLARED(TComponent); Internal_AddComponent(TypeID<Component>::Resolve<TComponent>().GetUnderlyingInteger(), L"" #TComponent, &CreateComponentFactory<TComponent>, nullptr); } while (false)
+#define DECLARE_COMPONENT_SPECIALIZATION(BaseComponent, Specialization) do { CHECK_BASE_DECLARED(Specialization); static_assert(IsDerivedFrom<Specialization, BaseComponent>, #Specialization " does not derive from " #BaseComponent); Internal_AddSpecialization(L"" #BaseComponent, TypeID<Component>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateComponentFactory<Specialization>, nullptr); } while (false)
 
 class ComponentList
 {
