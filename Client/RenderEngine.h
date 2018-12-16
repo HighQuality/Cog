@@ -32,6 +32,10 @@ public:
 	ID3D11Device* GetDevice() const { return myDevice.Get(); }
 	ID3D11DeviceContext* GetContext() const { return myContext.Get(); }
 
+	const std::shared_ptr<RenderTexture>& GetBackbuffer() const { return myBackbuffer; }
+
+	Event<const std::shared_ptr<RenderTexture>&> OnBackbufferRecreated;
+
 private:
 	void CreateBuffers(i32 aWidth, i32 aHeight);
 

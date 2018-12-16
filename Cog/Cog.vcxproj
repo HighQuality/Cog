@@ -108,7 +108,7 @@
     <ClInclude Include="ComponentList.h" />
     <ClInclude Include="EngineComponentList.h" />
     <ClInclude Include="Event.h" />
-    <ClInclude Include="EventListBase.h" />
+    <ClInclude Include="EventList.h" />
     <ClInclude Include="CogGame.h" />
     <ClInclude Include="GameThreadCallback.h" />
     <ClInclude Include="InheritComponent.h" />

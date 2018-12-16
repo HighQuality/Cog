@@ -324,6 +324,8 @@ void RenderEngine::CreateBuffers(const i32 aWidth, const i32 aHeight)
 
 	myContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), nullptr);
 	ResetViewport();
+
+	OnBackbufferRecreated.Broadcast(myBackbuffer);
 }
 
 void RenderEngine::SetFullscreen(const bool aIsFullscreen)

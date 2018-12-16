@@ -10,6 +10,7 @@
 #include "InputLayout.h"
 #include <BaseComponentFactory.h>
 #include <ThreadPool.h>
+#include "RenderTarget.h"
 
 CogClientGame::CogClientGame()
 {
@@ -120,10 +121,13 @@ void CogClientGame::DispatchWork(const Time& aDeltaTime)
 Object& CogClientGame::CreateCamera()
 {
 	ObjectInitializer camera = CreateObject();
+	RenderTarget& renderTarget = camera.AddComponent<RenderTarget>();
+	Object& cameraObject = camera.Initialize();
 
-	camera.AddComponent<RenderTarget>();
+	myRenderer->OnBackbufferRecreated.Subscribe(renderTarget, &RenderTarget::SetRenderTexture);
+	renderTarget.SetRenderTexture(myRenderer->GetBackbuffer());
 
-	return camera.Initialize();
+	return cameraObject;
 }
 
 void CogClientGame::DispatchTick(const Time& aDeltaTime)

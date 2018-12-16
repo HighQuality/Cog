@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "RenderTarget.h"
 
-RenderTarget::RenderTarget()
+void RenderTarget::SetRenderTexture(const std::shared_ptr<RenderTexture>& aNewRenderTexture)
 {
-}
+	myWidth = aNewRenderTexture->GetWidth();
+	myHeight = aNewRenderTexture->GetHeight();
 
-RenderTarget::~RenderTarget()
-{
+	mySize = Vec2(static_cast<f32>(myWidth), static_cast<f32>(myHeight));
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "EventListBase.h"
+#include "EventList.h"
 #include "ObjectFunctionView.h"
 #include "ThreadID.h"
 #include "WidgetFactory.h"
@@ -75,7 +75,7 @@ private:
 
 	ObjectFactory& myObjectFactory;
 
-	EventListBase<ObjectFunctionView<void()>> mySynchronizedCallbacks;
+	EventList<ObjectFunctionView<void()>> mySynchronizedCallbacks;
 	const ThreadID& myGameThreadID;
 
 	const ComponentList* myComponentList = nullptr;

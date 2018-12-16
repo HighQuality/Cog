@@ -35,7 +35,6 @@ private:
 	Window* myWindow = nullptr;
 	RenderEngine* myRenderer = nullptr;
 
-	Object* myCamera;
-	RenderTarget* myRenderTarget;
+	Ptr<Object> myCamera;
 };
 

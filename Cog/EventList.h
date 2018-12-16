@@ -2,10 +2,10 @@
 #include <ThreadID.h>
 
 template <typename T>
-class EventListBase
+class EventList
 {
 public:
-	EventListBase()
+	EventList()
 	{
 		for (auto& listPointer : myNonEmptyArrays)
 			listPointer = nullptr;

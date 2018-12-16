@@ -10,7 +10,6 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="Pointer.h" />
     <ClInclude Include="ObjectFactory.h" />
-    <ClInclude Include="EventListBase.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="CogGame.h" />
     <ClInclude Include="ObjectInitializer.h" />
@@ -27,6 +26,7 @@
     <ClInclude Include="BaseWidgetFactoryChunk.h" />
     <ClInclude Include="WidgetFactoryChunk.h" />
     <ClInclude Include="WidgetFactory.h" />
+    <ClInclude Include="EventList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
