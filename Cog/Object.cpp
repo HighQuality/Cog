@@ -13,6 +13,7 @@ Object::~Object()
 
 void Object::Destroy()
 {
+	CHECK(IsInGameThread());
 	Destroyed();
 	myChunk->ReturnByID(myChunkIndex);
 }
