@@ -28,6 +28,8 @@
     <ClInclude Include="BaseObjectFactory.h" />
     <ClInclude Include="ObjectFactory.h" />
     <ClInclude Include="Widget.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="ResourceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -40,5 +42,7 @@
     <ClCompile Include="EntityInitializer.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Widget.cpp" />
+    <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
   </ItemGroup>
 </Project>
