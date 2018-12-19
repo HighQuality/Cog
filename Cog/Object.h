@@ -1,8 +1,6 @@
 #pragma once
-#include "Event.h"
 
 class BaseObjectFactoryChunk;
-class RenderTarget;
 
 class Object
 {

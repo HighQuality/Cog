@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "Event.h"
 
 class CogClientGame;
 

@@ -3,6 +3,7 @@
 #include "ObjectFunctionView.h"
 #include "ThreadID.h"
 #include "ObjectFactory.h"
+#include "ResourceManager.h"
 
 class ThreadPool;
 class EntityFactory;
@@ -11,12 +12,19 @@ class Component;
 class Entity;
 class ComponentList;
 class Widget;
+class ResourceManager;
 
 class CogGame
 {
 public:
 	CogGame();
 	virtual ~CogGame();
+
+	CogGame(const CogGame&) = delete;
+	CogGame& operator=(const CogGame&) = delete;
+	
+	CogGame(CogGame&&) = delete;
+	CogGame& operator=(CogGame&&) = delete;
 	
 	virtual bool ShouldKeepRunning() const = 0;
 
@@ -50,7 +58,12 @@ public:
 
 		return object;
 	}
-	
+
+	ResourceManager& GetResourceManager() const
+	{
+		return *myResourceManager;
+	}
+
 	static CogGame& GetCogGame()
 	{
 		return *ourGame;
@@ -78,6 +91,7 @@ protected:
 	ThreadPool& myThreadPool;
 
 private:
+	void CreateResourceManager();
 	void AssignComponentList(const ComponentList& aComponents);
 	
 	friend Entity;
@@ -93,6 +107,8 @@ private:
 
 	const ComponentList* myComponentList = nullptr;
 
+	Ptr<ResourceManager> myResourceManager;
+
 	static CogGame* ourGame;
 };
 
@@ -100,4 +116,9 @@ template <typename TGameType = CogGame>
 static TGameType& GetGame()
 {
 	return CastChecked<TGameType>(CogGame::GetCogGame());
+}
+
+static ResourceManager& GetResourceManager()
+{
+	return GetGame().GetResourceManager();
 }

@@ -24,6 +24,7 @@ void EnsureLog(const char* aCondition);
 
 // #ifdef _DEBUG
 #define FATAL(format, ...) do { PRINT_ERROR(format, __VA_ARGS__); DebugBreak(); abort(); } while (false)
+#define FATAL_PURE_VIRTUAL() do { FATAL(L"Pure virtual function called"); } while (false)
 // #else
 // #define FATAL(format, ...) abort()
 // #endif

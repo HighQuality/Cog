@@ -9,6 +9,7 @@
 #include "EntityFactory.h"
 #include <Semaphore.h>
 #include "ComponentList.h"
+#include "ResourceManager.h"
 
 CogGame* CogGame::ourGame;
 
@@ -46,6 +47,8 @@ CogGame::~CogGame()
 
 void CogGame::Run()
 {
+	CreateResourceManager();
+
 	Stopwatch watch;
 	bool isFirstFrame = true;
 
@@ -161,6 +164,11 @@ Entity& CogGame::AllocateEntity()
 {
 	CHECK(IsInGameThread());
 	return myEntityFactory.Allocate();
+}
+
+void CogGame::CreateResourceManager()
+{
+	myResourceManager = CreateObject<ResourceManager>();
 }
 
 void CogGame::AssignComponentList(const ComponentList& aComponents)

@@ -1,5 +1,6 @@
 #pragma once
 #include "RenderingMode.h"
+#include <Event.h>
 
 #ifndef SIMULTANEOUS_RENDER_TARGETS
 #define SIMULTANEOUS_RENDER_TARGETS 8

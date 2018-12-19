@@ -1,12 +1,8 @@
 #include "pch.h"
 #include "Resource.h"
+#include "ResourceManager.h"
 
-
-Resource::Resource()
+void Resource::LoadFile(const StringView& aFileName, ObjectFunctionView<BinaryData(const ArrayView<u8>&)> aFileLoadedCallback)
 {
-}
-
-
-Resource::~Resource()
-{
+	GetResourceManager().LoadFile(aFileName, aFileLoadedCallback);
 }

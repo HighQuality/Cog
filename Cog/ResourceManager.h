@@ -1,12 +1,16 @@
 #pragma once
 #include <Function.h>
+#include <BinaryData.h>
 
 class Resource;
 class ThreadPool;
+class CogGame;
 
 class ResourceManager : public Object
 {
 public:
+	using Base = Object;
+
 	ResourceManager();
 	~ResourceManager();
 
@@ -29,10 +33,10 @@ public:
 
 		if (IsInGameThread())
 		{
-			TResourceType& resource = GetGame().CreateObject<TResourceType>();
+			TResourceType& resource = GetCogGame().template CreateObject<TResourceType>();
 			myLoadedResources.Add(aResourcePath, resource);
 			resource.RegisterCallback(Move(aFunctionCallback));
-			resource.BeginLoad();
+			resource.BeginLoad(aResourcePath);
 		}
 		else
 		{
@@ -46,7 +50,17 @@ public:
 	void LoadScheduledResources();
 
 private:
+	friend Resource;
+	
+	void LoadFile(const StringView& aPath, ObjectFunctionView<BinaryData(const ArrayView<u8>&)>);
+
+	static CogGame& GetCogGame();
+
 	ThreadPool* myThreadPool = nullptr;
 	EventList<Function<void()>> myScheduledLoads;
 	Map<String, Ptr<Resource>> myLoadedResources;
+
+	Map<String, Array<u8>> myLoadedFiles;
+	Map<String, Array<ObjectFunctionView<BinaryData(const ArrayView<u8>&)>>> myFileCallbacks;
+	std::mutex myFileLoadMutex;
 };

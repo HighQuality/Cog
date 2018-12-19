@@ -32,7 +32,7 @@ public:
 	}
 
 	template <typename TCallRet = TReturn>
-	EnableIf<!IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs, TCallRet& aReturnValue) const
+	typename EnableIf<!IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs, TCallRet& aReturnValue) const
 	{
 		if (!IsValid())
 			return false;
@@ -41,7 +41,7 @@ public:
 	}
 
 	template <typename TCallRet = TReturn>
-	EnableIf<IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs) const
+	typename EnableIf<IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs) const
 	{
 		if (!IsValid())
 			return false;
@@ -86,3 +86,12 @@ private:
 	TReturn (*myFunctionCaller)(const ObjectFunctionView&, const TArgs& ...) = nullptr;
 	bool (*myIsValid)(const ObjectFunctionView&) = nullptr;
 };
+
+// template <typename TType, typename TFunc>
+// void MakeObjectFunctionView();
+// 
+// template <typename TType, typename TReturn, typename ...TArgs>
+// ObjectFunctionView<TReturn(TArgs...)> MakeObjectFunctionView<TReturn(TArgs...)>(TType& aObject, TReturn(TType::*aFunctionPointer)(TArgs...))
+// {
+// 	return ObjectFunctionView<TReturn(TArgs...)>(aObject, aFunctionPointer);
+// }

@@ -9,6 +9,21 @@ Image::Image()
 	myHeight = 0;
 }
 
+Image::Image(const i32 aWidth, const i32 aHeight)
+{
+	myPixels.Resize(aWidth * aHeight);
+	myWidth = aWidth;
+	myHeight = aHeight;
+}
+
+Image::Image(Array<ByteColor> aPixels, const i32 aWidth, const i32 aHeight)
+{
+	CHECK(aPixels.GetLength() == aWidth * aHeight);
+	myPixels = Move(aPixels);
+	myWidth = aWidth;
+	myHeight = aHeight;
+}
+
 Image::Image(const StringView& aFileName)
 {
 	std::vector<unsigned char> data;

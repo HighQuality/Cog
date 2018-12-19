@@ -12,25 +12,23 @@ public:
 	~ThreadPool();
 
 	template <typename TWork>
-	auto QueueSingle(TWork aWork)
+	void QueueSingle(TWork aWork)
 	{
 		std::unique_lock<std::mutex> lk(myWorkMutex);
-		auto result = QueueSingleImpl(Move(aWork));
+		QueueSingleImpl(Move(aWork));
 		lk.unlock();
 		myWorkNotify.notify_one();
-		return result;
 	}
 
 	template <typename... TWork>
-	auto QueueMultiple(TWork... aWork)
+	void QueueMultiple(TWork... aWork)
 	{
 		std::unique_lock<std::mutex> lk(myWorkMutex);
-		auto result = std::make_tuple(QueueSingleImpl(Move(aWork))...);
+		std::make_tuple((QueueSingleImpl(Move(aWork)), 1.f)...);
 		lk.unlock();
 		// TODO: Look into if this makes any sense
 		for (i32 i = 0; i<sizeof...(aWork); ++i)
 			myWorkNotify.notify_one();
-		return result;
 	}
 
 	template <typename TWork>

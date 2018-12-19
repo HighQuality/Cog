@@ -360,6 +360,12 @@ public:
 		return false;
 	}
 
+	void Clear()
+	{
+		myBuckets.Clear();
+		myLength = 0;
+	}
+
 private:
 	FORCEINLINE void Grow(const i32 aNewBucketSize)
 	{
