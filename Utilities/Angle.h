@@ -8,7 +8,7 @@ struct Angle
 	}
 
 	// Construct using Radian(x) or Degrees(x)
-	FORCEINLINE Angle(f32 aRadianAngle, decltype(nullptr) aNull)
+	FORCEINLINE Angle(f32 aRadianAngle, decltype(nullptr))
 	{
 		myRadian = aRadianAngle;
 	}

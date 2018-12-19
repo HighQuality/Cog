@@ -20,13 +20,13 @@ void ComponentList::BuildList()
 	{
 		ComponentData& component = myIDToData[id];
 
-		StringView specializationOf = component.GetSpecializationOf();
+		const StringView& specializationOf = component.GetSpecializationOf();
 
 		if (specializationOf.GetLength() > 0)
 		{
-			if (const u16* id = myTypeNameToID.Find(specializationOf))
+			if (const u16* specializationOfID = myTypeNameToID.Find(specializationOf))
 			{
-				ComponentData* base = myIDToData.Find(*id);
+				ComponentData* base = myIDToData.Find(*specializationOfID);
 				CHECK(base);
 				CHECK(!base->GetSpecialization());
 				base->SetSpecialization(component);

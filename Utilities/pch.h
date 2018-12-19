@@ -14,6 +14,10 @@
 #include <condition_variable>
 #include <atomic>
 
+#pragma warning ( disable : 4100 ) // Unreferenced formal parameter
+#pragma warning ( disable : 4505 ) // Unreferenced local function has been removed
+#pragma warning ( disable : 4714 ) // Function marked as __forceinline not inlined
+
 #ifdef _MSC_VER
 #define FORCEINLINE __forceinline
 #else

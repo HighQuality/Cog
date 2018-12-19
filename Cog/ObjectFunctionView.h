@@ -11,13 +11,13 @@ public:
 	ObjectFunctionView() = default;
 
 	template <typename TObject>
-	ObjectFunctionView(TObject& aObject, TReturn(TObject::*aFunction)(const TArgs& ...))
+	ObjectFunctionView(TObject& aObject, TReturn(TObject::*aFunction)(TArgs...))
 	{
 		Initialize<TObject, decltype(aFunction)>(aObject, aFunction);
 	}
 
 	template <typename TObject>
-	ObjectFunctionView(const TObject& aObject, TReturn(TObject::*aFunction)(const TArgs& ...) const)
+	ObjectFunctionView(const TObject& aObject, TReturn(TObject::*aFunction)(TArgs...) const)
 	{
 		Initialize<const TObject, decltype(aFunction)>(aObject, aFunction);
 	}
@@ -32,16 +32,16 @@ public:
 	}
 
 	template <typename TCallRet = TReturn>
-	typename EnableIf<!IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs, TCallRet& aReturnValue) const
+	EnableIf<!IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs, TCallRet& aReturnValue) const
 	{
 		if (!IsValid())
 			return false;
-		aReturnValue = (*myFunctionCaller)(&this, aArgs...);
+		aReturnValue = (*myFunctionCaller)(*this, aArgs...);
 		return true;
 	}
 
 	template <typename TCallRet = TReturn>
-	typename EnableIf<IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs) const
+	EnableIf<IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs) const
 	{
 		if (!IsValid())
 			return false;

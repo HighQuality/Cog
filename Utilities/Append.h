@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-inline void Append(String& aString)
+inline void Append(String&)
 {
 }
 

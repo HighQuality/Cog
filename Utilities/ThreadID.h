@@ -35,7 +35,7 @@ private:
 			if (ourThreadIDs[i] == nullptr)
 			{
 				ourThreadIDs[i] = this;
-				myID = i;
+				myID = static_cast<u8>(i);
 				return;
 			}
 		}

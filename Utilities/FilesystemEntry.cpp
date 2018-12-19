@@ -39,8 +39,8 @@
 	
 	std::wstring FileSystemEntry::GetRelativePath(const Directory& aBaseDirectory) const
 	{
-		abort();
-		
+		TODO
+
 		// const StringView baseDirectoryPath = aBaseDirectory.GetAbsolutePath();
 		// const StringView ourPath = GetAbsolutePath();
 		// if (ourPath.compare(0, baseDirectoryPath.size(), baseDirectoryPath) == 0)

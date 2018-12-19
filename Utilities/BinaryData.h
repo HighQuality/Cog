@@ -71,6 +71,11 @@ inline void ReadFromArray<String>(const Array<u8>& aSource, i32& aReadHead, Stri
 class BinaryData
 {
 public:
+	void WriteRaw(const void* aData, const i32 aSize)
+	{
+		myData.Append(ArrayView<u8>(static_cast<const u8*>(aData), aSize));
+	}
+
 	template <typename T>
 	void Write(const T& aValue)
 	{
@@ -83,6 +88,13 @@ public:
 		T val;
 		ReadFromArray(myData, myReadHead, val);
 		return val;
+	}
+
+	ArrayView<u8> ReadRaw(const i32 aSize)
+	{
+		auto slice = myData.Slice(myReadHead, aSize);
+		myReadHead += aSize;
+		return slice;
 	}
 
 	void Compress()

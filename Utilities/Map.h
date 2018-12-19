@@ -366,6 +366,26 @@ public:
 		myLength = 0;
 	}
 
+	template <typename TCallback>
+	void ForEach(const TCallback& aCallback)
+	{
+		for (auto& pairList : myBuckets)
+		{
+			for (auto& pair : pairList)
+				aCallback(pair);
+		}
+	}
+
+	template <typename TCallback>
+	void ForEach(const TCallback& aCallback) const
+	{
+		for (const auto& pairList : myBuckets)
+		{
+			for (const auto& pair : pairList)
+				aCallback(pair);
+		}
+	}
+
 private:
 	FORCEINLINE void Grow(const i32 aNewBucketSize)
 	{

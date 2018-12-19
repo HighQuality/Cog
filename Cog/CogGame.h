@@ -113,12 +113,12 @@ private:
 };
 
 template <typename TGameType = CogGame>
-static TGameType& GetGame()
+TGameType& GetGame()
 {
 	return CastChecked<TGameType>(CogGame::GetCogGame());
 }
 
-static ResourceManager& GetResourceManager()
+inline ResourceManager& GetResourceManager()
 {
 	return GetGame().GetResourceManager();
 }

@@ -181,7 +181,7 @@ struct Vec2
 		const f32 length = GetLength();
 		if (length > 0.f)
 			return *this / length;
-		return *this;
+		return aDefault;
 	}
 
 	f32 GetLengthSquared() const

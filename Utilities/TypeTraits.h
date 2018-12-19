@@ -171,6 +171,9 @@ template <typename TDerived, typename TBase>
 constexpr bool IsDerivedFrom = sizeof(IsDerivedFromImpl<TDerived, TBase>::Test(static_cast<TDerived*>(nullptr))) == 1;
 
 template <typename T>
+RemoveReference<T>&& Move(const T& Object) = delete;
+
+template <typename T>
 RemoveReference<T>&& Move(T&& Object)
 {
 	return static_cast<RemoveReference<T>&&>(Object);

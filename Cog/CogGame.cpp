@@ -68,6 +68,9 @@ void CogGame::Run()
 
 		watch.Restart();
 
+		if (myResourceManager)
+			myResourceManager->Tick();
+
 		Tick(deltaTime);
 	}
 }

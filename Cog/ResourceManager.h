@@ -1,6 +1,7 @@
 #pragma once
 #include <Function.h>
 #include <BinaryData.h>
+#include <ThreadPool.h>
 
 class Resource;
 class ThreadPool;
@@ -47,12 +48,29 @@ public:
 		}
 	}
 
-	void LoadScheduledResources();
+	void Tick();
 
 private:
 	friend Resource;
+
+	void DistributeFinishedActions();
 	
-	void LoadFile(const StringView& aPath, ObjectFunctionView<BinaryData(const ArrayView<u8>&)>);
+	template <typename TReturn>
+	void DoLoadAction(Function<TReturn()> aWork, ObjectFunctionView<void(TReturn)> aCallback)
+	{
+		myThreadPool->QueueSingle([this, aWork, aCallback]
+		{
+			TReturn result = aWork();
+
+			std::unique_lock<std::mutex> lck(myFileLoadMutex);
+			// TODO: Result is copied...
+			myFinishedActionDistributers.Add(Function<void()>([result, aCallback]
+			{
+				// TODO: And again...
+				aCallback.TryCall(result);
+			}));
+		});
+	}
 
 	static CogGame& GetCogGame();
 
@@ -60,7 +78,6 @@ private:
 	EventList<Function<void()>> myScheduledLoads;
 	Map<String, Ptr<Resource>> myLoadedResources;
 
-	Map<String, Array<u8>> myLoadedFiles;
-	Map<String, Array<ObjectFunctionView<BinaryData(const ArrayView<u8>&)>>> myFileCallbacks;
 	std::mutex myFileLoadMutex;
+	Array<Function<void()>> myFinishedActionDistributers;
 };
