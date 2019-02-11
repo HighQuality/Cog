@@ -1,8 +1,47 @@
 ﻿#pragma once
 #include "Pointer.h"
+#include <InlineVirtualObject.h>
 
 template <typename TFunc>
 class ObjectFunctionView;
+
+template <typename TReturn, typename ...TArgs>
+class ObjectFunctionView<TReturn(TArgs...)>;
+
+template <typename TReturn, typename ...TArgs>
+class BaseObjectFunctionViewHelper
+{
+public:
+	virtual ~BaseObjectFunctionViewHelper() = default;
+	virtual TReturn Call(TArgs...) const = 0;
+	virtual bool IsValid() const = 0;
+	virtual ObjectFunctionView<void()> CreateFunction();
+};
+
+template <typename TObject, typename TReturn, typename ...TArgs>
+class ObjectFunctionViewHelper final : public BaseObjectFunctionViewHelper<TReturn, TArgs...>
+{
+public:
+	ObjectFunctionViewHelper(TObject& aObject, TReturn(TObject::*aMemberFunction)(TArgs...))
+	{
+		myObjectPointer = aObject;
+		myMemberFunction = aMemberFunction;
+	}
+
+	TReturn Call(TArgs... aArgs) const final
+	{
+		(myObjectPointer->*myMemberFunction)(std::forward<TArgs>(aArgs)...);
+	}
+
+	bool IsValid() const final
+	{
+		return myObjectPointer.IsValid() && myMemberFunction;
+	}
+
+private:
+	Ptr<TObject> myObjectPointer;
+	TReturn (TObject::*myMemberFunction)(TArgs...) = nullptr;
+};
 
 template <typename TReturn, typename ...TArgs>
 class ObjectFunctionView<TReturn(TArgs ...)>
@@ -22,69 +61,54 @@ public:
 		Initialize<const TObject, decltype(aFunction)>(aObject, aFunction);
 	}
 
+	ObjectFunctionView(const ObjectFunctionView& aCopy)
+		: ObjectFunctionView()
+	{
+		if (aCopy.IsValid())
+		{
+			myFunction = 
+		}
+	}
+
 	explicit operator bool() const { return IsValid(); }
 
 	bool IsValid() const
 	{
-		if (!myIsValid)
-			return false;
-		return myIsValid(*this);
+		return myFunction && myFunction->IsValid();
 	}
 
 	template <typename TCallRet = TReturn>
-	EnableIf<!IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs, TCallRet& aReturnValue) const
+	EnableIf<!IsSame<TCallRet, void>, bool> TryCall(TArgs ...aArgs, TCallRet& aReturnValue) const
 	{
 		if (!IsValid())
 			return false;
-		aReturnValue = (*myFunctionCaller)(*this, aArgs...);
+		aReturnValue = myFunction->Call(std::forward<TArgs>(aArgs)...);
 		return true;
 	}
 
 	template <typename TCallRet = TReturn>
-	EnableIf<IsSame<TCallRet, void>, bool> TryCall(const TArgs& ...aArgs) const
+	EnableIf<IsSame<TCallRet, void>, bool> TryCall(TArgs ...aArgs) const
 	{
 		if (!IsValid())
 			return false;
-		(*myFunctionCaller)(*this, aArgs...);
+		myFunction->Call();
 		return true;
 	}
 
-	TReturn Call(const TArgs& ...aArgs) const
+	TReturn Call(TArgs ...aArgs) const
 	{
 		CHECK(IsValid());
-		return (*myFunctionCaller)(*this, aArgs...);
+		return myFunction->Call(std::forward<TArgs>(aArgs)...);
 	}
 
 private:
 	template <typename TObject, typename TMemberFunction>
 	void Initialize(TObject& aObject, TMemberFunction aMemberFunction)
 	{
-		new (static_cast<void*>(&myPointer)) Ptr<TObject>(aObject);
-
-		auto lambda = [aMemberFunction](TObject& aObject, const TArgs&... aArgs)
-		{
-			return (aObject.*aMemberFunction)(aArgs...);
-		};
-
-		myFunctionCaller = [](const ObjectFunctionView& aSelf, const TArgs& ...aArgs)
-		{
-			const Ptr<TObject>& ptr = *reinterpret_cast<const Ptr<TObject>*>(&aSelf.myPointer);
-			return reinterpret_cast<const decltype(lambda)*>(&aSelf.myFunctionStorage)->operator()(*ptr, aArgs...);
-		};
-
-		myIsValid = [](const ObjectFunctionView& aSelf)
-		{
-			const Ptr<TObject>& ptr = *reinterpret_cast<const Ptr<TObject>*>(&aSelf.myPointer);
-			return ptr.IsValid();
-		};
-
-		new(static_cast<void*>(&myFunctionStorage)) decltype(lambda)(Move(lambda));
+		myFunction.Store<ObjectFunctionViewHelper<TObject, TReturn, TArgs...>>(aObject, aMemberFunction);
 	}
 
-	std::aligned_storage_t<sizeof(Ptr<Entity>), alignof(Ptr<Entity>)> myPointer;
-	std::aligned_storage_t<8> myFunctionStorage;
-	TReturn (*myFunctionCaller)(const ObjectFunctionView&, const TArgs& ...) = nullptr;
-	bool (*myIsValid)(const ObjectFunctionView&) = nullptr;
+	InlineVirtualObject<BaseObjectFunctionViewHelper<TReturn, TArgs...>, sizeof ObjectFunctionViewHelper<Object, TReturn, TArgs...>> myFunction;
 };
 
 // template <typename TType, typename TFunc>

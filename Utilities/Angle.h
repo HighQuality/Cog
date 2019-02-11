@@ -7,7 +7,7 @@ struct Angle
 		myRadian = 0.f;
 	}
 
-	// Construct using Radian(x) or Degrees(x)
+	// Construct using ::Radian(x) or ::Degrees(x) instead
 	FORCEINLINE Angle(f32 aRadianAngle, decltype(nullptr))
 	{
 		myRadian = aRadianAngle;
@@ -17,7 +17,7 @@ struct Angle
 
 	FORCEINLINE Angle(const Angle&) = default;
 
-	FORCEINLINE f32 AsRadian() const
+	FORCEINLINE f32 AsRadians() const
 	{
 		return myRadian;
 	}

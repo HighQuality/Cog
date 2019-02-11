@@ -12,6 +12,9 @@ ResourceManager::~ResourceManager()
 {
 	delete myThreadPool;
 	myThreadPool = nullptr;
+
+	for (BaseActionCallback* callback : myFinishedActionDistributers)
+		delete callback;
 }
 
 struct CallbackData
@@ -32,8 +35,13 @@ void ResourceManager::DistributeFinishedActions()
 {
 	std::unique_lock<std::mutex> lck(myFileLoadMutex);
 
-	for (const auto& callback : myFinishedActionDistributers)
-		callback();
+	Array<BaseActionCallback*> callbackList = Move(myFinishedActionDistributers);
+
+	for (BaseActionCallback* callback : callbackList)
+	{
+		callback->Call();
+		delete callback;
+	}
 }
 
 CogGame& ResourceManager::GetCogGame()

@@ -6,73 +6,96 @@ class Function;
 template <typename TReturn, typename... TArgs>
 class Function<TReturn(TArgs...)>
 {
-	const void* myObject;
-	TReturn(*myCaller)(const void*, TArgs...);
-	void(*myDeleter)(const void*);
+	class BaseHelper
+	{
+	public:
+		virtual ~BaseHelper() = default;
+		virtual TReturn Call(TArgs...) const = 0;
+		virtual BaseHelper* Copy() const = 0;
+	};
+
+	template <typename T>
+	class Helper final : public BaseHelper
+	{
+	public:
+		Helper(T&& aFunction)
+			: myFunction(Move(aFunction))
+		{
+		}
+
+		TReturn Call(TArgs... aArgs) const final
+		{
+			return myFunction(std::forward<TArgs>(aArgs)...);
+		}
+		
+		BaseHelper* Copy() const final
+		{
+			return new Helper(T(myFunction));
+		}
+
+	private:
+		T myFunction;
+	};
+
+	BaseHelper* myFunction = nullptr;
 
 public:
 	Function()
 	{
-		myObject = nullptr;
-		myCaller = nullptr;
-		myDeleter = nullptr;
 	}
 
 	Function(Function&& aMove) noexcept
 	{
-		myObject = aMove.myObject;
-		aMove.myObject = nullptr;
-
-		myCaller = aMove.myCaller;
-		aMove.myCaller = nullptr;
-
-		myDeleter = aMove.myDeleter;
-		aMove.myDeleter = nullptr;
+		myFunction = aMove.myFunction;
+		aMove.myFunction = nullptr;
 	}
 
 	Function& operator=(Function&& aMove)
 	{
-		if (myDeleter)
-			myDeleter(myObject);
+		if (myFunction)
+			delete myFunction;
 
-		myObject = aMove.myObject;
+		myFunction = aMove.myFunction;
 		aMove.myObject = nullptr;
-
-		myCaller = aMove.myCaller;
-		aMove.myCaller = nullptr;
-
-		myDeleter = aMove.myDeleter;
-		aMove.myDeleter = nullptr;
 	}
 
-	Function(const Function& aCopy) = delete;
-	Function& operator=(const Function& aCopy) = delete;
+	Function(const Function& aCopy)
+	{
+		if (aCopy.myFunction)
+			myFunction = aCopy.myFunction->Copy();
+		else
+			myFunction = nullptr;
+	}
+	
+	Function& operator=(const Function& aCopy)
+	{
+		if (aCopy.myFunction)
+			myFunction = aCopy.myFunction->Copy();
+		else
+			myFunction = nullptr;
+		return *this;
+	}
 
 	template <typename T>
 	Function(T aFunctor) noexcept
+		: myFunction(new Helper<T>(Move(aFunctor)))
 	{
-		myObject = new T(Move(aFunctor));
-
-		myCaller = [](const void* aObject, TArgs... aArgs) -> TReturn {
-			return (*static_cast<const T*>(aObject))(
-				std::forward<TArgs>(aArgs)...
-			);
-		};
-
-		myDeleter = [](const void* aObject) {
-			delete static_cast<const T*>(aObject);
-		};
 	}
 
 	~Function()
 	{
-		if (myDeleter)
-			myDeleter(myObject);
+		delete myFunction;
+		myFunction = nullptr;
 	}
 
-	TReturn operator()(TArgs... aArgs) const
+	FORCEINLINE bool IsValid() const
 	{
-		CHECK(myObject && myCaller);
-		return myCaller(myObject, std::forward<TArgs>(aArgs)...);
+		return myFunction != nullptr;
+	}
+
+	FORCEINLINE TReturn operator()(TArgs... aArgs) const
+	{
+		CHECK(IsValid());
+		return myFunction->Call(std::forward<TArgs>(aArgs)...);
 	}
 };

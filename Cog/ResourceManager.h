@@ -55,6 +55,35 @@ private:
 
 	void DistributeFinishedActions();
 	
+	class BaseActionCallback
+	{
+	public:
+		virtual void Call() = 0;
+		virtual ~BaseActionCallback() = default;
+
+	private:
+	};
+
+	template <typename TResource>
+	class ActionCallback : public BaseActionCallback
+	{
+	public:
+		ActionCallback(ObjectFunctionView<void(TResource)> aCallback, TResource&& aResource)
+		{
+			myCallback = Move(aCallback);
+			myResource = Move(aResource);
+		}
+
+		void Call() final
+		{
+			myCallback.TryCall(Move(myResource));
+		}
+
+	private:
+		ObjectFunctionView<void(TResource)> myCallback;
+		TResource myResource;
+	};
+
 	template <typename TReturn>
 	void DoLoadAction(Function<TReturn()> aWork, ObjectFunctionView<void(TReturn)> aCallback)
 	{
@@ -62,13 +91,10 @@ private:
 		{
 			TReturn result = aWork();
 
+			BaseActionCallback* callback = new ActionCallback<TReturn>(Move(aCallback), Move(result));
+
 			std::unique_lock<std::mutex> lck(myFileLoadMutex);
-			// TODO: Result is copied...
-			myFinishedActionDistributers.Add(Function<void()>([result, aCallback]
-			{
-				// TODO: And again...
-				aCallback.TryCall(result);
-			}));
+			myFinishedActionDistributers.Add(callback);
 		});
 	}
 
@@ -79,5 +105,5 @@ private:
 	Map<String, Ptr<Resource>> myLoadedResources;
 
 	std::mutex myFileLoadMutex;
-	Array<Function<void()>> myFinishedActionDistributers;
+	Array<BaseActionCallback*> myFinishedActionDistributers;
 };

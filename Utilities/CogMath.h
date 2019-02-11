@@ -117,7 +117,7 @@ inline f32 Sqrt(const f32 aValue)
 
 inline void SinCos(const Angle aAngle, f32& aSin, f32& aCos)
 {
-	const f32 radian = aAngle.AsRadian();
+	const f32 radian = aAngle.AsRadians();
 
 	float quotient = InvPi * 0.5f * radian;
 	if (radian >= 0.f)

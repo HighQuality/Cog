@@ -128,6 +128,7 @@
     <ClInclude Include="Hashing.h" />
     <ClInclude Include="HeapAllocator.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="InlineVirtualObject.h" />
     <ClInclude Include="json.h" />
     <ClInclude Include="LinearColor.h" />
     <ClInclude Include="lodepng.h" />
