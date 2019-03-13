@@ -29,8 +29,6 @@ public:
 
 	Array<T> Gather()
 	{
-		std::unique_lock<std::mutex> lck(myMutex);
-
 		Array<T> elements;
 
 		i32 count = 0;
@@ -77,5 +75,4 @@ private:
 	std::array<Array<T>, 256> myLocalElements;
 	std::array<Array<T>*, 256> myNonEmptyArrays;
 	std::atomic_int32_t myNextEmptyArrayIndex;
-	std::mutex myMutex;
 };

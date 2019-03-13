@@ -13,6 +13,7 @@
 #include <thread>
 #include <condition_variable>
 #include <atomic>
+#include <utility>
 
 #pragma warning ( disable : 4100 ) // Unreferenced formal parameter
 #pragma warning ( disable : 4505 ) // Unreferenced local function has been removed

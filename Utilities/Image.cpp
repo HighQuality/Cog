@@ -2,7 +2,6 @@
 #include "Image.h"
 #include "lodepng.h"
 
-
 Image::Image()
 {
 	myWidth = 0;

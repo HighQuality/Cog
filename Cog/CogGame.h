@@ -4,6 +4,7 @@
 #include "ThreadID.h"
 #include "ObjectFactory.h"
 #include "ResourceManager.h"
+#include "FileLoader.h"
 
 class ThreadPool;
 class EntityFactory;
@@ -12,7 +13,6 @@ class Component;
 class Entity;
 class ComponentList;
 class Widget;
-class ResourceManager;
 
 class CogGame
 {
@@ -63,6 +63,11 @@ public:
 	{
 		return *myResourceManager;
 	}
+	
+	FileLoader& GetFileLoader() const
+	{
+		return *myFileLoader;
+	}
 
 	static CogGame& GetCogGame()
 	{
@@ -92,6 +97,7 @@ protected:
 
 private:
 	void CreateResourceManager();
+	void CreateFileLoader();
 	void AssignComponentList(const ComponentList& aComponents);
 	
 	friend Entity;
@@ -108,6 +114,7 @@ private:
 	const ComponentList* myComponentList = nullptr;
 
 	Ptr<ResourceManager> myResourceManager;
+	Ptr<FileLoader> myFileLoader;
 
 	static CogGame* ourGame;
 };
@@ -121,4 +128,9 @@ TGameType& GetGame()
 inline ResourceManager& GetResourceManager()
 {
 	return GetGame().GetResourceManager();
+}
+
+inline FileLoader& GetFileLoader()
+{
+	return GetGame().GetFileLoader();
 }

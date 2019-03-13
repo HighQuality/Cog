@@ -19,17 +19,10 @@ protected:
 
 	// Return -1 in order to disable caching
 	virtual i32 GetVersion() = 0;
-
-	template <typename TReturn, typename TType>
-	void DoLoadAction(TType* aThisPtr, Function<TReturn()> aWork, void(TType::*aFunction)(TReturn))
-	{
-		CHECK(aThisPtr == this);
-		ResourceManager& resourceManager = GetResourceManager();
-		ObjectFunctionView<void(TReturn)> func(*aThisPtr, aFunction);
-		resourceManager.DoLoadAction(Move(aWork), func);
-	}
-
+	
 	static Array<u8> ReadEntireFile(const StringView& aFile);
+
+	void RegisterCallback(const Function<void(Resource&)>& aFunctionCallback);
 
 private:
 	bool myIsLoaded = false;

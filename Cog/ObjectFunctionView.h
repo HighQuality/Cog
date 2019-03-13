@@ -1,121 +1,69 @@
 ﻿#pragma once
 #include "Pointer.h"
 #include <InlineVirtualObject.h>
+#include <MemberFunctionPointer.h>
 
 template <typename TFunc>
 class ObjectFunctionView;
 
 template <typename TReturn, typename ...TArgs>
-class ObjectFunctionView<TReturn(TArgs...)>;
-
-template <typename TReturn, typename ...TArgs>
-class BaseObjectFunctionViewHelper
-{
-public:
-	virtual ~BaseObjectFunctionViewHelper() = default;
-	virtual TReturn Call(TArgs...) const = 0;
-	virtual bool IsValid() const = 0;
-	virtual ObjectFunctionView<void()> CreateFunction();
-};
-
-template <typename TObject, typename TReturn, typename ...TArgs>
-class ObjectFunctionViewHelper final : public BaseObjectFunctionViewHelper<TReturn, TArgs...>
-{
-public:
-	ObjectFunctionViewHelper(TObject& aObject, TReturn(TObject::*aMemberFunction)(TArgs...))
-	{
-		myObjectPointer = aObject;
-		myMemberFunction = aMemberFunction;
-	}
-
-	TReturn Call(TArgs... aArgs) const final
-	{
-		(myObjectPointer->*myMemberFunction)(std::forward<TArgs>(aArgs)...);
-	}
-
-	bool IsValid() const final
-	{
-		return myObjectPointer.IsValid() && myMemberFunction;
-	}
-
-private:
-	Ptr<TObject> myObjectPointer;
-	TReturn (TObject::*myMemberFunction)(TArgs...) = nullptr;
-};
-
-template <typename TReturn, typename ...TArgs>
 class ObjectFunctionView<TReturn(TArgs ...)>
 {
+	class A;
+
 public:
 	ObjectFunctionView() = default;
 
 	template <typename TObject>
-	ObjectFunctionView(TObject& aObject, TReturn(TObject::*aFunction)(TArgs...))
+	FORCEINLINE ObjectFunctionView(TObject& aObject, TReturn(TObject::*aFunction)(TArgs...))
 	{
-		Initialize<TObject, decltype(aFunction)>(aObject, aFunction);
+		myObject = &aObject;
+		new (static_cast<void*>(&myMemberFunctionPointerStorage)) MemberFunctionPointer<TObject, TReturn(TArgs...)>(aFunction);
+		static_assert(std::is_trivially_destructible_v<MemberFunctionPointer<TObject, TReturn(TArgs...)>>, "Member function storage must be trivially destructible in order not to leak");
 	}
 
 	template <typename TObject>
-	ObjectFunctionView(const TObject& aObject, TReturn(TObject::*aFunction)(TArgs...) const)
+	FORCEINLINE ObjectFunctionView(const TObject& aObject, TReturn(TObject::*aFunction)(TArgs...) const)
 	{
-		Initialize<const TObject, decltype(aFunction)>(aObject, aFunction);
+		myObject = const_cast<TObject*>(&aObject);
+		new (static_cast<void*>(&myMemberFunctionPointerStorage)) MemberFunctionPointer<const TObject, TReturn(TArgs...)>(aFunction);
+		static_assert(std::is_trivially_destructible_v<MemberFunctionPointer<const TObject, TReturn(TArgs...)>>, "Member function storage must be trivially destructible in order not to leak");
 	}
+	
+	FORCEINLINE explicit operator bool() const { return IsValid(); }
 
-	ObjectFunctionView(const ObjectFunctionView& aCopy)
-		: ObjectFunctionView()
+	FORCEINLINE bool IsValid() const
 	{
-		if (aCopy.IsValid())
-		{
-			myFunction = 
-		}
-	}
-
-	explicit operator bool() const { return IsValid(); }
-
-	bool IsValid() const
-	{
-		return myFunction && myFunction->IsValid();
+		return myObject;
 	}
 
 	template <typename TCallRet = TReturn>
-	EnableIf<!IsSame<TCallRet, void>, bool> TryCall(TArgs ...aArgs, TCallRet& aReturnValue) const
+	FORCEINLINE EnableIf<!IsSame<TCallRet, void>, bool> TryCall(TArgs ...aArgs, TCallRet& aReturnValue) const
 	{
 		if (!IsValid())
 			return false;
-		aReturnValue = myFunction->Call(std::forward<TArgs>(aArgs)...);
+		aReturnValue = Call(std::forward(aArgs)...);
 		return true;
 	}
 
 	template <typename TCallRet = TReturn>
-	EnableIf<IsSame<TCallRet, void>, bool> TryCall(TArgs ...aArgs) const
+	FORCEINLINE EnableIf<IsSame<TCallRet, void>, bool> TryCall(TArgs ...aArgs) const
 	{
 		if (!IsValid())
 			return false;
-		myFunction->Call();
+		Call(std::forward(aArgs)...);
 		return true;
 	}
 
-	TReturn Call(TArgs ...aArgs) const
+	FORCEINLINE TReturn Call(TArgs ...aArgs) const
 	{
 		CHECK(IsValid());
-		return myFunction->Call(std::forward<TArgs>(aArgs)...);
+		const auto& storage = *reinterpret_cast<const MemberFunctionPointer<A, TReturn(TArgs...)>*>(&myMemberFunctionPointerStorage);
+
+		return storage.Call(*static_cast<A*>(myObject), std::forward<TArgs>(aArgs)...);
 	}
 
 private:
-	template <typename TObject, typename TMemberFunction>
-	void Initialize(TObject& aObject, TMemberFunction aMemberFunction)
-	{
-		myFunction.Store<ObjectFunctionViewHelper<TObject, TReturn, TArgs...>>(aObject, aMemberFunction);
-	}
-
-	InlineVirtualObject<BaseObjectFunctionViewHelper<TReturn, TArgs...>, sizeof ObjectFunctionViewHelper<Object, TReturn, TArgs...>> myFunction;
+	std::aligned_storage_t<MemberFunctionPointerSize> myMemberFunctionPointerStorage;
+	void* myObject;
 };
-
-// template <typename TType, typename TFunc>
-// void MakeObjectFunctionView();
-// 
-// template <typename TType, typename TReturn, typename ...TArgs>
-// ObjectFunctionView<TReturn(TArgs...)> MakeObjectFunctionView<TReturn(TArgs...)>(TType& aObject, TReturn(TType::*aFunctionPointer)(TArgs...))
-// {
-// 	return ObjectFunctionView<TReturn(TArgs...)>(aObject, aFunctionPointer);
-// }

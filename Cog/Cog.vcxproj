@@ -14,19 +14,19 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{499D74DA-D82E-490B-AA3C-BD0E920F786F}</ProjectGuid>
     <RootNamespace>Cog</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -110,6 +110,7 @@
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventList.h" />
     <ClInclude Include="CogGame.h" />
+    <ClInclude Include="FileLoader.h" />
     <ClInclude Include="GameThreadCallback.h" />
     <ClInclude Include="ImageResource.h" />
     <ClInclude Include="InheritComponent.h" />
@@ -134,6 +135,7 @@
     <ClCompile Include="EngineComponentList.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityInitializer.cpp" />
+    <ClCompile Include="FileLoader.cpp" />
     <ClCompile Include="ImageResource.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

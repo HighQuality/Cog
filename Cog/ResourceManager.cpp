@@ -4,44 +4,16 @@
 
 ResourceManager::ResourceManager()
 {
-	// Create 8 threads for loading files
-	myThreadPool = new ThreadPool(8);
 }
 
 ResourceManager::~ResourceManager()
 {
-	delete myThreadPool;
-	myThreadPool = nullptr;
-
-	for (BaseActionCallback* callback : myFinishedActionDistributers)
-		delete callback;
 }
-
-struct CallbackData
-{
-	Array<u8> data;
-	Array<ObjectFunctionView<void(const ArrayView<u8>&, BinaryData&)>> callbacks;
-};
 
 void ResourceManager::Tick()
 {
 	for (const Function<void()>& loader : myScheduledLoads.Gather())
 		loader();
-
-	DistributeFinishedActions();
-}
-
-void ResourceManager::DistributeFinishedActions()
-{
-	std::unique_lock<std::mutex> lck(myFileLoadMutex);
-
-	Array<BaseActionCallback*> callbackList = Move(myFinishedActionDistributers);
-
-	for (BaseActionCallback* callback : callbackList)
-	{
-		callback->Call();
-		delete callback;
-	}
 }
 
 CogGame& ResourceManager::GetCogGame()

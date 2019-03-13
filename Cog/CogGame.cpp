@@ -10,6 +10,7 @@
 #include <Semaphore.h>
 #include "ComponentList.h"
 #include "ResourceManager.h"
+#include "FileLoader.h"
 
 CogGame* CogGame::ourGame;
 
@@ -48,6 +49,7 @@ CogGame::~CogGame()
 void CogGame::Run()
 {
 	CreateResourceManager();
+	CreateFileLoader();
 
 	Stopwatch watch;
 	bool isFirstFrame = true;
@@ -67,6 +69,9 @@ void CogGame::Run()
 		}
 
 		watch.Restart();
+
+		if (myFileLoader)
+			myFileLoader->Tick();
 
 		if (myResourceManager)
 			myResourceManager->Tick();
@@ -172,6 +177,11 @@ Entity& CogGame::AllocateEntity()
 void CogGame::CreateResourceManager()
 {
 	myResourceManager = CreateObject<ResourceManager>();
+}
+
+void CogGame::CreateFileLoader()
+{
+	myFileLoader = CreateObject<FileLoader>();
 }
 
 void CogGame::AssignComponentList(const ComponentList& aComponents)

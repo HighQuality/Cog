@@ -57,6 +57,7 @@
     <ClInclude Include="CityHash\config.h" />
     <ClInclude Include="ThreadID.h" />
     <ClInclude Include="InlineVirtualObject.h" />
+    <ClInclude Include="MemberFunctionPointer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

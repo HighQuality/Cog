@@ -15,8 +15,6 @@ private:
 
 	void FileLoaded(const ArrayView<u8>& aFileData, BinaryData& aOutput);
 
-	void ImageLoaded(Image aImage);
-
 protected:
 	i32 GetVersion() override { return -1; }
 };

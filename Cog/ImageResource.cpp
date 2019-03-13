@@ -8,10 +8,11 @@ void ImageResource::BeginLoad(const StringView& aResourcePath)
 	myFileName = aResourcePath;
 
 	const String file(myFileName);
-	DoLoadAction(this, Function<Image()>([file]() -> Image
-	{
-		return Image(file);
-	}), &ImageResource::ImageLoaded);
+	
+	// DoLoadAction(this, Function<Image()>([file]() -> Image
+	// {
+	// 	return Image(file);
+	// }), &ImageResource::ImageLoaded);
 }
 
 void ImageResource::FileLoaded(const ArrayView<u8>& aFileData, BinaryData& aOutput)
@@ -34,8 +35,4 @@ void ImageResource::FileLoaded(const ArrayView<u8>& aFileData, BinaryData& aOutp
 	aOutput.Write<i32>(height);
 	aOutput.Write<i32>(bytesPerPixel);
 	aOutput.WriteRaw(image.data(), CastBoundsChecked<i32>(image.size()));
-}
-
-void ImageResource::ImageLoaded(Image aImage)
-{
 }

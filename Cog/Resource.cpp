@@ -22,3 +22,7 @@ Array<u8> Resource::ReadEntireFile(const StringView& aFile)
 
 	return data;
 }
+
+void Resource::RegisterCallback(const Function<void(Resource&)>& aFunctionCallback)
+{
+}
