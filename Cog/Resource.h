@@ -19,9 +19,8 @@ protected:
 
 	// Return -1 in order to disable caching
 	virtual i32 GetVersion() = 0;
-	
-	static Array<u8> ReadEntireFile(const StringView& aFile);
 
+	//GENCELFIXED
 	void RegisterCallback(const Function<void(Resource&)>& aFunctionCallback);
 
 private:
