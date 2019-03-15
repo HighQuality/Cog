@@ -1,9 +1,15 @@
 ﻿#pragma once
 
+using ThreadIDInteger = u8;
+
+constexpr ThreadIDInteger MaxThreadID = 128;
+	
+static_assert(MaxThreadID != MaxOf<ThreadIDInteger>, "Max thread ID may not be the max of it's type");
+
 class ThreadID
 {
 public:
-	u8 GetInteger() const
+	ThreadIDInteger GetInteger() const
 	{
 		return myID;
 	}
@@ -27,34 +33,44 @@ private:
 	ThreadID()
 	{
 		std::unique_lock<std::mutex> lck(ourMutex);
-		if (ourThreadIDs.GetLength() == 0)
-			ourThreadIDs.Resize(255);
 
-		for (i32 i = 1; i < ourThreadIDs.GetLength(); ++i)
+		for (ThreadIDInteger i = 1; i < MaxThreadID; ++i)
 		{
 			if (ourThreadIDs[i] == nullptr)
 			{
 				ourThreadIDs[i] = this;
-				myID = static_cast<u8>(i);
+				myID = i;
 				return;
 			}
 		}
 
-		FATAL(L"Too many threads!");
+		FATAL(L"Too many threads running (maximum of {0})!", MaxThreadID);
 	}
 
 	~ThreadID()
 	{
 		std::unique_lock<std::mutex> lck(ourMutex);
 
-		const i32 index = ourThreadIDs.Find(this);
+		ThreadIDInteger index = MaxOf<ThreadIDInteger>;
+
+		for (ThreadIDInteger i = 1; i < MaxThreadID; ++i)
+		{
+			if (ourThreadIDs[i] == this)
+			{
+				index = i;
+				break;
+			}
+		}
+
 		CHECK(index >= 0);
 		ourThreadIDs[index] = nullptr;
 	}
 
-	u8 myID;
+	ThreadIDInteger myID;
 
 	static thread_local ThreadID ourThreadID;
 	static std::mutex ourMutex;
-	static Array<ThreadID*> ourThreadIDs;
+
+	// Static variables are zero-initialized
+	static ThreadID* ourThreadIDs[MaxThreadID];
 };

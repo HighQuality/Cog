@@ -4,7 +4,7 @@
 #include <string>
 #include <new>
 #include <initializer_list>
-#include <stdint.h>
+#include <cstdint>
 #include <iostream>
 #include <fstream>
 #include <malloc.h>
@@ -14,10 +14,13 @@
 #include <condition_variable>
 #include <atomic>
 #include <utility>
+#include <array>
 
 #pragma warning ( disable : 4100 ) // Unreferenced formal parameter
 #pragma warning ( disable : 4505 ) // Unreferenced local function has been removed
 #pragma warning ( disable : 4714 ) // Function marked as __forceinline not inlined
+
+#include "CityHash/city.h"
 
 #ifdef _MSC_VER
 #define FORCEINLINE __forceinline
@@ -52,8 +55,8 @@
 #undef assert
 #undef SendMessage
 
-#include "CityHash/city.h"
 #include "Types.h"
+
 #include "Random.h"
 #include "DebugAsserts.h"
 #include "CogMath.h"
@@ -67,8 +70,6 @@
 #include "CogStringView.h"
 
 #include "Format.h"
-
-#include "json.h"
 
 #include "Map.h"
 

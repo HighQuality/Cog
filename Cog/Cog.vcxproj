@@ -46,13 +46,13 @@
     <OutDir>..\lib\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>..\temp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
-    <IncludePath>..\Utilities\;..\extlibs\snappy\include\;..\Utilities\;$(IncludePath)</IncludePath>
+    <IncludePath>..\Utilities\;..\extlibs\snappy\include\;..\Utilities\;..\extlibs\libcurl\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\lib\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>..\temp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
-    <IncludePath>..\Utilities\;..\extlibs\snappy\include\;..\Utilities\;$(IncludePath)</IncludePath>
+    <IncludePath>..\Utilities\;..\extlibs\snappy\include\;..\Utilities\;..\extlibs\libcurl\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -108,7 +108,6 @@
     <ClInclude Include="ComponentList.h" />
     <ClInclude Include="EngineComponentList.h" />
     <ClInclude Include="Event.h" />
-    <ClInclude Include="EventList.h" />
     <ClInclude Include="CogGame.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="GameThreadCallback.h" />

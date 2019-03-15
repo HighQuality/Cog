@@ -196,39 +196,41 @@ public:
 		return removedElement;
 	}
 
-	FORCEINLINE void RemoveAtSwap(const i32 aIndex)
+	FORCEINLINE T RemoveAtSwap(const i32 aIndex)
 	{
 		if (aIndex < 0 || aIndex >= this->myLength)
 			abort();
 
 		if (aIndex + 1 == this->myLength)
 		{
-			RemoveAt(aIndex);
-			return;
+			return RemoveAt(aIndex);
 		}
 
 		this->myData[aIndex] = Move(this->Last());
-		this->Last().~T();
 		--this->myLength;
+		
+		T removedData = Move(this->myData[this->myLength]);
 
 		if constexpr (ZeroOnePastEnd)
 			memset(&this->myData[this->myLength], 0, sizeof T);
+
+		return removedData;
 	}
 
-	FORCEINLINE void RemoveAt(const i32 aIndex)
+	FORCEINLINE T RemoveAt(const i32 aIndex)
 	{
 		if (aIndex < 0 || aIndex >= this->myLength)
 			abort();
 
 		if (aIndex + 1 == this->myLength)
 		{
-			this->myData[aIndex].~T();
+			T removedData = Move(this->myData[aIndex]);
 			--this->myLength;
 
 			if constexpr (ZeroOnePastEnd)
 				memset(&this->myData[this->myLength], 0, sizeof T);
 
-			return;
+			return removedData;
 		}
 
 		for (i32 i = aIndex + 1; i < this->myLength; ++i)
@@ -238,9 +240,13 @@ public:
 		}
 
 		--this->myLength;
+		
+		T removedData = Move(this->myData[this->myLength]);
 
 		if constexpr (ZeroOnePastEnd)
 			memset(&this->myData[this->myLength], 0, sizeof T);
+
+		return removedData;
 	}
 
 	FORCEINLINE i32 GetCapacity() const

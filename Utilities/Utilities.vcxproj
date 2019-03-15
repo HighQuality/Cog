@@ -45,12 +45,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>..\lib\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>..\temp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-    <IncludePath>..\extlibs\snappy\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>..\extlibs\snappy\include\;$(VC_IncludePath);..\extlibs\libcurl\include\;$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\lib\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>..\temp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-    <IncludePath>..\extlibs\snappy\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>..\extlibs\snappy\include\;$(VC_IncludePath);..\extlibs\libcurl\include\;$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -116,6 +116,8 @@
     <ClInclude Include="CogStringView.h" />
     <ClInclude Include="CogTime.h" />
     <ClInclude Include="Convert.h" />
+    <ClInclude Include="EventList.h" />
+    <ClInclude Include="Program.h" />
     <ClInclude Include="DebugAsserts.h" />
     <ClInclude Include="Directory.h" />
     <ClInclude Include="Factory.h" />
@@ -127,6 +129,7 @@
     <ClInclude Include="FunctionView.h" />
     <ClInclude Include="Hashing.h" />
     <ClInclude Include="HeapAllocator.h" />
+    <ClInclude Include="HttpClient.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="InlineVirtualObject.h" />
     <ClInclude Include="json.h" />
@@ -163,6 +166,7 @@
     <ClCompile Include="Filesystem.cpp" />
     <ClCompile Include="FilesystemEntry.cpp" />
     <ClCompile Include="HeapAllocator.cpp" />
+    <ClCompile Include="HttpClient.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="LinearColor.cpp" />
     <ClCompile Include="lodepng.cpp" />
@@ -170,6 +174,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Program.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
     <ClCompile Include="StackAllocatorBlock.cpp" />
     <ClCompile Include="Stopwatch.cpp" />

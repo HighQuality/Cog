@@ -198,9 +198,39 @@ struct Vec2
 	{
 		return x * aSecond.x + y * aSecond.y;
 	}
-
+	
 	static f32 GetDot(const Vec2& aFirst, const Vec2& aSecond)
 	{
 		return aFirst.GetDot(aSecond);
+	}
+
+	Vec2 GetDeltaTo(const Vec2& aSecond) const
+	{
+		return aSecond - *this;
+	}
+
+	static Vec2 GetDeltaTo(const Vec2& aFirst, const Vec2& aSecond)
+	{
+		return aFirst.GetDeltaTo(aSecond);
+	}
+
+	f32 GetDistanceSquaredTo(const Vec2& aSecond) const
+	{
+		return GetDeltaTo(aSecond).GetLengthSquared();
+	}
+
+	static f32 GetDistanceSquaredTo(const Vec2& aFirst, const Vec2& aSecond)
+	{
+		return aFirst.GetDistanceSquaredTo(aSecond);
+	}
+
+	f32 GetDistanceTo(const Vec2& aSecond) const
+	{
+		return Sqrt(GetDistanceSquaredTo(aSecond));
+	}
+
+	static f32 GetDistanceTo(const Vec2& aFirst, const Vec2& aSecond)
+	{
+		return aFirst.GetDistanceTo(aSecond);
 	}
 };

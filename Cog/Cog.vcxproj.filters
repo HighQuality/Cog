@@ -18,7 +18,6 @@
     <ClInclude Include="ComponentList.h" />
     <ClInclude Include="ComponentData.h" />
     <ClInclude Include="EngineComponentList.h" />
-    <ClInclude Include="EventList.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityInitializer.h" />
     <ClInclude Include="EntityFactory.h" />

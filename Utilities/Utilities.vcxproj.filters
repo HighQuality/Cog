@@ -58,6 +58,9 @@
     <ClInclude Include="ThreadID.h" />
     <ClInclude Include="InlineVirtualObject.h" />
     <ClInclude Include="MemberFunctionPointer.h" />
+    <ClInclude Include="HttpClient.h" />
+    <ClInclude Include="Program.h" />
+    <ClInclude Include="EventList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -80,6 +83,8 @@
     <ClCompile Include="AwaitableWorkItem.cpp" />
     <ClCompile Include="CityHash\city.cc" />
     <ClCompile Include="ThreadID.cpp" />
+    <ClCompile Include="HttpClient.cpp" />
+    <ClCompile Include="Program.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />
