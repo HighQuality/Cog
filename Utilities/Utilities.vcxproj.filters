@@ -61,6 +61,9 @@
     <ClInclude Include="HttpClient.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="EventList.h" />
+    <ClInclude Include="ThreadLocalStack.h" />
+    <ClInclude Include="Fiber.h" />
+    <ClInclude Include="FiberLocalStorage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -85,6 +88,7 @@
     <ClCompile Include="ThreadID.cpp" />
     <ClCompile Include="HttpClient.cpp" />
     <ClCompile Include="Program.cpp" />
+    <ClCompile Include="Fiber.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

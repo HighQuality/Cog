@@ -3,4 +3,4 @@
 
 thread_local ThreadID ThreadID::ourThreadID;
 std::mutex ThreadID::ourMutex;
-ThreadID* ThreadID::ourThreadIDs[MaxThreadID];
+std::array<ThreadID*, MaxThreadID> ThreadID::ourThreadIDs;

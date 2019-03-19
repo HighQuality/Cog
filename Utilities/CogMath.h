@@ -56,7 +56,7 @@ FORCEINLINE f32 TruncToFloat(f32 aValue)
 template <typename T>
 void Swap(T& aFirst, T& aSecond)
 {
-	T temp = Move(aSecond);
+	T temp(Move(aSecond));
 	aSecond = Move(aFirst);
 	aFirst = Move(temp);
 }

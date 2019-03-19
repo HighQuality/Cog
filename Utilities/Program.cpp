@@ -115,6 +115,9 @@ void Program::Run()
 
 void Program::WorkerThread(const i32 aWorkerId)
 {
+	// This fiber shouldn't be deleted
+	ConvertThreadToFiber(nullptr);
+
 	const ThreadID& threadId = ThreadID::Get();
 	myWorkerThreadIds[aWorkerId] = threadId.GetInteger();
 

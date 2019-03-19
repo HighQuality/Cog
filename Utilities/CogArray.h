@@ -287,6 +287,20 @@ public:
 		MakeSizeFor(this->GetLength() + aElementCount);
 	}
 
+	FORCEINLINE void SetMinCapacity(const i32 aCapacity)
+	{
+		const i32 CapacityTarget = CeilToPowerTwo(aCapacity);
+		if (CapacityTarget > GetCapacity())
+			Reallocate(CapacityTarget);
+	}
+	
+
+	FORCEINLINE void SetMinLength(const i32 aLength)
+	{
+		if (aLength > this->GetLength())
+			Resize(aLength);
+	}
+
 	FORCEINLINE T Pop()
 	{
 		if (this->GetLength() == 0)

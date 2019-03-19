@@ -55,6 +55,9 @@
 #undef assert
 #undef SendMessage
 
+#define DELETE_MOVES(Type) Type(Type&&) = delete; \
+	Type& operator=(Type&&) = delete;
+
 #include "Types.h"
 
 #include "Random.h"

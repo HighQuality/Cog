@@ -72,5 +72,5 @@ private:
 	static std::mutex ourMutex;
 
 	// Static variables are zero-initialized
-	static ThreadID* ourThreadIDs[MaxThreadID];
+	static std::array<ThreadID*, MaxThreadID> ourThreadIDs;
 };

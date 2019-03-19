@@ -2,6 +2,7 @@
 #include "TypeID.h"
 #include "ThreadID.h"
 #include "EventList.h"
+#include "ThreadLocalStack.h"
 
 class BaseProgramAllocator
 {
@@ -100,7 +101,6 @@ private:
 	i32 mySleepingThreads;
 
 	i32 myNumWorkers;
-
 
 	EventList<void(*)(void*)> myQueuedWork;
 
