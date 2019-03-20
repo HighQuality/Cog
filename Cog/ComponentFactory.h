@@ -4,10 +4,10 @@
 #include "ComponentFactoryChunk.h"
 
 template <typename T>
-class ComponentFactory final : public Factory<T, ComponentFactoryChunk<T>>, public BaseComponentFactory
+class ComponentFactory final : public FactoryImplementation<T, ComponentFactoryChunk<T>>, public BaseComponentFactory
 {
 public:
-	using Base = Factory<T, ComponentFactoryChunk<T>>;
+	using Base = FactoryImplementation<T, ComponentFactoryChunk<T>>;
 
 	ComponentFactory(TypeID<Component> componentTypeID)
 		: BaseComponentFactory(componentTypeID)
@@ -23,11 +23,11 @@ public:
 protected:
 	Component& AllocateGeneric() override
 	{
-		return this->Allocate();
+		return *static_cast<Component*>(this->AllocateRawObject());
 	}
 
 	void ReturnGeneric(const Component& aComponent) override
 	{
-		this->Return(CastChecked<T>(aComponent));
+		this->ReturnRawObject(static_cast<const void*>(&aComponent));
 	}
 };

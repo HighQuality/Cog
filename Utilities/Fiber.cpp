@@ -23,6 +23,8 @@ void Fiber::ExecuteFiberLoop(void* aPtr)
 Fiber::Fiber()
 {
 	myFiberHandle = CreateFiber(0, &Fiber::ExecuteFiberLoop, this);
+
+	CHECK(myFiberHandle);
 }
 
 Fiber::~Fiber()
@@ -51,9 +53,10 @@ bool Fiber::Continue()
 	
 	// This fiber is already being worked on by someone else, some other thread most likely tried to continue simultaneously
 	CHECK(myCallingFiber == nullptr);
-
+	
+	myYieldedData = nullptr;
 	myCallingFiber = ourFiberHandle;
-
+	
 	if (myCallingFiber == nullptr)
 	{
 		ourFiberHandle = ConvertThreadToFiber(nullptr);
@@ -75,14 +78,14 @@ bool Fiber::Continue()
 	}
 
 	SwitchToFiber(myFiberHandle);
-	
-	myCallingFiber = nullptr;
 
+	myCallingFiber = nullptr;
+	
 	// Return true when we still have work to do
 	return myCurrentWork != nullptr;
 }
 
-void Fiber::YieldExecution()
+void Fiber::YieldExecution(void* yieldData)
 {
 	auto fiberPtr = static_cast<Fiber*>(GetFiberData());
 
@@ -98,6 +101,16 @@ void Fiber::YieldExecution()
 	CHECK(fiber.myCallingFiber);
 
 	void* callingFiber = fiber.myCallingFiber;
-	fiber.myCallingFiber = nullptr;
+
+	fiber.myYieldedData = yieldData;
+
 	SwitchToFiber(callingFiber);
+}
+
+void Fiber::ConvertCurrentThreadToFiber()
+{
+	if (ourFiberHandle == nullptr)
+	{
+		ourFiberHandle = ConvertThreadToFiber(nullptr);
+	}
 }

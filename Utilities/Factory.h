@@ -1,13 +1,14 @@
 #pragma once
+#include "BaseFactory.h"
 #include "FactoryChunk.h"
 
 template <typename T, typename TChunkType = FactoryChunk<T>>
-class Factory
+class FactoryImplementation : public BaseFactory
 {
 	using Chunk = TChunkType;
 
 public:
-	Factory()
+	FactoryImplementation()
 	{
 		myChunks.Add(new Chunk(4));
 	}
@@ -59,14 +60,27 @@ public:
 		FATAL(L"Object does not originate from us.");
 	}
 
-	virtual ~Factory()
+	virtual ~FactoryImplementation()
 	{
 		for (Chunk* chunk : myChunks)
 			delete chunk;
 		myChunks.Clear();
+	}
+	
+	void* AllocateRawObject() final
+	{
+		return &Allocate();
+	}
+
+	void ReturnRawObject(const void* aObject) final
+	{
+		Return(*static_cast<const T*>(aObject));
 	}
 
 protected:
 	Array<Chunk*> myChunks;
 };
 
+// Specialize this
+template <typename T>
+using Factory = FactoryImplementation<T, FactoryChunk<T>>;

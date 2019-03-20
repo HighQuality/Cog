@@ -4,10 +4,10 @@
 #include "BaseObjectFactory.h"
 
 template <typename T>
-class ObjectFactory final : public Factory<T, ObjectFactoryChunk<T>>, public BaseObjectFactory
+class ObjectFactory final : public FactoryImplementation<T, ObjectFactoryChunk<T>>, public BaseObjectFactory
 {
 public:
-	using Base = Factory<T, ObjectFactoryChunk<T>>;
+	using Base = FactoryImplementation<T, ObjectFactoryChunk<T>>;
 
 	ObjectFactory(const TypeID<Object> aWidgetTypeID)
 		: BaseObjectFactory(aWidgetTypeID)
@@ -23,11 +23,11 @@ public:
 protected:
 	Object& AllocateGeneric() override
 	{
-		return this->Allocate();
+		return *static_cast<Object*>(this->AllocateRawObject());
 	}
 
 	void ReturnGeneric(const Object& aComponent) override
 	{
-		this->Return(CastChecked<T>(aComponent));
+		this->ReturnRawObject(static_cast<const void*>(&aComponent));
 	}
 };

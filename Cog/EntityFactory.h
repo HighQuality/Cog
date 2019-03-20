@@ -43,6 +43,8 @@ private:
 	Array<u16> myGeneration;
 };
 
-class EntityFactory : public Factory<Entity, EntityFactoryChunk>
+class EntityFactory : public FactoryImplementation<Entity, EntityFactoryChunk>
 {
+public:
+	using Base = FactoryImplementation<Entity, EntityFactoryChunk>;
 };

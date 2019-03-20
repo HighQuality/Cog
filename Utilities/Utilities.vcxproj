@@ -68,6 +68,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -87,6 +88,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -98,8 +100,11 @@
     <ClInclude Include="Append.h" />
     <ClInclude Include="ArraySlice.h" />
     <ClInclude Include="ArrayView.h" />
+    <ClInclude Include="Awaitable.h" />
     <ClInclude Include="AwaitableWorkItem.h" />
+    <ClInclude Include="AwaitTime.h" />
     <ClInclude Include="Barrier.h" />
+    <ClInclude Include="BaseFactory.h" />
     <ClInclude Include="BinaryData.h" />
     <ClInclude Include="Bitfield.h" />
     <ClInclude Include="Bitset.h" />

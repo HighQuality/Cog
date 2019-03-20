@@ -68,6 +68,36 @@ public:
 		return mySeconds / 60.f / 60.f / 24.f / 7.f;
 	}
 
+	FORCEINLINE bool operator>(Time aRight) const
+	{
+		return mySeconds > aRight.mySeconds;
+	}
+
+	FORCEINLINE bool operator>=(Time aRight) const
+	{
+		return mySeconds >= aRight.mySeconds;
+	}
+
+	FORCEINLINE bool operator<(Time aRight) const
+	{
+		return mySeconds < aRight.mySeconds;
+	}
+
+	FORCEINLINE bool operator<=(Time aRight) const
+	{
+		return mySeconds <= aRight.mySeconds;
+	}
+	
+	FORCEINLINE bool operator==(Time aRight) const
+	{
+		return mySeconds == aRight.mySeconds;
+	}
+
+	FORCEINLINE bool operator!=(Time aRight) const
+	{
+		return mySeconds != aRight.mySeconds;
+	}
+
 private:
 	explicit Time(const f32 aSeconds)
 	{

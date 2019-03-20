@@ -2,20 +2,14 @@
 #include "TypeID.h"
 #include "ThreadID.h"
 #include "EventList.h"
-#include "ThreadLocalStack.h"
+#include "BaseFactory.h"
+#include "CogStack.h"
 
-class BaseProgramAllocator
-{
-public:
-	virtual void* AllocateRawObject() = 0;
-	virtual void ReturnRawObject(void* aObject) = 0;
-
-protected:
-	virtual ~BaseProgramAllocator();
-};
+class Fiber;
+class Awaitable;
 
 template <typename T>
-BaseProgramAllocator& AllocateFactory();
+BaseFactory& AllocateFactory();
 
 template <typename T>
 T& DefaultAllocate();
@@ -23,6 +17,14 @@ template <typename T>
 void DefaultFree(T& aObject);
 
 void YieldExecution();
+
+void Await(Awaitable* aAwaitable);
+
+template <typename T, typename ...TArgs>
+void Await(TArgs ...aArgs)
+{
+	Await(new T(std::forward<TArgs>(aArgs)...));
+}
 
 template <typename T, typename ...TArgs>
 T& Allocate(TArgs ...aArgs)
@@ -39,29 +41,22 @@ void Free(T& aObject)
 	DefaultFree<T>(aObject);
 }
 
-// TODO: Figure out how to get a rate from this without it being virtual
-class ITickRate
-{
-protected:
-	ITickRate() = default;
-	// Left non-virtual on purpose
-	~ITickRate() = default;
-};
-
 class Program
 {
 public:
-	Program(const ThreadID& aThreadID);
+	Program();
 	~Program();
 
 	void Run();
+
+	static Program& Create();
 
 	static Program& Get();
 
 	template <typename T>
 	T& AllocateUninitialized()
 	{
-		return *static_cast<T*>(Allocate(TypeID<void>::Resolve<T>(), &AllocateFactory<T>));
+		return *static_cast<T*>(AllocateRaw(TypeID<void>::Resolve<T>(), &AllocateFactory<T>));
 	}
 
 	template <typename T>
@@ -71,27 +66,32 @@ public:
 	}
 	
 	bool IsInMainThread() const { return myMainThread == ThreadID::Get(); }
-	bool IsExecutionSynchronized() const { return myExecutionIsSynchronized; }
 
-	void YieldExecution(const ThreadID& aThreadId = ThreadID::Get());
-	
+	void QueueWork(void(*aFunction)(void*), void* aArgument);
+
 private:
-	void* Allocate(TypeID<void> aTypeID, BaseProgramAllocator&(*aFactoryAllocator)());
+	void* AllocateRaw(TypeID<void> aTypeID, BaseFactory&(*aFactoryAllocator)());
 	void Return(TypeID<void> aTypeID, void* aObject);
-	void WorkerThread(i32 aWorkerId);
 	void WakeMain();
+	void WorkerThread();
 
-	u8 myWorkerYieldDepth[MaxThreadID];
-	ThreadIDInteger myWorkerThreadIds[MaxThreadID];
+	void FiberMain();
+
+	static void CheckYieldedFiber(void* aArg);
 
 	const ThreadID& myMainThread;
 	// TODO: Change key to TypeID<void>
-	Map<TypeID<void>::CounterType, BaseProgramAllocator*> myAllocators;
+	Map<TypeID<void>::CounterType, BaseFactory*> myAllocators;
+
+	std::mutex myFiberMutex;
+	Stack<Fiber*> myFibers;
 
 	std::mutex myWorkMutex;
-	std::condition_variable myWorkNotify[MaxThreadID];
+	std::condition_variable myWorkNotify;
 	Array<std::thread> myWorkers;
-	Array<void(*)(void*)> myCurrentWorkQueue;
+	
+	Array<Fiber*> myYieldedFibers;
+
 	bool myIsStopping = false;
 
 	std::condition_variable myWakeMainNotify;
@@ -102,16 +102,21 @@ private:
 
 	i32 myNumWorkers;
 
-	EventList<void(*)(void*)> myQueuedWork;
+	struct QueuedWork
+	{
+		void(*function)(void*) = nullptr;
+		void* argument = nullptr;
+	};
 
-	bool myExecutionIsSynchronized = false;
+	EventList<QueuedWork> myQueuedWork;
+	Array<QueuedWork> myCurrentWorkQueue;
 };
 
-extern Program gProgram;
+extern Program* gProgram;
 
 FORCEINLINE Program& Program::Get()
 {
-	return gProgram;
+	return *gProgram;
 }
 
 template <typename T>

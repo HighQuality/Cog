@@ -26,11 +26,16 @@ public:
 	{
 		Submit(T(aElement));
 	}
-
+	
 	Array<T> Gather()
 	{
 		Array<T> elements;
+		GatherInto(elements);
+		return elements;
+	}
 
+	void GatherInto(Array<T>& elements)
+	{
 		i32 count = 0;
 
 		for (Array<T>* list : myNonEmptyArrays)
@@ -62,8 +67,6 @@ public:
 		}
 
 		myNextEmptyArrayIndex.store(0);
-
-		return elements;
 	}
 
 private:

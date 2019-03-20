@@ -16,7 +16,15 @@ public:
 
 	bool HasWork() const { return myCurrentWork != nullptr; }
 	
-	static void YieldExecution();
+	static void YieldExecution(void* yieldData = nullptr);
+
+	static void ConvertCurrentThreadToFiber();
+
+	void* GetYieldedData() const
+	{
+		CHECK(HasWork());
+		return myYieldedData;
+	}
 
 private:
 	static void ExecuteFiberLoop(void*);
@@ -28,4 +36,6 @@ private:
 
 	void (*myCurrentWork)(void*) = nullptr;
 	void* myArgument = nullptr;
+
+	void* myYieldedData = nullptr;
 };

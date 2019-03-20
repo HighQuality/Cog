@@ -64,6 +64,9 @@
     <ClInclude Include="ThreadLocalStack.h" />
     <ClInclude Include="Fiber.h" />
     <ClInclude Include="FiberLocalStorage.h" />
+    <ClInclude Include="BaseFactory.h" />
+    <ClInclude Include="Awaitable.h" />
+    <ClInclude Include="AwaitTime.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

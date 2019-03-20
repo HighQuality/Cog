@@ -1,33 +1,29 @@
 #include "pch.h"
 #include "ClientGame.h"
+#include <Program.h>
 #include <Fiber.h>
-#include <Stopwatch.h>
+#include <AwaitTime.h>
 
 int main()
 {
-	{
-		Fiber f;
-		f.StartWork([](void*)
-		{
-			for (i32 i = 0; i < 3; ++i)
-			{
-				Println(L"Hello from fiber ", i);
-				Fiber::YieldExecution();
-			}
-		}, nullptr);
+	Program::Create();
 
-		i32 i = 0;
-		while (f.Continue())
-		{
-			Println(L"Hello from main ", i);
-			++i;
-		}
+	for (i32 i = 0; i < 2; ++i)
+	{
+		Program::Get().QueueWork([](void*)
+			{
+				Stopwatch w;
+				Await<AwaitTime>(Time::Seconds(2.f));
+				Println(L"Yield lasted % seconds", w.GetElapsedTime().Seconds());
+			}, nullptr);
 	}
 
-	std::cin.get();
+	Program::Get().Run();
 
-	ClientGame game;
-	game.Run();
+	// ClientGame game;
+	// game.Run();
+
+	system("pause");
 
 	return 0;
 }

@@ -265,6 +265,14 @@ public:
 		myCapacity = 0;
 	}
 
+	// Clear without changing memory allocations
+	void Empty()
+	{
+		for (i32 i = 0; i < this->myLength; ++i)
+			this->myData[i].~T();
+		this->myLength = 0;
+	}
+
 	FORCEINLINE void Resize(const i32 aNewSize)
 	{
 		if (aNewSize == this->GetLength())
@@ -274,6 +282,7 @@ public:
 
 		for (i32 i = this->myLength; i < aNewSize; ++i)
 			new (&this->myData[i]) T();
+		
 		this->myLength = aNewSize;
 
 		if constexpr (ZeroOnePastEnd)
