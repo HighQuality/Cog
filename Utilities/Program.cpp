@@ -49,7 +49,7 @@ Program::~Program()
 	Println(L"Finished stopping worker threads!");
 
 	Fiber * fiber;
-	while (myFibers.TryPop(fiber))
+	while (myUnusedFibers.TryPop(fiber))
 		delete fiber;
 }
 
@@ -72,8 +72,8 @@ void Program::CheckYieldedFiber(void* aArg)
 		}
 		else
 		{
-			std::unique_lock<std::mutex> lck(program.myWorkMutex);
-			program.myYieldedFibers.Add(&fiber);
+			std::unique_lock<std::mutex> lck(program.myFiberMutex);
+			program.myUnusedFibers.Push(&fiber);
 		}
 	}
 	else
@@ -101,26 +101,28 @@ void Program::Run()
 
 		if (numWork > 0)
 		{
-			myWakeMainFlag = false;
-
-			MemoryBarrier();
-
-			{
-				std::unique_lock<std::mutex> lck(myWorkMutex);
-				Swap(myCurrentWorkQueue, newWork);
-			}
+			std::unique_lock<std::mutex> workLck(myWorkMutex);
+			
+			Swap(myCurrentWorkQueue, newWork);
 
 			const i32 n = Min(numWork, myNumWorkers);
-
+			
+			myWakeMainFlag = false;
+			
 			// PERF: Try switching this to notify_all
 			for (i32 i = 0; i < n; ++i)
 				myWorkNotify.notify_one();
 
 			{
 				// Wait for all work to finish
-				std::unique_lock<std::mutex> lck(myWakeMainMutex);
-				myWakeMainNotify.wait(lck, [this]() { return myWakeMainFlag; });
+				std::unique_lock<std::mutex> wakeMainLck(myWakeMainMutex);
+				myIsMainRunning = false;
+				workLck.unlock();
+
+				myWakeMainNotify.wait(wakeMainLck, [this]() { return myWakeMainFlag; });
+
 				myWakeMainFlag = false;
+				myIsMainRunning = true;
 			}
 		}
 		else
@@ -188,6 +190,9 @@ void Program::FiberMain()
 				if (myIsStopping)
 					break;
 
+				if (myIsMainRunning)
+					continue;
+
 				if (myCurrentWorkQueue.GetLength() == 0)
 					continue;
 
@@ -236,7 +241,7 @@ void Program::WorkerThread()
 		{
 			std::unique_lock<std::mutex> lck(myFiberMutex);
 
-			if (!myFibers.TryPop(fiber))
+			if (!myUnusedFibers.TryPop(fiber))
 				fiber = nullptr;
 		}
 

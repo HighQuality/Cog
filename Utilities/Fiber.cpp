@@ -22,7 +22,8 @@ void Fiber::ExecuteFiberLoop(void* aPtr)
 
 Fiber::Fiber()
 {
-	myFiberHandle = CreateFiber(0, &Fiber::ExecuteFiberLoop, this);
+	// 16 KB stack size
+	myFiberHandle = CreateFiber(16 * 1024, &Fiber::ExecuteFiberLoop, this);
 
 	CHECK(myFiberHandle);
 }
@@ -68,19 +69,18 @@ bool Fiber::Continue()
 		}
 
 		myCallingFiber = ourFiberHandle;
-		CHECK(myCallingFiber);
-	}
-	else
-	{
-		// Causes unpredictable problems according to msdn: SwitchToFiber(GetCurrentFiber()), probably won't want this happening
-		// If you hit this, fibers can't continue on themselves
-		CHECK(GetCurrentFiber() != myFiberHandle);
 	}
 
-	SwitchToFiber(myFiberHandle);
+	CHECK(myCallingFiber);
 
-	myCallingFiber = nullptr;
+	// Causes unpredictable problems according to msdn: SwitchToFiber(GetCurrentFiber()), probably won't want this happening
+	// If you hit this, fibers can't continue on themselves
+	CHECK(myCallingFiber != myFiberHandle);
 	
+	SwitchToFiber(myFiberHandle);
+	
+	myCallingFiber = nullptr;
+
 	// Return true when we still have work to do
 	return myCurrentWork != nullptr;
 }

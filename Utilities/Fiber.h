@@ -29,7 +29,7 @@ public:
 private:
 	static void ExecuteFiberLoop(void*);
 	static thread_local void* ourFiberHandle;
-
+	
 	// Fiber handles
 	void* myFiberHandle = nullptr;
 	void* myCallingFiber = nullptr;

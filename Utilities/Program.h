@@ -84,7 +84,7 @@ private:
 	Map<TypeID<void>::CounterType, BaseFactory*> myAllocators;
 
 	std::mutex myFiberMutex;
-	Stack<Fiber*> myFibers;
+	Stack<Fiber*> myUnusedFibers;
 
 	std::mutex myWorkMutex;
 	std::condition_variable myWorkNotify;
@@ -110,6 +110,7 @@ private:
 
 	EventList<QueuedWork> myQueuedWork;
 	Array<QueuedWork> myCurrentWorkQueue;
+	bool myIsMainRunning = true;
 };
 
 extern Program* gProgram;
