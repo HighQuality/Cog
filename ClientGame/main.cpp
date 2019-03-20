@@ -8,13 +8,13 @@ int main()
 {
 	Program::Create();
 
-	for (i32 i = 0; i < 2; ++i)
+	for (i32 i = 0; i < 1000; ++i)
 	{
 		Program::Get().QueueWork([](void*)
 			{
 				Stopwatch w;
 				Await<AwaitTime>(Time::Seconds(2.f));
-				Println(L"Yield lasted % seconds", w.GetElapsedTime().Seconds());
+				// Println(L"Yield lasted % seconds", w.GetElapsedTime().Seconds());
 			}, nullptr);
 	}
 
