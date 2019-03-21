@@ -15,7 +15,6 @@ public:
 		return myWatch.GetElapsedTime() >= myWaitAmount;
 	}
 
-
 private:
 	Stopwatch myWatch;
 	Time myWaitAmount;

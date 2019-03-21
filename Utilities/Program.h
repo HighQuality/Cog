@@ -5,6 +5,7 @@
 #include "BaseFactory.h"
 #include "CogStack.h"
 
+class ThreadPool;
 class Fiber;
 class Awaitable;
 
@@ -16,14 +17,13 @@ T& DefaultAllocate();
 template <typename T>
 void DefaultFree(T& aObject);
 
-void YieldExecution();
-
 void Await(Awaitable* aAwaitable);
 
 template <typename T, typename ...TArgs>
 void Await(TArgs ...aArgs)
 {
-	Await(new T(std::forward<TArgs>(aArgs)...));
+	T awaitableItem(std::forward<TArgs>(aArgs)...);
+	Await(&awaitableItem);
 }
 
 template <typename T, typename ...TArgs>
@@ -66,13 +66,15 @@ public:
 	}
 	
 	bool IsInMainThread() const { return myMainThread == ThreadID::Get(); }
+	bool IsInManagedThread() const;
 
 	void QueueWork(void(*aFunction)(void*), void* aArgument);
+
+	void QueueBackgroundWork(void(*aFunction)(void*), void* aArgument);
 
 private:
 	void* AllocateRaw(TypeID<void> aTypeID, BaseFactory&(*aFactoryAllocator)());
 	void Return(TypeID<void> aTypeID, void* aObject);
-	void WakeMain();
 	void WorkerThread();
 
 	void FiberMain();
@@ -83,20 +85,22 @@ private:
 	// TODO: Change key to TypeID<void>
 	Map<TypeID<void>::CounterType, BaseFactory*> myAllocators;
 
+	ThreadPool* myBackgroundWorkThreadPool;
+
 	std::mutex myFiberMutex;
 	Stack<Fiber*> myUnusedFibers;
 
 	std::mutex myWorkMutex;
 	std::condition_variable myWorkNotify;
 	Array<std::thread> myWorkers;
-	
+
+	// Locks under myWorkMutex
 	Array<Fiber*> myYieldedFibers;
 
 	bool myIsStopping = false;
 
 	std::condition_variable myWakeMainNotify;
 	std::mutex myWakeMainMutex;
-	bool myWakeMainFlag = false;
 
 	i32 mySleepingThreads;
 

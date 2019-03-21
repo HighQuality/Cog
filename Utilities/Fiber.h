@@ -16,15 +16,19 @@ public:
 
 	bool HasWork() const { return myCurrentWork != nullptr; }
 	
-	static void YieldExecution(void* yieldData = nullptr);
+	static void YieldExecution(void* yieldData);
 
-	static void ConvertCurrentThreadToFiber();
+	static void ConvertCurrentThreadToFiber(const StringView& aDescription);
 
 	void* GetYieldedData() const
 	{
 		CHECK(HasWork());
 		return myYieldedData;
 	}
+
+	static Fiber* GetCurrentlyExecutingFiber();
+
+	static void SetCurrentWork(const StringView& aWork);
 
 private:
 	static void ExecuteFiberLoop(void*);

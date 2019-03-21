@@ -32,6 +32,15 @@ public:
 		return result;
 	}
 
+	FORCEINLINE static u64 GetCurrentTimeStamp()
+	{
+		LARGE_INTEGER time;
+		if (!QueryPerformanceCounter(&time))
+			FATAL(L"QueryPerformanceCounter failed");
+		return time.QuadPart;
+	}
+
+
 private:
 	static f32 ourFrequency;
 

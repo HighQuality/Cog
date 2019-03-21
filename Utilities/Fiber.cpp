@@ -4,6 +4,9 @@
 
 thread_local void* Fiber::ourFiberHandle = nullptr;
 
+static std::mutex gFiberIndexMutex;
+static std::unordered_map<void*, String> gFiberIndex;
+
 void Fiber::ExecuteFiberLoop(void* aPtr)
 {
 	Fiber& fiber = *static_cast<Fiber*>(aPtr);
@@ -24,8 +27,20 @@ Fiber::Fiber()
 {
 	// 16 KB stack size
 	myFiberHandle = CreateFiber(16 * 1024, &Fiber::ExecuteFiberLoop, this);
-
+	
 	CHECK(myFiberHandle);
+	
+	{
+		// TODO: Remove/disable for performance, only used for debugging
+		std::unique_lock<std::mutex> lck(gFiberIndexMutex);
+		gFiberIndex[myFiberHandle] = L"Fiber";
+	}
+}
+
+void Fiber::SetCurrentWork(const StringView& aWork)
+{
+	std::unique_lock<std::mutex> lck(gFiberIndexMutex);
+	gFiberIndex.find(ourFiberHandle)->second = L"Fiber";
 }
 
 Fiber::~Fiber()
@@ -54,22 +69,12 @@ bool Fiber::Continue()
 	
 	// This fiber is already being worked on by someone else, some other thread most likely tried to continue simultaneously
 	CHECK(myCallingFiber == nullptr);
-	
+
+	// You must call Fiber::ConvertCurrentThreadToFiber before working on fibers
+	CHECK(ourFiberHandle);
+
 	myYieldedData = nullptr;
-	myCallingFiber = ourFiberHandle;
-	
-	if (myCallingFiber == nullptr)
-	{
-		ourFiberHandle = ConvertThreadToFiber(nullptr);
-
-		if (ourFiberHandle == nullptr)
-		{
-			Println(L"ConvertThreadToFiber failed, assuming thread is already fiber...");
-			ourFiberHandle = GetCurrentFiber();
-		}
-
-		myCallingFiber = ourFiberHandle;
-	}
+	myCallingFiber = GetCurrentFiber();
 
 	CHECK(myCallingFiber);
 
@@ -87,15 +92,12 @@ bool Fiber::Continue()
 
 void Fiber::YieldExecution(void* yieldData)
 {
-	auto fiberPtr = static_cast<Fiber*>(GetFiberData());
+	Fiber* fiberPtr = GetCurrentlyExecutingFiber();
 
 	// Was not called from a fiber
 	CHECK(fiberPtr);
 
 	Fiber& fiber = *fiberPtr;
-
-	// Only the fiber itself may yield execution
-	CHECK(GetCurrentFiber() == fiber.myFiberHandle);
 
 	// Fiber yielded without having any work (executed without being supposed to, spooky)
 	CHECK(fiber.myCallingFiber);
@@ -105,12 +107,25 @@ void Fiber::YieldExecution(void* yieldData)
 	fiber.myYieldedData = yieldData;
 
 	SwitchToFiber(callingFiber);
+	
+	fiber.myYieldedData = nullptr;
 }
 
-void Fiber::ConvertCurrentThreadToFiber()
+void Fiber::ConvertCurrentThreadToFiber(const StringView& aDescription)
 {
 	if (ourFiberHandle == nullptr)
 	{
 		ourFiberHandle = ConvertThreadToFiber(nullptr);
+
+		{
+			// TODO: Remove/disable for performance, only used for debugging
+			std::unique_lock<std::mutex> lck(gFiberIndexMutex);
+			gFiberIndex[ourFiberHandle] = aDescription;
+		}
 	}
+}
+
+Fiber* Fiber::GetCurrentlyExecutingFiber()
+{
+	return static_cast<Fiber*>(GetFiberData());
 }

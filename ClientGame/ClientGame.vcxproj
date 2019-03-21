@@ -76,6 +76,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Utilities.lib;Client.lib;Cog.lib;Game.lib;..\extlibs\libcurl\lib\libcurl.lib;..\extlibs\snappy\lib\debug\snappy.lib;Ws2_32.lib;Iphlpapi.lib;D3D11.lib;dxguid.lib;D3DCompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

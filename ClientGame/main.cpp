@@ -3,22 +3,29 @@
 #include <Program.h>
 #include <Fiber.h>
 #include <AwaitTime.h>
+#include <ReadFileAwaitable.h>
 
 int main()
 {
-	Program::Create();
+	Program& program = Program::Create();
 
-	for (i32 i = 0; i < 1000; ++i)
+	// for (i32 i = 0; i < 1000; ++i)
 	{
-		Program::Get().QueueWork([](void*)
-			{
-				Stopwatch w;
-				Await<AwaitTime>(Time::Seconds(2.f));
-				// Println(L"Yield lasted % seconds", w.GetElapsedTime().Seconds());
-			}, nullptr);
+		// program.QueueWork([](void*)
+		// {
+		// 	Stopwatch w;
+		// 	Await<AwaitTime>(Time::Seconds(RandFloat(0.5f, 5.f)));
+		// 	Println(L"Yield lasted % seconds", w.GetElapsedTime().Seconds());
+		// }, nullptr);
+
+		program.QueueWork([](void*)
+		{
+			Await<ReadFileAwaitable>(L"main.cpp");
+			Println(L"Returned to work");
+		}, nullptr);
 	}
 
-	Program::Get().Run();
+	program.Run();
 
 	// ClientGame game;
 	// game.Run();

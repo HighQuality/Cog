@@ -11,7 +11,7 @@ ThreadPool::ThreadPool()
 
 ThreadPool::ThreadPool(const i32 aNumWorkers)
 {
-	Println(L"Starting thread pool with % workers...", aNumWorkers);
+	Println(L"Starting background thread pool with % workers...", aNumWorkers);
 
 	for (i32 i = 0; i < aNumWorkers; ++i)
 		myWorkers.Emplace(std::thread(&ThreadPool::Worker, this, i));

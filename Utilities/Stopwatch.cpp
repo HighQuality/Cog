@@ -9,14 +9,6 @@ static u64 GetFrequency()
 	return frequency.QuadPart;
 }
 
-static u64 GetCurrentTimeStamp()
-{
-	LARGE_INTEGER time;
-	if (!QueryPerformanceCounter(&time))
-		FATAL(L"QueryPerformanceCounter failed");
-	return time.QuadPart;
-}
-
 f32 Stopwatch::ourFrequency = static_cast<f32>(GetFrequency());
 
 Stopwatch::Stopwatch()

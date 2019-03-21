@@ -3,6 +3,8 @@
 #include "Fiber.h"
 #include "Stopwatch.h"
 #include "Awaitable.h"
+#include "AwaitableSignal.h"
+#include "ThreadPool.h"
 
 Program* gProgram = nullptr;
 
@@ -12,25 +14,32 @@ Program::Program()
 	: myMainThread(ThreadID::Get()), mySleepingThreads(0)
 {
 	gIsCogThread = true;
-	
+
+	myBackgroundWorkThreadPool = new ThreadPool();
+
 	myNumWorkers = CastBoundsChecked<i32>(std::thread::hardware_concurrency());
 
 	myWorkers.PrepareAdd(myNumWorkers);
 
 	Println(L"Program starting % worker threads...", myNumWorkers);
 
+	myIsMainRunning = false;
+
+	MemoryBarrier();
+
 	for (i32 i = 0; i < myNumWorkers; ++i)
 		myWorkers.Emplace(std::thread(&Program::WorkerThread, this));
-	
+
 	// Wait for all threads to start sleeping
 	std::unique_lock<std::mutex> lck(myWakeMainMutex);
-	myWakeMainNotify.wait(lck, [this]() { return myWakeMainFlag; });
-	myWakeMainFlag = false;
+	myWakeMainNotify.wait(lck, [this]() { return myIsMainRunning; });
 }
 
 Program::~Program()
 {
 	Println(L"Program shutting down...");
+
+	delete myBackgroundWorkThreadPool;
 
 	Println(L"Notifying worker threads to stop...");
 
@@ -53,31 +62,49 @@ Program::~Program()
 		delete fiber;
 }
 
+static thread_local bool gContinuingYield = false;
+
 void Program::CheckYieldedFiber(void* aArg)
 {
 	Fiber& fiber = *static_cast<Fiber*>(aArg);
+	CHECK(fiber.HasWork());
 	Awaitable* awaitable = static_cast<Awaitable*>(fiber.GetYieldedData());
 
 	Program& program = Program::Get();
 
 	if (!awaitable || awaitable->IsReady())
 	{
-		delete awaitable;
-		fiber.Continue();
+		// fiber.Continue() will delete this memory
+		awaitable = nullptr;
 
-		// Yielded again
-		if (fiber.HasWork())
+		gContinuingYield = true;
+		fiber.Continue();
+		gContinuingYield = false;
+
+		// Fibers should never finish execution
+		CHECK (fiber.HasWork());
+
+		void* yieldedData = fiber.GetYieldedData();
+
+		// TODO: Get rid of magic pointer number
+		// 1 == finished yielded work
+		if (yieldedData == reinterpret_cast<void*>(1))
+		{
+			std::unique_lock<std::mutex> lck(program.myFiberMutex);
+			program.myUnusedFibers.Push(&fiber);
+		}
+		else if (yieldedData)
 		{
 			program.QueueWork(&Program::CheckYieldedFiber, aArg);
 		}
 		else
 		{
-			std::unique_lock<std::mutex> lck(program.myFiberMutex);
-			program.myUnusedFibers.Push(&fiber);
+			FATAL(L"Program is exiting, implement here");
 		}
 	}
 	else
 	{
+		// Not ready yet, todo: merge these checks
 		program.QueueWork(&Program::CheckYieldedFiber, aArg);
 	}
 }
@@ -90,42 +117,46 @@ void Program::Run()
 
 	Array<QueuedWork> newWork;
 
+	std::unique_lock<std::mutex> workMutexLck(myWorkMutex, std::defer_lock);
+
 	for (;;)
 	{
 		newWork.Empty();
+
+		workMutexLck.lock();
 		myQueuedWork.GatherInto(newWork);
 
 		const i32 numWork = newWork.GetLength();
 
-		// Println(L"numWork = ", numWork);
-
 		if (numWork > 0)
 		{
-			std::unique_lock<std::mutex> workLck(myWorkMutex);
-			
 			Swap(myCurrentWorkQueue, newWork);
 
-			const i32 n = Min(numWork, myNumWorkers);
-			
-			myWakeMainFlag = false;
-			
-			// PERF: Try switching this to notify_all
-			for (i32 i = 0; i < n; ++i)
-				myWorkNotify.notify_one();
+			const i32 numWorkersToWake = Min(numWork, myNumWorkers);
+
+			if (numWorkersToWake == myNumWorkers)
+			{
+				myWorkNotify.notify_all();
+			}
+			else
+			{
+				// PERF: Try making the switch to notify_all more sensitive
+				for (i32 i = 0; i < numWorkersToWake; ++i)
+					myWorkNotify.notify_one();
+			}
 
 			{
 				// Wait for all work to finish
 				std::unique_lock<std::mutex> wakeMainLck(myWakeMainMutex);
 				myIsMainRunning = false;
-				workLck.unlock();
+				workMutexLck.unlock();
 
-				myWakeMainNotify.wait(wakeMainLck, [this]() { return myWakeMainFlag; });
+				myWakeMainNotify.wait(wakeMainLck, [this]() { return myIsMainRunning; });
 
-				myWakeMainFlag = false;
-				myIsMainRunning = true;
+				workMutexLck.lock();
 			}
 		}
-		else
+		else if (!AwaitableSignal::IsWaitingOnAnySignals())
 		{
 			if (myYieldedFibers.GetLength() == 0)
 			{
@@ -134,17 +165,25 @@ void Program::Run()
 			}
 		}
 
-		if (myYieldedFibers.GetLength() > 0)
-		{
-			// TODO: Don't submit as individual elements, instead implement list submit method that does multiple checks per work unit
-			for (i32 i = 0; i < myYieldedFibers.GetLength(); ++i)
-				QueueWork(&Program::CheckYieldedFiber, myYieldedFibers[i]);
+		Array<Fiber*> yieldedFibers = Move(myYieldedFibers);
+		workMutexLck.unlock();
 
-			myYieldedFibers.Resize(0);
-		}
-		else
-		{
+		AwaitableSignal::GatherSignaledFibers(yieldedFibers);
+
+		// Yield if we're not currently working
+		if (yieldedFibers.GetLength() == 0)
 			std::this_thread::yield();
+
+		if (yieldedFibers.GetLength() > 0)
+		{
+			// Distribute work-amounts "equally"
+			yieldedFibers.Shuffle();
+
+			// TODO: Don't submit as individual elements, instead implement list submit method that does multiple checks per work unit
+			for (i32 i = 0; i < yieldedFibers.GetLength(); ++i)
+				QueueWork(&Program::CheckYieldedFiber, yieldedFibers[i]);
+
+			yieldedFibers.Resize(0);
 		}
 
 		++frames;
@@ -180,7 +219,13 @@ void Program::FiberMain()
 
 			if (mySleepingThreads == myNumWorkers)
 			{
-				WakeMain();
+				{
+					// Could probably be changed to a memory barrier
+					std::unique_lock<std::mutex> mainLock(myWakeMainMutex);
+					myIsMainRunning = true;
+				}
+
+				myWakeMainNotify.notify_one();
 			}
 
 			for (;;)
@@ -198,7 +243,7 @@ void Program::FiberMain()
 
 				break;
 			}
-			
+
 			--mySleepingThreads;
 		}
 
@@ -209,29 +254,24 @@ void Program::FiberMain()
 			lck.unlock();
 
 			work.function(work.argument);
+
+			if (gContinuingYield)
+			{
+				// TODO: Get rid of magic pointer number
+				Fiber::YieldExecution(reinterpret_cast<void*>(1));
+			}
 		}
 	}
 
-	Fiber::YieldExecution();
+	Fiber::YieldExecution(nullptr);
 	// Should not return here once yield is called
 	CHECK(false);
-}
-
-void Program::WakeMain()
-{
-	{
-		// Could probably be changed to a memory barrier
-		std::unique_lock<std::mutex> mainLock(myWakeMainMutex);
-		myWakeMainFlag = true;
-	}
-
-	myWakeMainNotify.notify_one();
 }
 
 void Program::WorkerThread()
 {
 	gIsCogThread = true;
-	Fiber::ConvertCurrentThreadToFiber();
+	Fiber::ConvertCurrentThreadToFiber(L"Program Worker Thread");
 
 	Fiber* fiber = nullptr;
 
@@ -271,10 +311,30 @@ void Program::WorkerThread()
 	delete fiber;
 }
 
+bool Program::IsInManagedThread() const
+{
+	return gIsCogThread;
+}
+
 void Program::QueueWork(void(*aFunction)(void*), void* aArgument)
 {
-	CHECK(gIsCogThread);
-	myQueuedWork.Submit({ aFunction, aArgument });
+	if (IsInManagedThread())
+	{
+		myQueuedWork.Submit({ aFunction, aArgument });
+	}
+	else
+	{
+		std::unique_lock<std::mutex> lck(myWorkMutex);
+		myQueuedWork.Submit({ aFunction, aArgument });
+	}
+}
+
+void Program::QueueBackgroundWork(void(*aFunction)(void*), void* aArgument)
+{
+	myBackgroundWorkThreadPool->QueueSingle([aFunction, aArgument]()
+		{
+			aFunction(aArgument);
+		});
 }
 
 void* Program::AllocateRaw(TypeID<void> aTypeID, BaseFactory & (*aFactoryAllocator)())
@@ -301,12 +361,9 @@ void Program::Return(TypeID<void> aTypeID, void* aObject)
 	FATAL(L"Tried to a return a object to a removed object allocator.");
 }
 
-void YieldExecution()
-{
-	Fiber::YieldExecution(nullptr);
-}
-
 void Await(Awaitable * aAwaitable)
 {
-	Fiber::YieldExecution(aAwaitable);
+	// Should call Fiber::YieldExecution(this) internally
+	aAwaitable->StartWaiting();
+	CHECK(aAwaitable->IsReady());
 }
