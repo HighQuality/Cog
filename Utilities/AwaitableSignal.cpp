@@ -47,11 +47,13 @@ AwaitableSignal::AwaitableSignal()
 	CHECK(ourFirstFreeIndex >= 0);
 }
 
-void AwaitableSignal::GatherSignaledFibers(Array<Fiber*>& aSignaledFibers)
+i32 AwaitableSignal::GatherSignaledFibers(Array<Fiber*>& aSignaledFibers)
 {
 	std::unique_lock<std::mutex> lck(ourMutex);
 
 	ourFirstFreeIndex = -1;
+
+	i32 gatheredSignals = 0;
 
 	// TODO: Optimize
 
@@ -77,6 +79,8 @@ void AwaitableSignal::GatherSignaledFibers(Array<Fiber*>& aSignaledFibers)
 			if (ourFirstFreeIndex == -1)
 				ourFirstFreeIndex = i;
 
+			++gatheredSignals;
+
 			break;
 
 		default:
@@ -89,6 +93,8 @@ void AwaitableSignal::GatherSignaledFibers(Array<Fiber*>& aSignaledFibers)
 
 	if (ourFirstFreeIndex == -1)
 		ourFirstFreeIndex = ourAwaitables.GetLength();
+
+	return gatheredSignals;
 }
 
 bool AwaitableSignal::IsWaitingOnAnySignals()

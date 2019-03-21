@@ -22,8 +22,10 @@ void Await(Awaitable* aAwaitable);
 template <typename T, typename ...TArgs>
 void Await(TArgs ...aArgs)
 {
-	T awaitableItem(std::forward<TArgs>(aArgs)...);
-	Await(&awaitableItem);
+	// TODO: Change to a stack allocation
+	T* awaitableItem = new T(std::forward<TArgs>(aArgs)...);
+	Await(awaitableItem);
+	delete awaitableItem;
 }
 
 template <typename T, typename ...TArgs>

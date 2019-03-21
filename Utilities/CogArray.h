@@ -43,8 +43,10 @@ public:
 	{
 		this->myData = aMove.myData;
 		aMove.myData = nullptr;
+
 		this->myLength = aMove.myLength;
 		aMove.myLength = 0;
+
 		this->myCapacity = aMove.myCapacity;
 		aMove.myCapacity = 0;
 	}
@@ -95,8 +97,10 @@ public:
 
 		this->myLength = aCopy.GetLength();
 
-		for (i32 i = 0; i < this->GetLength(); ++i)
-			new (static_cast<void*>(&this->GetData()[i])) T(aCopy.GetData()[i]);
+		const T* otherData= aCopy.GetData();
+
+		for (i32 i = 0; i < this->myLength; ++i)
+			new (static_cast<void*>(&this->myData[i])) T(otherData[i]);
 
 		return *this;
 	}

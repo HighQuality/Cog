@@ -168,7 +168,7 @@ void Program::Run()
 		Array<Fiber*> yieldedFibers = Move(myYieldedFibers);
 		workMutexLck.unlock();
 
-		AwaitableSignal::GatherSignaledFibers(yieldedFibers);
+		const i32 gatheredSignals = AwaitableSignal::GatherSignaledFibers(yieldedFibers);
 
 		// Yield if we're not currently working
 		if (yieldedFibers.GetLength() == 0)

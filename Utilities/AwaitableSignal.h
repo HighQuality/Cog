@@ -19,7 +19,7 @@ public:
 		return myIsSignaled;
 	}
 
-	static void GatherSignaledFibers(Array<Fiber*>& aSignaledFibers);
+	static i32 GatherSignaledFibers(Array<Fiber*>& aSignaledFibers);
 	static bool IsWaitingOnAnySignals();
 
 	static void SignalIndex(i32 aIndex);
