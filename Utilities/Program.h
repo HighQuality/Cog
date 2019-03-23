@@ -22,10 +22,8 @@ void Await(Awaitable* aAwaitable);
 template <typename T, typename ...TArgs>
 void Await(TArgs ...aArgs)
 {
-	// TODO: Change to a stack allocation
-	T* awaitableItem = new T(std::forward<TArgs>(aArgs)...);
-	Await(awaitableItem);
-	delete awaitableItem;
+	T awaitableItem(std::forward<TArgs>(aArgs)...);
+	Await(&awaitableItem);
 }
 
 template <typename T, typename ...TArgs>
@@ -77,7 +75,7 @@ public:
 private:
 	void* AllocateRaw(TypeID<void> aTypeID, BaseFactory&(*aFactoryAllocator)());
 	void Return(TypeID<void> aTypeID, void* aObject);
-	void WorkerThread();
+	void WorkerThread(i32 aThreadIndex);
 
 	void FiberMain();
 

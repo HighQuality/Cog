@@ -13,11 +13,13 @@ static thread_local bool gIsCogThread = false;
 Program::Program()
 	: myMainThread(ThreadID::Get()), mySleepingThreads(0)
 {
+	ThreadID::SetName(String(L"Main Thread"));
+
 	gIsCogThread = true;
 
-	myBackgroundWorkThreadPool = new ThreadPool();
+	myBackgroundWorkThreadPool = new ThreadPool(1);
 
-	myNumWorkers = CastBoundsChecked<i32>(std::thread::hardware_concurrency());
+	myNumWorkers = 1; // CastBoundsChecked<i32>(std::thread::hardware_concurrency());
 
 	myWorkers.PrepareAdd(myNumWorkers);
 
@@ -28,7 +30,7 @@ Program::Program()
 	MemoryBarrier();
 
 	for (i32 i = 0; i < myNumWorkers; ++i)
-		myWorkers.Emplace(std::thread(&Program::WorkerThread, this));
+		myWorkers.Emplace(std::thread(&Program::WorkerThread, this, i));
 
 	// Wait for all threads to start sleeping
 	std::unique_lock<std::mutex> lck(myWakeMainMutex);
@@ -90,11 +92,13 @@ void Program::CheckYieldedFiber(void* aArg)
 		// 1 == finished yielded work
 		if (yieldedData == reinterpret_cast<void*>(1))
 		{
+			// fiber.SetWork(L"Awaiting more work...");
 			std::unique_lock<std::mutex> lck(program.myFiberMutex);
 			program.myUnusedFibers.Push(&fiber);
 		}
 		else if (yieldedData)
 		{
+			// fiber.SetWork(L"Awaiting another awaitable...");
 			program.QueueWork(&Program::CheckYieldedFiber, aArg);
 		}
 		else
@@ -230,6 +234,7 @@ void Program::FiberMain()
 
 			for (;;)
 			{
+				// Fiber::SetCurrentWork(L"Sleeping (no work/waiting for main)...");
 				myWorkNotify.wait(lck);
 
 				if (myIsStopping)
@@ -253,7 +258,11 @@ void Program::FiberMain()
 
 			lck.unlock();
 
+			// Fiber::SetCurrentWork(L"Working...");
+
 			work.function(work.argument);
+
+			Println(L"Returning from work...");
 
 			if (gContinuingYield)
 			{
@@ -268,8 +277,10 @@ void Program::FiberMain()
 	CHECK(false);
 }
 
-void Program::WorkerThread()
+void Program::WorkerThread(const i32 aThreadIndex)
 {
+	ThreadID::SetName(Format(L"Worker Thread %", aThreadIndex));
+
 	gIsCogThread = true;
 	Fiber::ConvertCurrentThreadToFiber(L"Program Worker Thread");
 

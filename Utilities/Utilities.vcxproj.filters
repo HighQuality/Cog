@@ -70,6 +70,7 @@
     <ClInclude Include="AwaitableSignal.h" />
     <ClInclude Include="ReadFileAwaitable.h" />
     <ClInclude Include="BackgroundWorkAwaitable.h" />
+    <ClInclude Include="FiberHandle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

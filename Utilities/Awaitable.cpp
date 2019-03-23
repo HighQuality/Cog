@@ -10,12 +10,20 @@ Awaitable::Awaitable()
 	myWaitingFiber = nullptr;
 }
 
-void Awaitable::StartWaiting()
+bool Awaitable::StartWaiting()
 {
 	if (!IsReady())
 	{
 		myWaitingFiber = Fiber::GetCurrentlyExecutingFiber();
 		Fiber::YieldExecution(this);
 		myWaitingFiber = nullptr;
+		return true;
 	}
+
+	return false;
+}
+
+Awaitable::~Awaitable()
+{
+	myWaitingFiber = (Fiber*)1;
 }

@@ -47,7 +47,7 @@ AwaitableSignal::AwaitableSignal()
 	CHECK(ourFirstFreeIndex >= 0);
 }
 
-i32 AwaitableSignal::GatherSignaledFibers(Array<Fiber*>& aSignaledFibers)
+i32 AwaitableSignal::GatherSignaledFibers(Array<Fiber*> & aSignaledFibers)
 {
 	std::unique_lock<std::mutex> lck(ourMutex);
 
@@ -117,4 +117,23 @@ void AwaitableSignal::SignalIndex(i32 aIndex)
 
 	ourSignals[aIndex] = AwaitableSignalStatus::Signaled;
 	ourAwaitables[aIndex]->myIsSignaled = true;
+}
+
+bool AwaitableSignal::StartWaiting()
+{
+	const bool bWaited = Awaitable::StartWaiting();
+
+	// If we didn't wait we need to free our slot manually
+	if (!bWaited)
+	{
+		std::unique_lock<std::mutex> lck(ourMutex);
+		ourAwaitables[mySignalIndex] = nullptr;
+		ourSignals[mySignalIndex] = AwaitableSignalStatus::Unused;
+		
+		ourAwaitables.ShaveFromEnd(nullptr);
+		if (ourFirstFreeIndex > ourAwaitables.GetLength())
+			ourFirstFreeIndex = ourAwaitables.GetLength();
+	}
+
+	return bWaited;
 }

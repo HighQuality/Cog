@@ -21,7 +21,12 @@ int main()
 		program.QueueWork([](void*)
 		{
 			Await<ReadFileAwaitable>(L"main.cpp");
+
+			Sleep(10);
+
 			Println(L"Returned to work");
+
+			Sleep(10);
 		}, nullptr);
 	}
 

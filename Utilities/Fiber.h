@@ -1,5 +1,7 @@
 #pragma once
 #include "FunctionView.h"
+#include "FiberHandle.h"
+#include "CogStack.h"
 
 class Fiber
 {
@@ -29,14 +31,16 @@ public:
 	static Fiber* GetCurrentlyExecutingFiber();
 
 	static void SetCurrentWork(const StringView& aWork);
+	void SetWork(const StringView& aWork);
+
+	const FiberHandle& GetFiberHandle() const { return myFiberHandle; }
 
 private:
 	static void ExecuteFiberLoop(void*);
 	static thread_local void* ourFiberHandle;
 	
-	// Fiber handles
-	void* myFiberHandle = nullptr;
-	void* myCallingFiber = nullptr;
+	FiberHandle myFiberHandle;
+	FiberHandle myCallingFiber;
 
 	void (*myCurrentWork)(void*) = nullptr;
 	void* myArgument = nullptr;

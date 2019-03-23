@@ -19,6 +19,16 @@ public:
 		return ourThreadID;
 	}
 
+	static StringView GetName()
+	{
+		return ourThreadName;
+	}
+
+	static void SetName(String aThreadName)
+	{
+		ourThreadName = Move(aThreadName);
+	}
+
 	bool operator==(const ThreadID& aOther) const
 	{
 		return myID == aOther.myID;
@@ -28,7 +38,7 @@ public:
 	{
 		return myID != aOther.myID;
 	}
-
+	
 private:
 	ThreadID()
 	{
@@ -70,6 +80,8 @@ private:
 
 	static thread_local ThreadID ourThreadID;
 	static std::mutex ourMutex;
+
+	static thread_local String ourThreadName;
 
 	// Static variables are zero-initialized
 	static std::array<ThreadID*, MaxThreadID> ourThreadIDs;

@@ -14,8 +14,8 @@ public:
 	Awaitable& operator=(Awaitable&&) = delete;
 
 	virtual bool IsReady() const = 0;
-	virtual void StartWaiting();
-	virtual ~Awaitable() = default;
+	virtual bool StartWaiting();
+	virtual ~Awaitable();
 
 protected:
 	Fiber* myWaitingFiber;

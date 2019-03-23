@@ -29,6 +29,8 @@ public:
 		SignalIndex(mySignalIndex);
 	}
 
+	bool StartWaiting() override;
+
 private:
 	i32 mySignalIndex;
 	bool myIsSignaled;

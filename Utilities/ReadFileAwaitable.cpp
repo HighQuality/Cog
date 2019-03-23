@@ -11,7 +11,7 @@ void ReadFileAwaitable::SynchronousWork()
 	std::ifstream fileStream(myPath.View().ToStdWString());
 
 	if (!fileStream.good())
-		FATAL(L"Failed to open file");
+		FATAL(L"Failed to open file \"%\"", myPath);
 
 	fileStream.seekg(0, std::ios::end);
 	Array<u8> data;
