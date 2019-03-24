@@ -72,7 +72,6 @@ private:
 			}
 		}
 
-		CHECK(index >= 0);
 		ourThreadIDs[index] = nullptr;
 	}
 

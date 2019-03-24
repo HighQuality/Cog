@@ -11,10 +11,14 @@ int main()
 
 	Array<StringView> files(
 	{
-		L"main.cpp"
+		L"main.cpp",
+		L"ClientGame.cpp",
+		L"ClientGame.h",
+		L"pch.h",
+		L"ClientGameComponentList.cpp"
 	});
 
-	for (i32 i = 0; i < 1000; ++i)
+	for (i32 i = 0; i < 100; ++i)
 	{
 		for (i32 j = 0; j < files.GetLength(); ++j)
 		{

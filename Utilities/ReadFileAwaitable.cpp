@@ -20,5 +20,5 @@ void ReadFileAwaitable::SynchronousWork()
 	fileStream.seekg(0, std::ios::beg);
 	fileStream.read(reinterpret_cast<char*>(data.GetData()), data.GetLength());
 
-	// Println(L"Read % bytes from ", data.GetLength(), myPath);
+	Println(L"Read % bytes from ", data.GetLength(), myPath);
 }
