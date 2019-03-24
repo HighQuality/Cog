@@ -80,7 +80,7 @@ public:
 
 	std::wstring ToStdWString() const
 	{
-		return GetData();
+		return std::wstring(GetData(), GetLength());
 	}
 
 	DECLARE_ARRAY_SLICE_FUNCTIONS(StringView);

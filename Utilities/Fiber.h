@@ -27,6 +27,14 @@ public:
 		CHECK(HasWork());
 		return myYieldedData;
 	}
+	
+	void* RetrieveYieldedData()
+	{
+		CHECK(HasWork());
+		void* data = myYieldedData;
+		myYieldedData = nullptr;
+		return data;
+	}
 
 	static Fiber* GetCurrentlyExecutingFiber();
 

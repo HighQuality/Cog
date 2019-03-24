@@ -2,10 +2,17 @@
 
 class Fiber;
 
+enum class AwaitableType
+{
+	Polling,
+	Pushing
+};
+
 class Awaitable
 {
 public:
 	Awaitable();
+	Awaitable(AwaitableType aAwaitableType);
 
 	Awaitable(const Awaitable&) = delete;
 	Awaitable(Awaitable&&) = delete;
@@ -17,6 +24,12 @@ public:
 	virtual bool StartWaiting();
 	virtual ~Awaitable();
 
+	FORCEINLINE bool UsePolling() const { return myAwaitableType == AwaitableType::Polling; }
+
 protected:
+	Awaitable(bool bUsePolling);
 	Fiber* myWaitingFiber;
+
+private:
+	AwaitableType myAwaitableType = AwaitableType::Polling;
 };

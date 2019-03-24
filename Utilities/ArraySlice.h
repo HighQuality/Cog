@@ -79,7 +79,7 @@ public:
 
 	void Shuffle()
 	{
-		if (this->myLength == 0)
+		if (this->myLength <= 1)
 			return;
 
 		for (i32 i = 0; i < this->myLength - 1; ++i)

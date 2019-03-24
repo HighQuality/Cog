@@ -10,6 +10,12 @@ Awaitable::Awaitable()
 	myWaitingFiber = nullptr;
 }
 
+Awaitable::Awaitable(const AwaitableType aAwaitableType)
+	: Awaitable()
+{
+	myAwaitableType = aAwaitableType;
+}
+
 bool Awaitable::StartWaiting()
 {
 	if (!IsReady())
@@ -25,5 +31,5 @@ bool Awaitable::StartWaiting()
 
 Awaitable::~Awaitable()
 {
-	myWaitingFiber = (Fiber*)1;
+	myWaitingFiber = (Fiber*)2;
 }

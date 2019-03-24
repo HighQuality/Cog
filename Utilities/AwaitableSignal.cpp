@@ -14,6 +14,7 @@ Array<AwaitableSignal*> AwaitableSignal::ourAwaitables;
 i32 AwaitableSignal::ourFirstFreeIndex = 0;
 
 AwaitableSignal::AwaitableSignal()
+	: Awaitable(AwaitableType::Pushing)
 {
 	std::unique_lock<std::mutex> lck(ourMutex);
 
@@ -107,13 +108,14 @@ bool AwaitableSignal::IsWaitingOnAnySignals()
 void AwaitableSignal::SignalIndex(i32 aIndex)
 {
 	CHECK(aIndex >= 0);
-	CHECK(aIndex < ourAwaitables.GetLength());
 
 	// PERF: This lock could potentially be skipped if Program::Get().IsInManagedThread() is true
 	std::unique_lock<std::mutex> lck(ourMutex);
 
+	CHECK(aIndex < ourAwaitables.GetLength());
 	CHECK(ourSignals[aIndex] != AwaitableSignalStatus::Unused);
 	CHECK(ourSignals[aIndex] != AwaitableSignalStatus::Signaled);
+	CHECK(!ourAwaitables[aIndex]->myIsSignaled);
 
 	ourSignals[aIndex] = AwaitableSignalStatus::Signaled;
 	ourAwaitables[aIndex]->myIsSignaled = true;

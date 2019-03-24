@@ -15,22 +15,24 @@ thread_local StringView gCurrentFiber;
 
 static void SwitchFiber(FiberHandle aFiber)
 {
-	void* currentFiber = GetCurrentFiber();
-	String threadName = String(ThreadID::GetName());
-	String currentFiberName = gFiberIndex[currentFiber];
-	String targetFiber = gFiberIndex[aFiber.GetHandle()];
+	// void* currentFiber = GetCurrentFiber();
+	// String threadName = String(ThreadID::GetName());
+	// String currentFiberName = gFiberIndex[currentFiber];
+	// String targetFiber = gFiberIndex[aFiber.GetHandle()];
 
-	Println(L"Thread % (fiber %) switching to fiber %", threadName, currentFiberName, targetFiber);
+	// Println(L"Thread % (fiber %) switching to fiber %", threadName, currentFiberName, targetFiber);
 
-	previousFiberStack.Push(GetCurrentFiber());
+	// previousFiberStack.Push(GetCurrentFiber());
+
+	// Println(L"Switching to fiber %", gFiberIndex[aFiber.GetHandle()]);
 
 	SwitchToFiber(aFiber.GetHandle());
 
-	void* previousFiber = previousFiberStack.Pop();
+	// void* previousFiber = previousFiberStack.Pop();
 
 	// CHECK(previousFiber == GetCurrentFiber());
 
-	Println(L"Thread % returned from fiber % to fiber %", threadName, gFiberIndex[previousFiber], gFiberIndex[currentFiber]);
+	//Println(L"Thread % returned from fiber % to fiber %", threadName, gFiberIndex[previousFiber], gFiberIndex[currentFiber]);
 
 	// {
 	// 	StringView currentFiber = gFiberIndex[Fiber::GetCurrentlyExecutingFiber()->GetFiberHandle()];
@@ -101,6 +103,7 @@ void Fiber::StartWork(void (*aWork)(void*), void* aArgument)
 {
 	CHECK(!HasWork());
 
+	// myYieldedData = nullptr;
 	myCurrentWork = aWork;
 	myArgument = aArgument;
 }
@@ -146,12 +149,14 @@ void Fiber::YieldExecution(void* yieldData)
 
 	FiberHandle callingFiber = fiber.myCallingFiber;
 
-	void* oldData = fiber.myYieldedData;
+	// Fiber is executing recursively
+	CHECK(fiber.myYieldedData == nullptr);
+
 	fiber.myYieldedData = yieldData;
 
 	SwitchFiber(callingFiber);
 
-	fiber.myYieldedData = oldData;
+	fiber.myYieldedData = nullptr;
 }
 
 void Fiber::ConvertCurrentThreadToFiber(const StringView & aDescription)

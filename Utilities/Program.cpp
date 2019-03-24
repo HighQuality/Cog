@@ -79,12 +79,13 @@ void Program::CheckYieldedFiber(void* aArg)
 		// fiber.Continue() will delete this memory
 		awaitable = nullptr;
 
+		const bool bPreviousContinuingYield = gContinuingYield;
 		gContinuingYield = true;
 		fiber.Continue();
-		gContinuingYield = false;
+		gContinuingYield = bPreviousContinuingYield;
 
 		// Fibers should never finish execution
-		CHECK (fiber.HasWork());
+		CHECK(fiber.HasWork());
 
 		void* yieldedData = fiber.GetYieldedData();
 
@@ -170,9 +171,15 @@ void Program::Run()
 		}
 
 		Array<Fiber*> yieldedFibers = Move(myYieldedFibers);
+		myYieldedFibers = Array<Fiber*>();
 		workMutexLck.unlock();
 
-		const i32 gatheredSignals = AwaitableSignal::GatherSignaledFibers(yieldedFibers);
+		Array<Fiber*> readyFibers;
+		const i32 gatheredSignals = AwaitableSignal::GatherSignaledFibers(readyFibers);
+
+		// Println(L"Gathered % signals", gatheredSignals);
+
+		yieldedFibers.Append(readyFibers);
 
 		// Yield if we're not currently working
 		if (yieldedFibers.GetLength() == 0)
@@ -182,6 +189,8 @@ void Program::Run()
 		{
 			// Distribute work-amounts "equally"
 			yieldedFibers.Shuffle();
+
+			// Println(L"% awaitables", yieldedFibers.GetLength());
 
 			// TODO: Don't submit as individual elements, instead implement list submit method that does multiple checks per work unit
 			for (i32 i = 0; i < yieldedFibers.GetLength(); ++i)
@@ -262,10 +271,11 @@ void Program::FiberMain()
 
 			work.function(work.argument);
 
-			Println(L"Returning from work...");
+			// Println(L"Returning from work...");
 
 			if (gContinuingYield)
 			{
+				// Println(L"Yielding after work...");
 				// TODO: Get rid of magic pointer number
 				Fiber::YieldExecution(reinterpret_cast<void*>(1));
 			}
@@ -309,8 +319,17 @@ void Program::WorkerThread(const i32 aThreadIndex)
 		// Work yielded
 		if (fiber->HasWork())
 		{
-			std::unique_lock<std::mutex> lck(myWorkMutex);
-			myYieldedFibers.Add(fiber);
+			CHECK(fiber->GetYieldedData());
+			// TODO: Fix this pedantic check
+			// CHECK(dynamic_cast<Awaitable*>(fiber->GetYieldedData()));
+			Awaitable& awaitable = *static_cast<Awaitable*>(fiber->GetYieldedData());
+
+			if (awaitable.UsePolling())
+			{
+				std::unique_lock<std::mutex> lck(myWorkMutex);
+				myYieldedFibers.Add(fiber);
+			}
+			
 			fiber = nullptr;
 			continue;
 		}
