@@ -9,25 +9,21 @@ int main()
 {
 	Program& program = Program::Create();
 
-	// for (i32 i = 0; i < 1000; ++i)
+	Array<StringView> files(
 	{
-		// program.QueueWork([](void*)
-		// {
-		// 	Stopwatch w;
-		// 	Await<AwaitTime>(Time::Seconds(RandFloat(0.5f, 5.f)));
-		// 	Println(L"Yield lasted % seconds", w.GetElapsedTime().Seconds());
-		// }, nullptr);
+		L"main.cpp"
+	});
 
-		program.QueueWork([](void*)
+	for (i32 i = 0; i < 1000; ++i)
+	{
+		for (i32 j = 0; j < files.GetLength(); ++j)
 		{
-			Await<ReadFileAwaitable>(L"main.cpp");
-
-			Sleep(10);
-
-			Println(L"Returned to work");
-
-			Sleep(10);
-		}, nullptr);
+			program.QueueWork([](void* aArg)
+			{
+				StringView path = *static_cast<StringView*>(aArg);
+				Await<ReadFileAwaitable>(path);
+			}, &files[j]);
+		}
 	}
 
 	program.Run();

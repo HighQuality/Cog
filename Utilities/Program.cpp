@@ -17,9 +17,9 @@ Program::Program()
 
 	gIsCogThread = true;
 
-	myBackgroundWorkThreadPool = new ThreadPool(1);
+	myBackgroundWorkThreadPool = new ThreadPool();
 
-	myNumWorkers = 1; // CastBoundsChecked<i32>(std::thread::hardware_concurrency());
+	myNumWorkers = CastBoundsChecked<i32>(std::thread::hardware_concurrency());
 
 	myWorkers.PrepareAdd(myNumWorkers);
 

@@ -6,9 +6,15 @@ class BackgroundWorkAwaitable : public AwaitableSignal
 public:
 	BackgroundWorkAwaitable()
 	{
-		Program::Get().QueueBackgroundWork(&DoBackgroundWork, this);
 	}
 	
+	bool StartWaiting() override
+	{
+		Program::Get().QueueBackgroundWork(&DoBackgroundWork, this);
+
+		return AwaitableSignal::StartWaiting();
+	}
+
 protected:
 	virtual void SynchronousWork() = 0;
 

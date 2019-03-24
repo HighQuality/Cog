@@ -8,7 +8,8 @@ ReadFileAwaitable::ReadFileAwaitable(const StringView& aPath)
 
 void ReadFileAwaitable::SynchronousWork()
 {
-	std::ifstream fileStream(myPath.View().ToStdWString());
+	std::wstring filePath = myPath.View().ToStdWString();
+	std::ifstream fileStream(filePath);
 
 	if (!fileStream.good())
 		FATAL(L"Failed to open file \"%\"", myPath);
@@ -19,5 +20,5 @@ void ReadFileAwaitable::SynchronousWork()
 	fileStream.seekg(0, std::ios::beg);
 	fileStream.read(reinterpret_cast<char*>(data.GetData()), data.GetLength());
 
-	Println(L"Read % bytes from ", data.GetLength(), myPath);
+	// Println(L"Read % bytes from ", data.GetLength(), myPath);
 }
