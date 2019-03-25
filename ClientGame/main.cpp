@@ -2,8 +2,9 @@
 #include "ClientGame.h"
 #include <Program.h>
 #include <Fiber.h>
-#include <AwaitTime.h>
 #include <ReadFileAwaitable.h>
+
+std::atomic<i32> sizeSum = 0;
 
 int main()
 {
@@ -18,29 +19,36 @@ int main()
 		L"ClientGameComponentList.cpp"
 	});
 
+	sizeSum = 0;
+
 	for (i32 i = 0; i < 1; ++i)
 	{
 		for (StringView& path : files)
 		{
 			program.QueueWork([](void* aArg)
 			{
-				StringView path = *static_cast<StringView*>(aArg);
-
-				ReadFileAwaitable FileReadTask(path);
-				Array<u8> data = Await(FileReadTask);
-
-				Println(L"Returned from reading % bytes from ", data.GetLength(), path);
+				StringView filePath = *static_cast<StringView*>(aArg);
 				
-				Stopwatch w;
-				Await(AwaitTime(Time::Seconds(1.f)));
+				//Println(L"Loading file %...", filePath);
 
-				Println(L"Waited % seconds; data for % is % bytes", w.GetElapsedTime().Seconds(), path, data.GetLength());
+				ReadFileAwaitable readFileTask(filePath);
+				Await awaitable(readFileTask);
+				awaitable.Execute();
+
+				Array<u8> data = readFileTask.RetrieveReturnedData();
+
+				Println(L"Read % bytes from ", data.GetLength(), filePath);
+
+				sizeSum.fetch_add(data.GetLength());
 
 			}, &path);
 		}
 	}
 
 	program.Run();
+
+	Println(L"% (Received)", sizeSum);
+	Println(L"18070 (Expected)");
 
 	// ClientGame game;
 	// game.Run();

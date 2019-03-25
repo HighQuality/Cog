@@ -100,9 +100,9 @@
     <ClInclude Include="Append.h" />
     <ClInclude Include="ArraySlice.h" />
     <ClInclude Include="ArrayView.h" />
+    <ClInclude Include="Await.h" />
     <ClInclude Include="Awaitable.h" />
     <ClInclude Include="AwaitableWorkItem.h" />
-    <ClInclude Include="AwaitTime.h" />
     <ClInclude Include="BackgroundWorkAwaitable.h" />
     <ClInclude Include="Barrier.h" />
     <ClInclude Include="BaseFactory.h" />
@@ -154,7 +154,6 @@
     <ClInclude Include="Random.h" />
     <ClInclude Include="ReadFileAwaitable.h" />
     <ClInclude Include="Semaphore.h" />
-    <ClInclude Include="AwaitableSignal.h" />
     <ClInclude Include="StackAllocator.h" />
     <ClInclude Include="StackAllocatorBlock.h" />
     <ClInclude Include="Stopwatch.h" />
@@ -189,7 +188,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Program.cpp" />
-    <ClCompile Include="AwaitableSignal.cpp" />
     <ClCompile Include="ReadFileAwaitable.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
     <ClCompile Include="StackAllocatorBlock.cpp" />

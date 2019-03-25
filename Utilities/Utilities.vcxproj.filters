@@ -66,11 +66,10 @@
     <ClInclude Include="FiberLocalStorage.h" />
     <ClInclude Include="BaseFactory.h" />
     <ClInclude Include="Awaitable.h" />
-    <ClInclude Include="AwaitTime.h" />
-    <ClInclude Include="AwaitableSignal.h" />
     <ClInclude Include="ReadFileAwaitable.h" />
     <ClInclude Include="BackgroundWorkAwaitable.h" />
     <ClInclude Include="FiberHandle.h" />
+    <ClInclude Include="Await.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -96,7 +95,6 @@
     <ClCompile Include="HttpClient.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="Fiber.cpp" />
-    <ClCompile Include="AwaitableSignal.cpp" />
     <ClCompile Include="ReadFileAwaitable.cpp" />
     <ClCompile Include="Awaitable.cpp" />
   </ItemGroup>

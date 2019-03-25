@@ -1,21 +1,27 @@
 #pragma once
-#include "AwaitableSignal.h"
+#include "Awaitable.h"
+#include "Program.h"
 
 template <typename T>
-class BackgroundWorkAwaitable : public AwaitableSignal
+class BackgroundWorkAwaitable : public Awaitable
 {
 public:
+	using Base = Awaitable;
 	using ReturnType = T;
 
-	BackgroundWorkAwaitable()
-	{
-	}
-	
-	bool StartWaiting() override
+	void StartWork() final
 	{
 		Program::Get().QueueBackgroundWork(&DoBackgroundWork, this);
+	}
+	
+	virtual void DoWork() final
+	{
+		if constexpr (HasData)
+			myReturnedData = SynchronousWork();
+		else
+			SynchronousWork();
 
-		return AwaitableSignal::StartWaiting();
+		Base::DoWork();
 	}
 
 	T RetrieveReturnedData()
@@ -42,6 +48,6 @@ private:
 		else
 			work.SynchronousWork();
 
-		work.Signal();
+		work.SignalWorkFinished();
 	}
 };

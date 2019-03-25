@@ -108,7 +108,7 @@ void Fiber::StartWork(void (*aWork)(void*), void* aArgument)
 	myArgument = aArgument;
 }
 
-bool Fiber::Continue()
+bool Fiber::Continue(FiberHandle* aCallingFiber /* = nullptr*/)
 {
 	CHECK(HasWork());
 
@@ -119,7 +119,7 @@ bool Fiber::Continue()
 	CHECK(ourFiberHandle);
 
 	myYieldedData = nullptr;
-	myCallingFiber = FiberHandle(GetCurrentFiber());
+	myCallingFiber = aCallingFiber ? *aCallingFiber : FiberHandle(GetCurrentFiber());
 
 	CHECK(myCallingFiber);
 

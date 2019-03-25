@@ -5,31 +5,21 @@
 
 Awaitable::Awaitable()
 {
-	CHECK(Program::Get().IsInManagedThread());
-
-	myWaitingFiber = nullptr;
 }
 
-Awaitable::Awaitable(const AwaitableType aAwaitableType)
-	: Awaitable()
+void Awaitable::StartAwaitableWork(void* aAwaitable)
 {
-	myAwaitableType = aAwaitableType;
+	Awaitable& This = *reinterpret_cast<Awaitable*>(aAwaitable);
+	This.DoWork();
+	This.SignalWorkFinished();
 }
 
-bool Awaitable::StartWaiting()
+void Awaitable::StartWork()
 {
-	if (!IsReady())
-	{
-		myWaitingFiber = Fiber::GetCurrentlyExecutingFiber();
-		Fiber::YieldExecution(this);
-		myWaitingFiber = nullptr;
-		return true;
-	}
-
-	return false;
+	Program::Get().QueueWork(&Awaitable::StartAwaitableWork, this);
 }
 
-Awaitable::~Awaitable()
+void Awaitable::SignalWorkFinished()
 {
-	myWaitingFiber = (Fiber*)2;
+	myAwaiter->DecrementCounter();
 }

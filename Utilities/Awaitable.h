@@ -2,17 +2,10 @@
 
 class Fiber;
 
-enum class AwaitableType
-{
-	Polling,
-	Pushing
-};
-
 class Awaitable
 {
 public:
 	Awaitable();
-	Awaitable(AwaitableType aAwaitableType);
 
 	Awaitable(const Awaitable&) = delete;
 	Awaitable(Awaitable&&) = delete;
@@ -20,16 +13,23 @@ public:
 	Awaitable& operator=(const Awaitable&) = delete;
 	Awaitable& operator=(Awaitable&&) = delete;
 
-	virtual bool IsReady() const = 0;
-	virtual bool StartWaiting();
-	virtual ~Awaitable();
+	virtual void StartWork();
 
-	FORCEINLINE bool UsePolling() const { return myAwaitableType == AwaitableType::Polling; }
+	virtual void DoWork() = 0
+	{
+		SignalWorkFinished();
+	}
+
+	virtual ~Awaitable() = default;
 
 protected:
-	Awaitable(bool bUsePolling);
-	Fiber* myWaitingFiber;
+	void SignalWorkFinished();
 
 private:
-	AwaitableType myAwaitableType = AwaitableType::Polling;
+	static void StartAwaitableWork(void* aAwaitable);
+
+	friend class Await;
+	Await* myAwaiter = nullptr;
 };
+
+#include "Await.h"

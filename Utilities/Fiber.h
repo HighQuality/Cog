@@ -14,7 +14,7 @@ public:
 	bool Execute(void (*aWork)(void*), void* aArgument);
 	
 	void StartWork(void (*aWork)(void*), void* aArgument);
-	bool Continue();
+	bool Continue(FiberHandle* aCallingFiber = nullptr);
 
 	bool HasWork() const { return myCurrentWork != nullptr; }
 	
@@ -37,6 +37,8 @@ public:
 	}
 
 	static Fiber* GetCurrentlyExecutingFiber();
+
+	FiberHandle GetCallingFiber() { return myCallingFiber; }
 
 	static void SetCurrentWork(const StringView& aWork);
 	void SetWork(const StringView& aWork);

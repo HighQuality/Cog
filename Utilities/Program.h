@@ -1,7 +1,6 @@
 #pragma once
 #include "TypeID.h"
 #include "ThreadID.h"
-#include "EventList.h"
 #include "BaseFactory.h"
 #include "CogStack.h"
 
@@ -16,29 +15,6 @@ template <typename T>
 T& DefaultAllocate();
 template <typename T>
 void DefaultFree(T& aObject);
-
-template <typename T>
-FORCEINLINE auto DoAwait(T& aAwaitable, nullptr_t) -> decltype(aAwaitable.RetrieveReturnedData())
-{
-	// Should call Fiber::YieldExecution(this) internally
-	aAwaitable.StartWaiting();
-	CHECK(aAwaitable.IsReady());
-	return aAwaitable.RetrieveReturnedData();
-}
-
-template <typename T>
-FORCEINLINE void DoAwait(T& aAwaitable, ...)
-{
-	// Should call Fiber::YieldExecution(this) internally
-	aAwaitable.StartWaiting();
-	CHECK(aAwaitable.IsReady());
-}
-
-template <typename T>
-auto Await(T&& aAwaitable)
-{
-	return DoAwait(aAwaitable, nullptr);
-}
 
 template <typename T, typename ...TArgs>
 T& Allocate(TArgs ...aArgs)
@@ -83,6 +59,7 @@ public:
 	bool IsInManagedThread() const;
 
 	void QueueWork(void(*aFunction)(void*), void* aArgument);
+	void QueueFiber(Fiber* aFiber);
 
 	void QueueBackgroundWork(void(*aFunction)(void*), void* aArgument);
 
@@ -108,15 +85,12 @@ private:
 	std::condition_variable myWorkNotify;
 	Array<std::thread> myWorkers;
 
-	// Locks under myWorkMutex
-	Array<Fiber*> myYieldedFibers;
-
 	bool myIsStopping = false;
 
 	std::condition_variable myWakeMainNotify;
 	std::mutex myWakeMainMutex;
 
-	i32 mySleepingThreads;
+	i32 mySleepingThreads = 0;
 
 	i32 myNumWorkers;
 
@@ -126,8 +100,9 @@ private:
 		void* argument = nullptr;
 	};
 
-	EventList<QueuedWork> myQueuedWork;
-	Array<QueuedWork> myCurrentWorkQueue;
+	Array<QueuedWork> myWorkQueue;
+	Array<Fiber*> myQueuedFibers;
+
 	bool myIsMainRunning = true;
 };
 

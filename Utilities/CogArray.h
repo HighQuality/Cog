@@ -325,6 +325,17 @@ public:
 		this->myData[this->myLength].~T();
 		return val;
 	}
+	
+	FORCEINLINE bool TryPop(T& aElement)
+	{
+		if (this->GetLength() == 0)
+			return false;
+
+		--this->myLength;
+		aElement = Move(this->myData[this->myLength]);
+		this->myData[this->myLength].~T();
+		return true;
+	}
 
 	i32 ShaveFromStart(const T & aValue)
 	{
