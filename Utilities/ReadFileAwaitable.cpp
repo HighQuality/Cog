@@ -6,7 +6,7 @@ ReadFileAwaitable::ReadFileAwaitable(const StringView& aPath)
 	myPath = String(aPath);
 }
 
-void ReadFileAwaitable::SynchronousWork()
+Array<u8> ReadFileAwaitable::SynchronousWork()
 {
 	std::wstring filePath = myPath.View().ToStdWString();
 	std::ifstream fileStream(filePath);
@@ -20,5 +20,7 @@ void ReadFileAwaitable::SynchronousWork()
 	fileStream.seekg(0, std::ios::beg);
 	fileStream.read(reinterpret_cast<char*>(data.GetData()), data.GetLength());
 
-	Println(L"Read % bytes from ", data.GetLength(), myPath);
+	// Println(L"Read % bytes from ", data.GetLength(), myPath);
+
+	return data;
 }

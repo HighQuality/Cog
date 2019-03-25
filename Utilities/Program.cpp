@@ -390,10 +390,3 @@ void Program::Return(TypeID<void> aTypeID, void* aObject)
 
 	FATAL(L"Tried to a return a object to a removed object allocator.");
 }
-
-void Await(Awaitable * aAwaitable)
-{
-	// Should call Fiber::YieldExecution(this) internally
-	aAwaitable->StartWaiting();
-	CHECK(aAwaitable->IsReady());
-}

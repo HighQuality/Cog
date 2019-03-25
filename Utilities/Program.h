@@ -17,13 +17,27 @@ T& DefaultAllocate();
 template <typename T>
 void DefaultFree(T& aObject);
 
-void Await(Awaitable* aAwaitable);
-
-template <typename T, typename ...TArgs>
-void Await(TArgs ...aArgs)
+template <typename T>
+FORCEINLINE auto DoAwait(T& aAwaitable, nullptr_t) -> decltype(aAwaitable.RetrieveReturnedData())
 {
-	T awaitableItem(std::forward<TArgs>(aArgs)...);
-	Await(&awaitableItem);
+	// Should call Fiber::YieldExecution(this) internally
+	aAwaitable.StartWaiting();
+	CHECK(aAwaitable.IsReady());
+	return aAwaitable.RetrieveReturnedData();
+}
+
+template <typename T>
+FORCEINLINE void DoAwait(T& aAwaitable, ...)
+{
+	// Should call Fiber::YieldExecution(this) internally
+	aAwaitable.StartWaiting();
+	CHECK(aAwaitable.IsReady());
+}
+
+template <typename T>
+auto Await(T&& aAwaitable)
+{
+	return DoAwait(aAwaitable, nullptr);
 }
 
 template <typename T, typename ...TArgs>
@@ -64,7 +78,7 @@ public:
 	{
 		Return(TypeID<void>::Resolve<T>(), &aObject);
 	}
-	
+
 	bool IsInMainThread() const { return myMainThread == ThreadID::Get(); }
 	bool IsInManagedThread() const;
 

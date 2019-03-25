@@ -18,15 +18,25 @@ int main()
 		L"ClientGameComponentList.cpp"
 	});
 
-	for (i32 i = 0; i < 100; ++i)
+	for (i32 i = 0; i < 1; ++i)
 	{
-		for (i32 j = 0; j < files.GetLength(); ++j)
+		for (StringView& path : files)
 		{
 			program.QueueWork([](void* aArg)
 			{
 				StringView path = *static_cast<StringView*>(aArg);
-				Await<ReadFileAwaitable>(path);
-			}, &files[j]);
+
+				ReadFileAwaitable FileReadTask(path);
+				Array<u8> data = Await(FileReadTask);
+
+				Println(L"Returned from reading % bytes from ", data.GetLength(), path);
+				
+				Stopwatch w;
+				Await(AwaitTime(Time::Seconds(1.f)));
+
+				Println(L"Waited % seconds; data for % is % bytes", w.GetElapsedTime().Seconds(), path, data.GetLength());
+
+			}, &path);
 		}
 	}
 

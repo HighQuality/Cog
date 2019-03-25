@@ -1,7 +1,7 @@
 #pragma once
 #include "BackgroundWorkAwaitable.h"
 
-class ReadFileAwaitable : public BackgroundWorkAwaitable
+class ReadFileAwaitable : public BackgroundWorkAwaitable<Array<u8>>
 {
 public:
 	explicit ReadFileAwaitable(const StringView& aPath);
@@ -9,6 +9,6 @@ public:
 private:
 	String myPath;
 
-	void SynchronousWork() override;
+	Array<u8> SynchronousWork() override;
 };
 
