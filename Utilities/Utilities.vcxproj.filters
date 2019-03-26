@@ -70,6 +70,8 @@
     <ClInclude Include="BackgroundWorkAwaitable.h" />
     <ClInclude Include="FiberHandle.h" />
     <ClInclude Include="Await.h" />
+    <ClInclude Include="UtilitiesTLS.h" />
+    <ClInclude Include="FiberResumeData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -97,6 +99,7 @@
     <ClCompile Include="Fiber.cpp" />
     <ClCompile Include="ReadFileAwaitable.cpp" />
     <ClCompile Include="Awaitable.cpp" />
+    <ClCompile Include="UtilitiesTLS.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

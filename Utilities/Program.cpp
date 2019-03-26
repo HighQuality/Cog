@@ -9,6 +9,8 @@ Program* gProgram = nullptr;
 
 static thread_local bool gIsCogThread = false;
 
+static std::atomic<i32> gNextFiberIndex = 0;
+
 Program::Program()
 	: myMainThread(ThreadID::Get()), mySleepingThreads(0)
 {
@@ -108,8 +110,15 @@ void Program::Run()
 		}
 		else
 		{
-			Println(L"Program finished in % seconds", static_cast<float>(elapsedSeconds) + watch.GetElapsedTime().Seconds());
-			break;
+			std::unique_lock<std::mutex> fibersLck(myFiberMutex);
+			// TODO: Make this check "better"?
+			// Basically, if the number of unused fibers added to the number of workers equal the next fiber index we have no live fibers waiting on something
+			// Each worker thread always have exactly one fiber allocated to itself
+			if (myUnusedFibers.GetLength() + myNumWorkers == gNextFiberIndex)
+			{
+				Println(L"Program finished in %ms", (static_cast<float>(elapsedSeconds) + watch.GetElapsedTime().Seconds()) * 1000.f);
+				break;
+			}
 		}
 
 		workMutexLck.unlock();
@@ -126,6 +135,8 @@ void Program::Run()
 			++elapsedSeconds;
 		}
 	}
+
+	Println(L"Program finished with % fibers allocated", gNextFiberIndex.load());
 }
 
 Program& Program::Create()
@@ -137,143 +148,112 @@ Program& Program::Create()
 
 void Program::FiberMain()
 {
+	Fiber* currentFiber = Fiber::GetCurrentlyExecutingFiber();
+
+	std::unique_lock<std::mutex> lck(myWorkMutex);
+
 	while (!myIsStopping)
 	{
-		std::unique_lock<std::mutex> lck(myWorkMutex);
-		
 		if (myQueuedFibers.GetLength() > 0)
 		{
 			Fiber* fiberToExecute = myQueuedFibers.Pop();
-
 			lck.unlock();
 
-			Fiber* currentFiber = Fiber::GetCurrentlyExecutingFiber();
-			
-			// FIXME Register currentFiber as unused
-			
+			FiberResumeData resumeData(FiberResumeType::ResumeFromAwait);
+			resumeData.resumeFromAwaitData.sleepingFiber = currentFiber;
+			fiberToExecute->Resume(resumeData);
 
-			FiberHandle workerThreadFiber = currentFiber->GetCallingFiber();
-			
-			fiberToExecute->Continue(&workerThreadFiber);
+			lck.lock();
 			continue;
 		}
-		
+
 		if (myWorkQueue.GetLength() > 0)
 		{
-			const auto work = myWorkQueue.RemoveAt(0);
-
+			QueuedWork work = myWorkQueue.RemoveAt(0);
 			lck.unlock();
-
-			// Fiber::SetCurrentWork(L"Working...");
 
 			work.function(work.argument);
 
-			// Println(L"Returning from work...");
+			lck.lock();
 			continue;
 		}
 
-		if (myWorkQueue.GetLength() == 0 && myQueuedFibers.GetLength() == 0)
+		++mySleepingThreads;
+
+		if (mySleepingThreads == myNumWorkers)
 		{
-			++mySleepingThreads;
-
-			if (mySleepingThreads == myNumWorkers)
 			{
-				{
-					// Could probably be changed to a memory barrier
-					std::unique_lock<std::mutex> mainLock(myWakeMainMutex);
-					myIsMainRunning = true;
-				}
-
-				myWakeMainNotify.notify_one();
+				// Could probably be changed to a memory barrier
+				std::unique_lock<std::mutex> mainLock(myWakeMainMutex);
+				myIsMainRunning = true;
 			}
 
-			for (;;)
-			{
-				// Fiber::SetCurrentWork(L"Sleeping (no work/waiting for main)...");
-				myWorkNotify.wait(lck);
-
-				if (myIsStopping)
-					break;
-
-				if (myIsMainRunning)
-					continue;
-
-				if (myWorkQueue.GetLength() == 0 && myQueuedFibers.GetLength() == 0)
-					continue;
-
-				break;
-			}
-
-			--mySleepingThreads;
+			myWakeMainNotify.notify_one();
 		}
-	}
 
-	Fiber::YieldExecution(nullptr);
-	// Should not return here once yield is called
-	CHECK(false);
+	relock:
+		myWorkNotify.wait(lck);
+
+		if (myIsMainRunning)
+			goto relock;
+
+		--mySleepingThreads;
+	}
 }
 
 void Program::WorkerThread(const i32 aThreadIndex)
 {
-	auto setAffinityResult = SetThreadAffinityMask(GetCurrentThread(), 1 < aThreadIndex);
-	CHECK(setAffinityResult != -1);
+	// auto setAffinityResult = SetThreadAffinityMask(GetCurrentThread(), 1 << aThreadIndex);
+	// CHECK(setAffinityResult != -1);
 
 	ThreadID::SetName(Format(L"Worker Thread %", aThreadIndex));
 
 	gIsCogThread = true;
-	Fiber::ConvertCurrentThreadToFiber(L"Program Worker Thread");
+	Fiber::ConvertCurrentThreadToFiber(Format(L"Program Worker Thread ", aThreadIndex).View());
 
 	Fiber* fiber = nullptr;
 
 	for (;;)
 	{
 		if (fiber == nullptr)
-		{
-			std::unique_lock<std::mutex> lck(myFiberMutex);
+			fiber = GetUnusedFiber();
 
-			if (!myUnusedFibers.TryPop(fiber))
-				fiber = nullptr;
+		// Resume the fiber
+		FiberResumeData returnedData = fiber->Resume(FiberResumeData(FiberResumeType::Starting));
+
+		switch (returnedData.type)
+		{
+		case FiberResumeType::Await:
+		{
+			// TODO: Queue in one lock
+			for (Awaitable* awaitable : *returnedData.awaitData.workItems)
+				awaitable->StartWork();
+		} break;
+
+		case FiberResumeType::Exiting:
+			CHECK(myIsStopping);
+			delete fiber;
+			return;
+
+		default:
+			FATAL(L"FiberResumeType out of range (", static_cast<i32>(returnedData.type), L")");
 		}
 
-		if (fiber == nullptr)
-		{
-			fiber = new Fiber();
-
-			fiber->Execute([](void* aArg)
-				{
-					Program& program = *static_cast<Program*>(aArg);
-					program.FiberMain();
-
-				}, this);
-		}
-		else
-		{
-			fiber->Continue();
-		}
-
-		// Work yielded
-		if (fiber->HasWork())
-		{
-			if (void* yieldedData = fiber->RetrieveYieldedData())
-			{
-				std::atomic_bool& flagToSet = *static_cast<std::atomic_bool*>(yieldedData);
-				flagToSet.store(true);
-			}
-
-			fiber = nullptr;
-			continue;
-		}
-
-		CHECK(myIsStopping);
-		break;
+		fiber = nullptr;
 	}
-
-	delete fiber;
 }
 
 bool Program::IsInManagedThread() const
 {
 	return gIsCogThread;
+}
+
+void Program::RegisterUnusedFiber(Fiber* aFiber)
+{
+	// Println(L"Registering fiber % as unused", aFiber->GetName());
+
+	std::unique_lock<std::mutex> lck(myFiberMutex);
+	myUnusedFibers.Push(aFiber);
 }
 
 void Program::QueueWork(void(*aFunction)(void*), void* aArgument)
@@ -297,9 +277,9 @@ void Program::QueueFiber(Fiber * aFiber)
 void Program::QueueBackgroundWork(void(*aFunction)(void*), void* aArgument)
 {
 	myBackgroundWorkThreadPool->QueueSingle([aFunction, aArgument]()
-		{
-			aFunction(aArgument);
-		});
+	{
+		aFunction(aArgument);
+	});
 }
 
 void* Program::AllocateRaw(TypeID<void> aTypeID, BaseFactory & (*aFactoryAllocator)())
@@ -324,4 +304,30 @@ void Program::Return(TypeID<void> aTypeID, void* aObject)
 	}
 
 	FATAL(L"Tried to a return a object to a removed object allocator.");
+}
+
+Fiber* Program::GetUnusedFiber()
+{
+	{
+		std::unique_lock<std::mutex> lck(myFiberMutex);
+
+		Fiber* fiber;
+		if (myUnusedFibers.TryPop(fiber))
+			return fiber;
+	}
+
+	const i32 newFiberIndex = gNextFiberIndex.fetch_add(1);
+
+	// Println(L"Allocating fiber #", newFiberIndex + 1);
+
+	Fiber* newFiber = new Fiber(
+		Format(L"Fiber %", newFiberIndex).View(),
+		[](void* aArg)
+	{
+		Program& program = *static_cast<Program*>(aArg);
+		program.FiberMain();
+
+	}, this);
+
+	return newFiber;
 }

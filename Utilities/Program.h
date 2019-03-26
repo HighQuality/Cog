@@ -58,10 +58,14 @@ public:
 	bool IsInMainThread() const { return myMainThread == ThreadID::Get(); }
 	bool IsInManagedThread() const;
 
+	void RegisterUnusedFiber(Fiber* aFiber);
+
 	void QueueWork(void(*aFunction)(void*), void* aArgument);
 	void QueueFiber(Fiber* aFiber);
 
 	void QueueBackgroundWork(void(*aFunction)(void*), void* aArgument);
+
+	Fiber* GetUnusedFiber();
 
 private:
 	void* AllocateRaw(TypeID<void> aTypeID, BaseFactory&(*aFactoryAllocator)());
@@ -69,8 +73,6 @@ private:
 	void WorkerThread(i32 aThreadIndex);
 
 	void FiberMain();
-
-	static void CheckYieldedFiber(void* aArg);
 
 	const ThreadID& myMainThread;
 	// TODO: Change key to TypeID<void>

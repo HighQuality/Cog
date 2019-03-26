@@ -30,6 +30,8 @@ private:
 
 	friend class Await;
 	Await* myAwaiter = nullptr;
+
+	bool myWorkFinished = false;
 };
 
 #include "Await.h"

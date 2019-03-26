@@ -19,16 +19,27 @@ public:
 
 	void Execute()
 	{
+		// No work
+		if (myAwaitables.GetLength() == 0)
+			return;
+
 		mySleepingFiber = Fiber::GetCurrentlyExecutingFiber();
 
 		MemoryBarrier();
 
-		// TODO: Queue in one lock
-		for (i32 i = 0; i < myAwaitables.GetLength(); ++i)
-			myAwaitables[i]->StartWork();
+		for (Awaitable* awaitable : myAwaitables)
+			awaitable->myAwaiter = this;
 
 		// Put this fiber to sleep until we're woken up
-		Fiber::YieldExecution(&myIsWaiting);
+		FiberResumeData resumeData;
+		resumeData.type = FiberResumeType::Await;
+		resumeData.awaitData.workItems = &myAwaitables;
+		FiberResumeData returnedData = UtilitiesTLS::GetThisThreadsStartingFiber()->Resume(resumeData);
+
+		CHECK(returnedData.type == FiberResumeType::ResumeFromAwait);
+		CHECK(returnedData.resumeFromAwaitData.sleepingFiber);
+
+		Program::Get().RegisterUnusedFiber(returnedData.resumeFromAwaitData.sleepingFiber);
 
 		// Checks that the counter is 0 and prevent other threads from simultaneously succeeding this check
 		CHECK(myCounter.fetch_sub(1) == 0);
@@ -52,10 +63,6 @@ public:
 	{
 		if (myCounter.fetch_sub(1) == 1)
 		{
-			// Spin lock until the fiber has stopped executing
-			while (!myIsWaiting.load())
-			{ }
-			
 			Program::Get().QueueFiber(mySleepingFiber);
 		}
 	}
@@ -71,7 +78,6 @@ public:
 
 private:
 	std::atomic<u8> myCounter;
-	std::atomic_bool myIsWaiting;
 	Array<Awaitable*> myAwaitables;
 	Await* myFollowedBy = nullptr;
 	Fiber* mySleepingFiber = nullptr;

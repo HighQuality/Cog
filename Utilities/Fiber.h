@@ -1,59 +1,37 @@
 #pragma once
-#include "FunctionView.h"
 #include "FiberHandle.h"
-#include "CogStack.h"
+#include "FiberResumeData.h"
 
 class Fiber
 {
 public:
-	Fiber();
+	Fiber(StringView aName, void (*aWork)(void*), void* aArgument);
 	~Fiber();
 
 	DELETE_MOVES(Fiber);
 
-	bool Execute(void (*aWork)(void*), void* aArgument);
+	FiberResumeData Resume(const FiberResumeData& aResumeData);
 	
-	void StartWork(void (*aWork)(void*), void* aArgument);
-	bool Continue(FiberHandle* aCallingFiber = nullptr);
-
-	bool HasWork() const { return myCurrentWork != nullptr; }
-	
-	static void YieldExecution(void* yieldData);
-
-	static void ConvertCurrentThreadToFiber(const StringView& aDescription);
-
-	void* GetYieldedData() const
-	{
-		CHECK(HasWork());
-		return myYieldedData;
-	}
-	
-	void* RetrieveYieldedData()
-	{
-		CHECK(HasWork());
-		void* data = myYieldedData;
-		myYieldedData = nullptr;
-		return data;
-	}
+	static Fiber* ConvertCurrentThreadToFiber(StringView aName);
 
 	static Fiber* GetCurrentlyExecutingFiber();
 
-	FiberHandle GetCallingFiber() { return myCallingFiber; }
-
-	static void SetCurrentWork(const StringView& aWork);
-	void SetWork(const StringView& aWork);
+	void SetWorkDescription(const StringView& aWorkDescription);
 
 	const FiberHandle& GetFiberHandle() const { return myFiberHandle; }
 
+	const String& GetName() const { return myName; }
+	const String& GetWorkDescription() const { return myWorkDescription; }
+
 private:
-	static void ExecuteFiberLoop(void*);
-	static thread_local void* ourFiberHandle;
+	Fiber(StringView aName);
+	static void ExecuteFiberWork(void*);
 	
+	String myName;
+	String myWorkDescription;
+
 	FiberHandle myFiberHandle;
-	FiberHandle myCallingFiber;
 
 	void (*myCurrentWork)(void*) = nullptr;
 	void* myArgument = nullptr;
-
-	void* myYieldedData = nullptr;
 };

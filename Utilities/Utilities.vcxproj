@@ -126,6 +126,7 @@
     <ClInclude Include="Fiber.h" />
     <ClInclude Include="FiberHandle.h" />
     <ClInclude Include="FiberLocalStorage.h" />
+    <ClInclude Include="FiberResumeData.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="DebugAsserts.h" />
     <ClInclude Include="Directory.h" />
@@ -163,6 +164,7 @@
     <ClInclude Include="TypeID.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="TypeTraits.h" />
+    <ClInclude Include="UtilitiesTLS.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="Vec4.h" />
   </ItemGroup>
@@ -194,6 +196,7 @@
     <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="ThreadID.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
+    <ClCompile Include="UtilitiesTLS.cpp" />
     <ClCompile Include="Vec2.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -25,8 +25,10 @@
 
 #ifdef _MSC_VER
 #define FORCEINLINE __forceinline
+#define NOINLINE __declspec(noinline)
 #else
 #define FORCEINLINE inline
+#define NOINLINE noinline
 #endif
 
 #ifndef NOMINMAX
@@ -60,6 +62,8 @@
 	Type& operator=(Type&&) = delete;
 
 #include "Types.h"
+
+#include "UtilitiesTLS.h"
 
 #include "Random.h"
 #include "DebugAsserts.h"

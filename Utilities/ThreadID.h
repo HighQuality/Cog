@@ -16,18 +16,20 @@ public:
 
 	static const ThreadID& Get()
 	{
-		return ourThreadID;
+		if (const ThreadID* threadID = UtilitiesTLS::GetThreadID())
+			return *threadID;
+
+		ThreadID* newThreadID = new ThreadID();
+		UtilitiesTLS::SetThreadID(newThreadID);
+		return *newThreadID;
 	}
 
 	static StringView GetName()
 	{
-		return ourThreadName;
+		return UtilitiesTLS::GetThreadName();
 	}
 
-	static void SetName(String aThreadName)
-	{
-		ourThreadName = Move(aThreadName);
-	}
+	static void SetName(String aThreadName);
 
 	bool operator==(const ThreadID& aOther) const
 	{
@@ -39,6 +41,11 @@ public:
 		return myID != aOther.myID;
 	}
 	
+	void NotifyThreadShuttingDown()
+	{
+		delete this;
+	}
+
 private:
 	ThreadID()
 	{
@@ -77,10 +84,7 @@ private:
 
 	ThreadIDInteger myID;
 
-	static thread_local ThreadID ourThreadID;
 	static std::mutex ourMutex;
-
-	static thread_local String ourThreadName;
 
 	// Static variables are zero-initialized
 	static std::array<ThreadID*, MaxThreadID> ourThreadIDs;

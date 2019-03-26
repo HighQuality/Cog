@@ -21,5 +21,7 @@ void Awaitable::StartWork()
 
 void Awaitable::SignalWorkFinished()
 {
+	CHECK(!myWorkFinished);
+	myWorkFinished = true;
 	myAwaiter->DecrementCounter();
 }

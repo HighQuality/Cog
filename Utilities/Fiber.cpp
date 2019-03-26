@@ -1,87 +1,45 @@
 #include "pch.h"
 #include "Fiber.h"
-#include "FiberLocalStorage.h"
+#include "FiberResumeData.h"
 #include "ThreadID.h"
-#include "CogStack.h"
-
-thread_local void* Fiber::ourFiberHandle = nullptr;
 
 static std::mutex gFiberIndexMutex;
-static std::unordered_map<void*, String> gFiberIndex;
+static Array<Fiber*> gFiberIndex;
 
-thread_local Stack<void*> previousFiberStack;
-
-thread_local StringView gCurrentFiber;
-
-static void SwitchFiber(FiberHandle aFiber)
-{
-	// void* currentFiber = GetCurrentFiber();
-	// String threadName = String(ThreadID::GetName());
-	// String currentFiberName = gFiberIndex[currentFiber];
-	// String targetFiber = gFiberIndex[aFiber.GetHandle()];
-
-	// Println(L"Thread % (fiber %) switching to fiber %", threadName, currentFiberName, targetFiber);
-
-	// previousFiberStack.Push(GetCurrentFiber());
-
-	// Println(L"Switching to fiber %", gFiberIndex[aFiber.GetHandle()]);
-
-	SwitchToFiber(aFiber.GetHandle());
-
-	// void* previousFiber = previousFiberStack.Pop();
-
-	// CHECK(previousFiber == GetCurrentFiber());
-
-	//Println(L"Thread % returned from fiber % to fiber %", threadName, gFiberIndex[previousFiber], gFiberIndex[currentFiber]);
-
-	// {
-	// 	StringView currentFiber = gFiberIndex[Fiber::GetCurrentlyExecutingFiber()->GetFiberHandle()];
-	// 	StringView callingFiber = gFiberIndex[aFiber.GetHandle()];
-	// 	Println(L"Thread % (fiber %) switching to fiber %", ThreadID::GetName(), currentFiber, callingFiber);
-	// }
-}
-
-void Fiber::ExecuteFiberLoop(void* aPtr)
+void Fiber::ExecuteFiberWork(void* aPtr)
 {
 	Fiber& fiber = *static_cast<Fiber*>(aPtr);
 
-	for (;;)
-	{
-		// Fiber was executed without having any work provided
-		CHECK(fiber.myCurrentWork);
-		fiber.myCurrentWork(fiber.myArgument);
-		fiber.myCurrentWork = nullptr;
-		fiber.myArgument = nullptr;
+	// Fiber was executed without having any work provided
+	CHECK(fiber.myCurrentWork);
 
-		SwitchFiber(fiber.myCallingFiber);
-	}
+	fiber.myCurrentWork(fiber.myArgument);
+
+	FATAL(L"Fiber finished execution (should never happen)");
 }
 
-std::atomic<i32> fiberNum = 1;
-
-Fiber::Fiber()
+Fiber::Fiber(StringView aName)
+	: myName(aName)
 {
-	// 16 KB stack size
-	myFiberHandle = FiberHandle(CreateFiber(32 * 1024, &Fiber::ExecuteFiberLoop, this));
-
-	CHECK(myFiberHandle.GetHandle());
-
-	{
-		// TODO: Remove/disable for performance, only used for debugging
-		std::unique_lock<std::mutex> lck(gFiberIndexMutex);
-		gFiberIndex[myFiberHandle.GetHandle()] = Format(L"Fiber ", fiberNum.fetch_add(1));
-	}
-}
-
-void Fiber::SetCurrentWork(const StringView& aWork)
-{
-	GetCurrentlyExecutingFiber()->SetWork(aWork);
-}
-
-void Fiber::SetWork(const StringView& aWork)
-{
+	// TODO: Remove/disable for performance, only used for debugging
 	std::unique_lock<std::mutex> lck(gFiberIndexMutex);
-	gFiberIndex.find(myFiberHandle.GetHandle())->second = aWork;
+	gFiberIndex.Add(this);
+}
+
+Fiber::Fiber(StringView aName, void(*aWork)(void*), void* aArgument)
+	: Fiber(aName)
+{
+	myCurrentWork = aWork;
+	myArgument = aArgument;
+
+	const i32 stackSizeKB = 16;
+	myFiberHandle = FiberHandle(CreateFiber(stackSizeKB * 1024, &Fiber::ExecuteFiberWork, this));
+	CHECK(myFiberHandle);
+}
+
+void Fiber::SetWorkDescription(const StringView& aWorkDescription)
+{
+	myWorkDescription = aWorkDescription;
 }
 
 Fiber::~Fiber()
@@ -93,84 +51,33 @@ Fiber::~Fiber()
 	}
 }
 
-bool Fiber::Execute(void (*aWork)(void*), void* aArgument)
+FiberResumeData Fiber::Resume(const FiberResumeData& aResumeData)
 {
-	StartWork(aWork, aArgument);
-	return Continue();
-}
+	UtilitiesTLS::SetFiberResumeData(aResumeData);
 
-void Fiber::StartWork(void (*aWork)(void*), void* aArgument)
-{
-	CHECK(!HasWork());
-
-	// myYieldedData = nullptr;
-	myCurrentWork = aWork;
-	myArgument = aArgument;
-}
-
-bool Fiber::Continue(FiberHandle* aCallingFiber /* = nullptr*/)
-{
-	CHECK(HasWork());
-
-	// This fiber is already being worked on by someone else, some other thread most likely tried to continue simultaneously
-	CHECK(!myCallingFiber);
-
-	// You must call Fiber::ConvertCurrentThreadToFiber before working on fibers
-	CHECK(ourFiberHandle);
-
-	myYieldedData = nullptr;
-	myCallingFiber = aCallingFiber ? *aCallingFiber : FiberHandle(GetCurrentFiber());
-
-	CHECK(myCallingFiber);
-
-	// Causes unpredictable problems according to msdn: SwitchToFiber(GetCurrentFiber()), probably won't want this happening
-	// If you hit this, fibers can't continue on themselves
-	CHECK(myCallingFiber != myFiberHandle);
-
-	SwitchFiber(myFiberHandle);
-
-	myCallingFiber.Reset();
-
-	// Return true when we still have work to do
-	return myCurrentWork != nullptr;
-}
-
-void Fiber::YieldExecution(void* yieldData)
-{
-	Fiber* fiberPtr = GetCurrentlyExecutingFiber();
-
-	// Was not called from a fiber
-	CHECK(fiberPtr);
-
-	Fiber& fiber = *fiberPtr;
-
-	// Fiber yielded without having any work (executed without being supposed to, spooky)
-	CHECK(fiber.myCallingFiber);
-
-	FiberHandle callingFiber = fiber.myCallingFiber;
-
-	// Fiber is executing recursively
-	CHECK(fiber.myYieldedData == nullptr);
-
-	fiber.myYieldedData = yieldData;
-
-	SwitchFiber(callingFiber);
-
-	fiber.myYieldedData = nullptr;
-}
-
-void Fiber::ConvertCurrentThreadToFiber(const StringView & aDescription)
-{
-	if (ourFiberHandle == nullptr)
+	if (false)
 	{
-		ourFiberHandle = ConvertThreadToFiber(nullptr);
+		Fiber& currentFiber = *Fiber::GetCurrentlyExecutingFiber();
 
-		{
-			// TODO: Remove/disable for performance, only used for debugging
-			std::unique_lock<std::mutex> lck(gFiberIndexMutex);
-			gFiberIndex[ourFiberHandle] = aDescription;
-		}
+		Println(L"Fiber % (%) switch to fiber % (%) (Thread %)", currentFiber.GetName(), currentFiber.GetWorkDescription(), GetName(), GetWorkDescription(), ThreadID::GetName());
 	}
+
+	SwitchToFiber(myFiberHandle.GetHandle());
+
+	return UtilitiesTLS::RetrieveFiberResumeData();
+}
+
+Fiber* Fiber::ConvertCurrentThreadToFiber(StringView aName)
+{
+	CHECK(UtilitiesTLS::GetThisThreadsStartingFiber() == nullptr);
+
+	Fiber* fiber = new Fiber(aName);
+	fiber->myFiberHandle = FiberHandle(ConvertThreadToFiber(fiber));
+	CHECK(fiber->myFiberHandle);
+
+	UtilitiesTLS::SetThisThreadsStartingFiber(fiber);
+
+	return fiber;
 }
 
 Fiber* Fiber::GetCurrentlyExecutingFiber()
