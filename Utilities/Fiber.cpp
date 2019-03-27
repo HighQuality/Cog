@@ -76,6 +76,7 @@ Fiber* Fiber::ConvertCurrentThreadToFiber(StringView aName)
 	CHECK(fiber->myFiberHandle);
 
 	UtilitiesTLS::SetThisThreadsStartingFiber(fiber);
+	UtilitiesTLS::SetProhibitAwaits(false);
 
 	return fiber;
 }

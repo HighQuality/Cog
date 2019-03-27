@@ -30,7 +30,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ImageResource.h" />
-    <ClInclude Include="FileLoader.h" />
+    <ClInclude Include="FrameData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -46,6 +46,5 @@
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ImageResource.cpp" />
-    <ClCompile Include="FileLoader.cpp" />
   </ItemGroup>
 </Project>

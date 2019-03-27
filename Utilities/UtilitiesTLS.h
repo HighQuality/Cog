@@ -19,4 +19,7 @@ namespace UtilitiesTLS
 
 	NOINLINE void SetFiberResumeData(const FiberResumeData& aResumeData);
 	NOINLINE FiberResumeData RetrieveFiberResumeData();
+	
+	NOINLINE void SetProhibitAwaits(bool aProhibitAwaits);
+	NOINLINE bool GetProhibitAwaits();
 }

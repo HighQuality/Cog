@@ -15,7 +15,7 @@ struct FiberResumeData
 	{
 		struct 
 		{
-			Array<class Awaitable*>* workItems;
+			Array<class AwaitableBase*>* workItems;
 		} awaitData;
 
 		struct 

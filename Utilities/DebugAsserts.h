@@ -37,9 +37,11 @@ void ErrorLog(StringView aMessage);
 #ifdef _DEBUG
 #define ASSUME(e) do { if (!(e)) FATAL(L"Assumption \"%\" failed", #e); } while (false)
 #define ASSUME_UNREACHABLE() FATAL(L"Unreachable assumption failed")
+#define CHECK_PEDANTIC(e) CHECK(e)
 #else
 #define ASSUME(e) __assume(e)
 #define ASSUME_UNREACHABLE() __assume(0)
+#define CHECK_PEDANTIC(e) do { e; } while (false)
 #endif
 
 #define ALWAYS_ASSUME(e) __assume(e)

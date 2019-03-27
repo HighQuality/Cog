@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "CogGame.h"
-#include "ThreadPool.h"
 #include "Stopwatch.h"
 #include "Component.h"
 #include "BaseComponentFactory.h"
@@ -10,7 +9,8 @@
 #include <Semaphore.h>
 #include "ComponentList.h"
 #include "ResourceManager.h"
-#include "FileLoader.h"
+#include <Program.h>
+#include <Await.h>
 
 CogGame* CogGame::ourGame;
 
@@ -20,9 +20,9 @@ bool IsInGameThread()
 }
 
 CogGame::CogGame()
-	: myThreadPool(*new ThreadPool(8)),
-	myGameThreadID(ThreadID::Get()),
-	myEntityFactory(*new EntityFactory())
+	: myGameThreadID(ThreadID::Get()),
+	myEntityFactory(new EntityFactory()),
+	myFrameData(new FrameData())
 {
 	// Multiple game instances are not allowed under 1 process
 	CHECK(!ourGame);
@@ -31,17 +31,19 @@ CogGame::CogGame()
 
 CogGame::~CogGame()
 {
-	myEntityFactory.ReturnAll();
+	myEntityFactory->ReturnAll();
 
 	for (BaseComponentFactory* factory : myComponentFactories)
 		delete factory;
 	myComponentFactories.Clear();
 
-	delete &myEntityFactory;
-
-	delete &myThreadPool;
+	delete myEntityFactory;
 
 	delete myComponentList;
+	myComponentList = nullptr;
+
+	delete myFrameData;
+	myFrameData = nullptr;
 
 	ourGame = nullptr;
 }
@@ -49,7 +51,6 @@ CogGame::~CogGame()
 void CogGame::Run()
 {
 	CreateResourceManager();
-	CreateFileLoader();
 
 	Stopwatch watch;
 	bool isFirstFrame = true;
@@ -70,52 +71,29 @@ void CogGame::Run()
 
 		watch.Restart();
 
-		if (myFileLoader)
-			myFileLoader->Tick();
-
 		if (myResourceManager)
 			myResourceManager->Tick();
 
-		Tick(deltaTime);
+		SynchronizedTick(deltaTime);
 	}
 }
 
-void CogGame::Tick(const Time& aDeltaTime)
+void CogGame::SynchronizedTick(const Time& aDeltaTime)
 {
-	Semaphore doneWithSemaphore;
-	Semaphore resume;
-	myThreadPool.Pause(resume, doneWithSemaphore);
+	QueueDispatchers(aDeltaTime);
 
-	DispatchWork(aDeltaTime);
+	// Execute this frame's work
+	gProgram->Run(false);
+}
 
-	// Resume the thread pool
-	resume.Notify();
-	doneWithSemaphore.Wait();
-	
-	for (;;)
+void CogGame::QueueDispatchers(const Time& aDeltaTime)
+{
+	UpdateFrameData(*myFrameData, aDeltaTime);
+
+	gProgram->QueueHighPrioWork<CogGame>([](CogGame* aGame)
 	{
-		myThreadPool.Pause(resume, doneWithSemaphore);
-	
-		auto synchronizedCallback = mySynchronizedCallbacks.Gather();
-	
-		for (auto synchronizedWork : synchronizedCallback)
-			synchronizedWork.TryCall();
-
-		// Resume the thread pool
-		resume.Notify();
-		doneWithSemaphore.Wait();
-	
-		// Stop iterating if we did no work
-		if (synchronizedCallback.GetLength() == 0)
-			break;
-	}
-
-	// Println(L"Tick % FPS", 1.f / aDeltaTime.Seconds());
-}
-
-void CogGame::DispatchWork(const Time& aDeltaTime)
-{
-	DispatchTick(aDeltaTime);
+		aGame->DispatchTick();
+	}, this);
 }
 
 BaseComponentFactory& CogGame::FindOrCreateComponentFactory(const TypeID<Component> aComponentType)
@@ -137,18 +115,25 @@ BaseComponentFactory& CogGame::FindOrCreateComponentFactory(const TypeID<Compone
 	return *factory;
 }
 
-void CogGame::DispatchTick(const Time& aDeltaTime)
+void CogGame::DispatchTick()
 {
-	for (BaseComponentFactory* factory : myComponentFactories)
+	gProgram->QueueHighPrioWork<FrameData>([](FrameData* aTickData)
 	{
-		if (!factory)
-			continue;
+		NO_AWAITS;
 
-		factory->IterateChunks([aDeltaTime](BaseComponentFactoryChunk& aChunk)
+		CogGame& game = GetGame();
+
+		for (BaseComponentFactory* factory : game.myComponentFactories)
 		{
-			aChunk.DispatchTick(aDeltaTime);
-		});
-	}
+			if (!factory)
+				continue;
+			
+			factory->IterateChunks([aTickData](BaseComponentFactoryChunk& aChunk)
+			{
+				aChunk.DispatchTick(*aTickData);
+			});
+		}
+	}, myFrameData);
 }
 
 BaseObjectFactory& CogGame::FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseObjectFactory*()>& aFactoryCreator)
@@ -171,7 +156,7 @@ EntityInitializer CogGame::CreateEntity()
 Entity& CogGame::AllocateEntity()
 {
 	CHECK(IsInGameThread());
-	return myEntityFactory.Allocate();
+	return myEntityFactory->Allocate();
 }
 
 void CogGame::CreateResourceManager()
@@ -179,12 +164,12 @@ void CogGame::CreateResourceManager()
 	myResourceManager = CreateObject<ResourceManager>();
 }
 
-void CogGame::CreateFileLoader()
-{
-	myFileLoader = CreateObject<FileLoader>();
-}
-
 void CogGame::AssignComponentList(const ComponentList& aComponents)
 {
 	myComponentList = &aComponents;
+}
+
+void CogGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
+{
+	aData.deltaTime = aDeltaTime;
 }

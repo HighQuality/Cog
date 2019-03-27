@@ -53,8 +53,8 @@ public:
 			if (list == nullptr)
 				break;
 
-			for (T& drawCall : *list)
-				elements.Add(Move(drawCall));
+			for (T& element : *list)
+				elements.Add(Move(element));
 			list->Clear();
 		}
 

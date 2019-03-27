@@ -68,19 +68,15 @@ Program::~Program()
 		delete fiber;
 }
 
-void Program::Run()
+void Program::Run(const bool aPrintDebugInfo)
 {
-	Stopwatch watch;
-	i32 frames = 0;
-	i32 elapsedSeconds = 0;
-
 	std::unique_lock<std::mutex> workMutexLck(myWorkMutex, std::defer_lock);
 
 	for (;;)
 	{
 		workMutexLck.lock();
 
-		const i32 numWork = myWorkQueue.GetLength() + myQueuedFibers.GetLength();
+		const i32 numWork = myWorkQueue.GetLength() + myHighPrioWorkQueue.GetLength() + myQueuedFibers.GetLength();
 
 		if (numWork > 0)
 		{
@@ -116,27 +112,29 @@ void Program::Run()
 			// Each worker thread always have exactly one fiber allocated to itself
 			if (myUnusedFibers.GetLength() + myNumWorkers == gNextFiberIndex)
 			{
-				Println(L"Program finished in %ms", (static_cast<float>(elapsedSeconds) + watch.GetElapsedTime().Seconds()) * 1000.f);
+				if (aPrintDebugInfo)
+					Println(L"Program finished in %ms", (static_cast<float>(myElapsedSeconds) + myWatch.GetElapsedTime().Seconds()) * 1000.f);
 				break;
 			}
 		}
 
 		workMutexLck.unlock();
 
-		++frames;
+		++myFrames;
 
-		if (watch.GetElapsedTime().Seconds() > 1.f)
+		if (myWatch.GetElapsedTime().Seconds() > 1.f)
 		{
-			watch.Restart();
+			myWatch.Restart();
 
-			Println(L"% FPS", frames);
-			frames = 0;
+			Println(L"% FPS", myFrames);
+			myFrames = 0;
 
-			++elapsedSeconds;
+			++myElapsedSeconds;
 		}
 	}
 
-	Println(L"Program finished with % fibers allocated", gNextFiberIndex.load());
+	if (aPrintDebugInfo)
+		Println(L"Program finished with % fibers allocated", gNextFiberIndex.load());
 }
 
 Program& Program::Create()
@@ -154,6 +152,17 @@ void Program::FiberMain()
 
 	while (!myIsStopping)
 	{
+		if (myHighPrioWorkQueue.GetLength() > 0)
+		{
+			QueuedWork work = myHighPrioWorkQueue.RemoveAt(0);
+			lck.unlock();
+
+			work.function(work.argument);
+
+			lck.lock();
+			continue;
+		}
+
 		if (myQueuedFibers.GetLength() > 0)
 		{
 			Fiber* fiberToExecute = myQueuedFibers.Pop();
@@ -226,8 +235,8 @@ void Program::WorkerThread(const i32 aThreadIndex)
 		case FiberResumeType::Await:
 		{
 			// TODO: Queue in one lock
-			for (Awaitable* awaitable : *returnedData.awaitData.workItems)
-				awaitable->StartWork();
+			for (AwaitableBase* awaitable : *returnedData.awaitData.workItems)
+				awaitable->TriggerWork();
 		} break;
 
 		case FiberResumeType::Exiting:
@@ -254,15 +263,6 @@ void Program::RegisterUnusedFiber(Fiber* aFiber)
 
 	std::unique_lock<std::mutex> lck(myFiberMutex);
 	myUnusedFibers.Push(aFiber);
-}
-
-void Program::QueueWork(void(*aFunction)(void*), void* aArgument)
-{
-	std::unique_lock<std::mutex> lck(myWorkMutex);
-	myWorkQueue.Add({ aFunction, aArgument });
-	lck.unlock();
-
-	myWorkNotify.notify_one();
 }
 
 void Program::QueueFiber(Fiber * aFiber)

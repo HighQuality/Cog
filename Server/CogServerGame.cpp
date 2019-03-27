@@ -14,9 +14,9 @@ bool CogServerGame::ShouldKeepRunning() const
 	return true;
 }
 
-void CogServerGame::Tick(const Time& aDeltaTime)
+void CogServerGame::SynchronizedTick(const Time& aDeltaTime)
 {
-	Base::Tick(aDeltaTime);
+	Base::SynchronizedTick(aDeltaTime);
 }
 
 void CogServerGame::NewWidgetCreated(Widget& aWidget)

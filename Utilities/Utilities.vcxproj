@@ -169,6 +169,7 @@
     <ClInclude Include="Vec4.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Await.cpp" />
     <ClCompile Include="Awaitable.cpp" />
     <ClCompile Include="AwaitableWorkItem.cpp" />
     <ClCompile Include="ByteColor.cpp" />

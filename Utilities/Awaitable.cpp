@@ -3,23 +3,21 @@
 #include "Fiber.h"
 #include "Program.h"
 
-Awaitable::Awaitable()
+AwaitableBase::AwaitableBase()
 {
 }
 
-void Awaitable::StartAwaitableWork(void* aAwaitable)
+void AwaitableBase::StartAwaitableWork(AwaitableBase* aAwaitable)
 {
-	Awaitable& This = *reinterpret_cast<Awaitable*>(aAwaitable);
-	This.DoWork();
-	This.SignalWorkFinished();
+	aAwaitable->DoWork();
 }
 
-void Awaitable::StartWork()
+void AwaitableBase::TriggerWork()
 {
-	Program::Get().QueueWork(&Awaitable::StartAwaitableWork, this);
+	Program::Get().QueueHighPrioWork(&AwaitableBase::StartAwaitableWork, this);
 }
 
-void Awaitable::SignalWorkFinished()
+void AwaitableBase::SignalWorkFinished()
 {
 	CHECK(!myWorkFinished);
 	myWorkFinished = true;

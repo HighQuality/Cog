@@ -6,7 +6,7 @@ ReadFileAwaitable::ReadFileAwaitable(const StringView& aPath)
 	myPath = String(aPath);
 }
 
-Array<u8> ReadFileAwaitable::SynchronousWork()
+Array<u8> ReadFileAwaitable::Work()
 {
 	std::wstring filePath = myPath.View().ToStdWString();
 	std::ifstream fileStream(filePath);

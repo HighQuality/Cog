@@ -7,7 +7,6 @@ public:
 
 protected:
 	void Initialize() override;
-	void Callback() override;
 
 };
 

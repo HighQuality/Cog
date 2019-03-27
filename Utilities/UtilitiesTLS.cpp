@@ -7,6 +7,7 @@ static thread_local Fiber* ourThisThreadsStartingFiber = nullptr;
 static thread_local ThreadID* ourThreadID = nullptr;
 static thread_local String ourThreadName;
 static thread_local FiberResumeData ourFiberResumeData;
+static thread_local bool ourProhibitAwaits = true;
 
 struct TlsDestruct
 {
@@ -62,4 +63,13 @@ namespace UtilitiesTLS
 		return resumeData;
 	}
 
+	NOINLINE void SetProhibitAwaits(bool aProhibitAwaits)
+	{
+		ourProhibitAwaits = aProhibitAwaits;
+	}
+
+	NOINLINE bool GetProhibitAwaits()
+	{
+		return ourProhibitAwaits;
+	}
 }

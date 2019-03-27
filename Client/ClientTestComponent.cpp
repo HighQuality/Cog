@@ -8,8 +8,3 @@ void ClientTestComponent::Initialize()
 
 	CreateWidget<ImageWidget>();
 }
-
-void ClientTestComponent::Callback()
-{
-	// Println(L"Client callback");
-}

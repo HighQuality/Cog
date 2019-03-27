@@ -12,7 +12,7 @@ public:
 	bool ShouldKeepRunning() const override;
 
 protected:
-	void Tick(const Time& aDeltaTime) override;
+	void SynchronizedTick(const Time& aDeltaTime) override;
 	void NewWidgetCreated(Widget& aWidget) override;
 };
 

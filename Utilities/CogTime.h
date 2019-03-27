@@ -97,6 +97,16 @@ public:
 	{
 		return mySeconds != aRight.mySeconds;
 	}
+	
+	FORCEINLINE Time operator+(Time aRight) const
+	{
+		return Seconds(mySeconds + aRight.mySeconds);
+	}
+	
+	FORCEINLINE Time operator-(Time aRight) const
+	{
+		return Seconds(mySeconds - aRight.mySeconds);
+	}
 
 private:
 	explicit Time(const f32 aSeconds)

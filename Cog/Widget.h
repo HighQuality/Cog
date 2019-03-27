@@ -14,8 +14,7 @@ public:
 protected:
 	friend CogClientGame;
 	
-	virtual void Tick(const Time& aDeltaTime) {  }
-	virtual void Draw(RenderTarget& aRenderTarget) const {  }
+	virtual void Tick(const FrameData& aFrameData) {  }
 
 	void Destroyed() override;
 };

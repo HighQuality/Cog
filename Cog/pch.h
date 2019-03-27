@@ -23,3 +23,5 @@ bool IsInGameThread();
 #include "EntityInitializer.h"
 #include "Component.h"
 #include "Pointer.h"
+
+#include "FrameData.h"

@@ -1,12 +1,7 @@
 #include "pch.h"
 #include "TestComponent.h"
+#include <Stopwatch.h>
 
-void TestComponent::Tick(Time aDeltaTime)
+void TestComponent::Tick(const FrameData& aTickData)
 {
-	Synchronize(*this, &TestComponent::Callback);
-}
-
-void TestComponent::Callback()
-{
-	// Println(L"Callback!");
 }

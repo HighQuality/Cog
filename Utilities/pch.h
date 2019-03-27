@@ -58,8 +58,13 @@
 #undef assert
 #undef SendMessage
 
-#define DELETE_MOVES(Type) Type(Type&&) = delete; \
+#define DELETE_MOVES(Type) Type(Type&&) = delete;\
 	Type& operator=(Type&&) = delete;
+
+#define DELETE_COPYCONSTRUCTORS_AND_MOVES(Type) Type(Type&&) = delete;\
+	Type& operator=(Type&&) = delete;\
+	Type(const Type&) = delete;\
+	Type& operator=(const Type&) = delete;
 
 #include "Types.h"
 

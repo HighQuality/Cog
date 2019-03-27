@@ -1,5 +1,6 @@
 #pragma once
 
+struct FrameData;
 class RenderTarget;
 class Entity;
 class Component;
@@ -12,26 +13,20 @@ public:
 		myEntities.Resize(aSize);
 		myGeneration.Resize(aSize);
 		myReceiveTicks.Resize(aSize);
-		myIsVisible.Resize(aSize);
 
 		for (auto& object : myEntities)
 			object = nullptr;
 
 		for (bool& tick : myReceiveTicks)
 			tick = false;
-
-		for (bool& visible : myIsVisible)
-			visible = false;
-
+		
 		for (u16& generation : myGeneration)
 			generation = 1;
 	}
 
 	virtual ~BaseComponentFactoryChunk() = default;
 
-	virtual void DispatchTick(Time aDeltaTime) = 0;
-	virtual void DispatchDraw2D(RenderTarget& aRenderTarget) = 0;
-	virtual void DispatchDraw3D(RenderTarget& aRenderTarget) = 0;
+	virtual void DispatchTick(const FrameData& aFrameData) = 0;
 
 	virtual void ReturnByID(u16 aIndex) = 0;
 
@@ -51,7 +46,6 @@ protected:
 		myEntities[aIndex] = nullptr;
 		myGeneration[aIndex]++;
 		myReceiveTicks[aIndex] = true;
-		myIsVisible[aIndex] = true;
 	}
 
 	void DestroySOAProperties(const u16 aIndex)
@@ -59,7 +53,6 @@ protected:
 		myEntities[aIndex] = nullptr;
 		myGeneration[aIndex]++;
 		myReceiveTicks[aIndex] = false;
-		myIsVisible[aIndex] = false;
 	}
 
 	friend Component;
@@ -79,20 +72,9 @@ protected:
 	{
 		return myReceiveTicks[aIndex];
 	}
-
-	FORCEINLINE void SetIsVisible(const u16 aIndex, const bool aIsVisible)
-	{
-		myIsVisible[aIndex] = aIsVisible;
-	}
-
-	FORCEINLINE bool IsVisible(const u16 aIndex) const
-	{
-		return myIsVisible[aIndex];
-	}
-
+	
 private:
 	Array<Entity*> myEntities;
 	Array<u16> myGeneration;
 	Array<bool> myReceiveTicks;
-	Array<bool> myIsVisible;
 };

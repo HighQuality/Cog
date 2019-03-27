@@ -9,7 +9,7 @@ static_assert(MaxThreadID != MaxOf<ThreadIDInteger>, "Max thread ID may not be t
 class ThreadID
 {
 public:
-	ThreadIDInteger GetInteger() const
+	FORCEINLINE ThreadIDInteger GetInteger() const
 	{
 		return myID;
 	}

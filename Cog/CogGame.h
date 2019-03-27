@@ -4,7 +4,6 @@
 #include "ThreadID.h"
 #include "ObjectFactory.h"
 #include "ResourceManager.h"
-#include "FileLoader.h"
 
 class ThreadPool;
 class EntityFactory;
@@ -13,6 +12,7 @@ class Component;
 class Entity;
 class ComponentList;
 class Widget;
+struct FrameData;
 
 class CogGame
 {
@@ -20,23 +20,11 @@ public:
 	CogGame();
 	virtual ~CogGame();
 
-	CogGame(const CogGame&) = delete;
-	CogGame& operator=(const CogGame&) = delete;
-	
-	CogGame(CogGame&&) = delete;
-	CogGame& operator=(CogGame&&) = delete;
-	
+	DELETE_COPYCONSTRUCTORS_AND_MOVES(CogGame);
+
 	virtual bool ShouldKeepRunning() const = 0;
 
 	virtual void Run();
-
-	template <typename TType, typename ...TArgs>
-	void Synchronize(TType& aObject, void(TType::*aFunction)(TArgs...))
-	{
-		mySynchronizedCallbacks.Submit(ObjectFunctionView<void(TArgs...)>(aObject, aFunction));
-	}
-
-	FORCEINLINE bool IsInGameThread() const { return myGameThreadID == ThreadID::Get(); }
 
 	BaseComponentFactory& FindOrCreateComponentFactory(TypeID<Component> aComponentType);
 
@@ -64,21 +52,21 @@ public:
 		return *myResourceManager;
 	}
 	
-	FileLoader& GetFileLoader() const
-	{
-		return *myFileLoader;
-	}
-
 	static CogGame& GetCogGame()
 	{
 		return *ourGame;
 	}
 
-protected:
-	virtual void Tick(const Time& aDeltaTime);
+	bool IsInGameThread() const
+	{
+		return myGameThreadID == ThreadID::Get();
+	}
 
-	virtual void DispatchWork(const Time& aDeltaTime);
-	virtual void DispatchTick(const Time& aDeltaTime);
+protected:
+	virtual void SynchronizedTick(const Time& aDeltaTime);
+
+	virtual void QueueDispatchers(const Time& aDeltaTime);
+	virtual void DispatchTick();
 
 	virtual void NewWidgetCreated(Widget& aWidget) = 0;
 
@@ -93,28 +81,27 @@ protected:
 	BaseObjectFactory& FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseObjectFactory*()>& aFactoryCreator);
 
 	Array<BaseComponentFactory*> myComponentFactories;
-	ThreadPool& myThreadPool;
+	
+	FrameData* myFrameData = nullptr;
 
 private:
 	void CreateResourceManager();
-	void CreateFileLoader();
 	void AssignComponentList(const ComponentList& aComponents);
-	
+	virtual void UpdateFrameData(FrameData& aData, const Time& aDeltaTime);
+
 	friend Entity;
 
 	// Only to be used by Entity::CreateChild, use CreateEntity instead
 	Entity& AllocateEntity();
 
-	EntityFactory& myEntityFactory;
+	EntityFactory* myEntityFactory;
 	Array<BaseObjectFactory*> myObjectFactories;
 
-	EventList<ObjectFunctionView<void()>> mySynchronizedCallbacks;
 	const ThreadID& myGameThreadID;
 
 	const ComponentList* myComponentList = nullptr;
 
 	Ptr<ResourceManager> myResourceManager;
-	Ptr<FileLoader> myFileLoader;
 
 	static CogGame* ourGame;
 };
@@ -128,9 +115,4 @@ TGameType& GetGame()
 inline ResourceManager& GetResourceManager()
 {
 	return GetGame().GetResourceManager();
-}
-
-inline FileLoader& GetFileLoader()
-{
-	return GetGame().GetFileLoader();
 }

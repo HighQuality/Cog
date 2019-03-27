@@ -18,20 +18,23 @@ public:
 	void Run() override;
 
 protected:
-	void Tick(const Time& aDeltaTime) override;
+	void SynchronizedTick(const Time& aDeltaTime) override;
 
-	void DispatchTick(const Time& aDeltaTime) override;
-	void DispatchDraw(RenderTarget& aRenderTarget);
-
-	void DispatchWork(const Time& aDeltaTime) override;
-
+	void DispatchTick() override;
+	
 	void NewWidgetCreated(Widget& aWidget) override;
+	void UpdateFrameData(FrameData& aData, const Time& aDeltaTime) override;
 
 private:
-	Entity& CreateCamera();
+	void ProcessInput();
+	void GpuExec();
 
+	Entity& CreateCamera();
+	
 	Window* myWindow = nullptr;
 	RenderEngine* myRenderer = nullptr;
+	EventList<struct GpuCommand>* myNextFramesGpuCommands;
+	Array<struct GpuCommand>* myCurrentlyExecutingGpuCommands;
 
 	Array<Ptr<Widget>> myWidgets;
 

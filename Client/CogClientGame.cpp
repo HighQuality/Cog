@@ -12,9 +12,15 @@
 #include <ThreadPool.h>
 #include "RenderTarget.h"
 #include <Widget.h>
+#include <Program.h>
+#include <Await.h>
+#include "GpuCommand.h"
 
 CogClientGame::CogClientGame()
 {
+	myNextFramesGpuCommands = new EventList<GpuCommand>();
+	myCurrentlyExecutingGpuCommands = new Array<GpuCommand>();
+
 	myWindow = new Window();
 	myRenderer = nullptr;
 }
@@ -26,6 +32,12 @@ CogClientGame::~CogClientGame()
 
 	delete myRenderer;
 	myRenderer = nullptr;
+
+	delete myNextFramesGpuCommands;
+	myNextFramesGpuCommands = nullptr;
+
+	delete myCurrentlyExecutingGpuCommands;
+	myCurrentlyExecutingGpuCommands = nullptr;
 }
 
 bool CogClientGame::ShouldKeepRunning() const
@@ -80,7 +92,27 @@ void CogClientGame::Run()
 	Base::Run();
 }
 
-void CogClientGame::Tick(const Time& aDeltaTime)
+void CogClientGame::SynchronizedTick(const Time& aDeltaTime)
+{
+	for (i32 i = 0; i < myWidgets.GetLength(); ++i)
+	{
+		if (!myWidgets[i])
+		{
+			myWidgets.RemoveAtSwap(i);
+			--i;
+		}
+	}
+
+	ProcessInput();
+
+	// Gather the previous frame's GPU commands into a list for us to execute this frame
+	myCurrentlyExecutingGpuCommands->Empty();
+	myNextFramesGpuCommands->GatherInto(*myCurrentlyExecutingGpuCommands);
+
+	Base::SynchronizedTick(aDeltaTime);
+}
+
+void CogClientGame::ProcessInput()
 {
 	myWindow->ProcessMessages();
 
@@ -102,26 +134,27 @@ void CogClientGame::Tick(const Time& aDeltaTime)
 			break;
 		}
 	}
-
-	Base::Tick(aDeltaTime);
-
-	myRenderer->ClearBackbuffer();
-
-	myRenderer->Draw();
-
-	myRenderer->Present();
 }
 
-void CogClientGame::DispatchWork(const Time& aDeltaTime)
+void CogClientGame::GpuExec()
 {
-	myThreadPool.Barrier();
+	Array<GpuCommand>& gpuCommands = *myCurrentlyExecutingGpuCommands;
 
-	DispatchDraw(myCamera->GetComponent<RenderTarget>());
+	myRenderer->ClearBackbuffer();
+	
+	myRenderer->Draw();
+	
+	myRenderer->Present();
 }
 
 void CogClientGame::NewWidgetCreated(Widget& aWidget)
 {
 	myWidgets.Add(aWidget);
+}
+
+void CogClientGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
+{
+	aData.gpuCommands = myNextFramesGpuCommands;
 }
 
 Entity& CogClientGame::CreateCamera()
@@ -136,51 +169,21 @@ Entity& CogClientGame::CreateCamera()
 	return cameraObject;
 }
 
-void CogClientGame::DispatchTick(const Time& aDeltaTime)
+void CogClientGame::DispatchTick()
 {
-	Base::DispatchTick(aDeltaTime);
-
-	for (i32 i = 0; i < myWidgets.GetLength(); ++i)
+	Base::DispatchTick();
+	
+	gProgram->QueueHighPrioWork<FrameData>([](FrameData* aTickData)
 	{
-		if (myWidgets[i])
+		NO_AWAITS;
+
+		CogClientGame& game = GetGame<CogClientGame>();
+		for (Ptr<Widget>& widget : game.myWidgets)
 		{
-			myWidgets[i]->Tick(aDeltaTime);
+			if (widget)
+				widget->Tick(*aTickData);
 		}
-		else
-		{
-			myWidgets.RemoveAtSwap(i);
-			--i;
-		}
-	}
-}
-
-void CogClientGame::DispatchDraw(RenderTarget& aRenderTarget)
-{
-	for (BaseComponentFactory* factory : myComponentFactories)
-	{
-		if (!factory)
-			continue;
-
-		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
-			{
-				aChunk.DispatchDraw3D(aRenderTarget);
-			});
-	}
-
-	for (BaseComponentFactory* factory : myComponentFactories)
-	{
-		if (!factory)
-			continue;
-
-		factory->IterateChunks([&aRenderTarget](BaseComponentFactoryChunk& aChunk)
-			{
-				aChunk.DispatchDraw2D(aRenderTarget);
-			});
-	}
-
-	for (i32 i = 0; i < myWidgets.GetLength(); ++i)
-	{
-		if (myWidgets[i])
-			myWidgets[i]->Draw(aRenderTarget);
-	}
+	}, myFrameData);
+	
+	Program::Get().QueueHighPrioWork<CogClientGame>([](CogClientGame* This) { This->GpuExec(); }, this);
 }

@@ -5,9 +5,6 @@
 #include <ReadFileAwaitable.h>
 
 std::atomic<i32> sizeSum = 0;
-std::atomic<i32> awaitablesExecuted = 0;
-std::atomic<i32> awaitablesDone = 0;
-
 i32 FileSize(StringView aPath)
 {
 	if (true)
@@ -34,62 +31,52 @@ i32 FileSize(StringView aPath)
 
 int main()
 {
-	Program& program = Program::Create();
+	Program::Create();
 
-	Array<StringView> files(
-		{
-			L"ClientGame.cpp",
-			L"ClientGame.h",
-			L"pch.h",
-			L"ClientGameComponentList.cpp"
-		});
+	// Program& program = Program::Get();
+	// 
+	// Array<StringView> files(
+	// 	{
+	// 		L"ClientGame.cpp",
+	// 		L"ClientGame.h",
+	// 		L"pch.h",
+	// 		L"ClientGameComponentList.cpp"
+	// 	});
+	// 
+	// i32 expectedSize = 0;
+	// 
+	// for (i32 i = 0; i < 100; ++i)
+	// {
+	// 	for (StringView& path : files)
+	// 	{
+	// 		expectedSize += FileSize(path);
+	// 
+	// 		program.QueueWork([](void* aArg)
+	// 		{
+	// 			StringView filePath = *static_cast<StringView*>(aArg);
+	// 
+	// 			// Println(L"Loading file %...", filePath);
+	// 
+	// 			Array<u8> data = Await<ReadFileAwaitable>(filePath);
+	// 
+	// 			// Println(L"Read % bytes from ", data.GetLength(), filePath);
+	// 
+	// 			sizeSum.fetch_add(data.GetLength());
+	// 
+	// 		}, &path);
+	// 	}
+	// }
+	// 
+	// program.Run(true);
+	// 
+	// Println(L"% (Received)", sizeSum);
+	// Println(L"% (Expected)", expectedSize);
+	// 
+	// CHECK(sizeSum > 0);
+	// CHECK(sizeSum == expectedSize);
 
-	i32 expectedSize = 0;
-
-	for (i32 i = 0; i < 10; ++i)
-	{
-		for (StringView& path : files)
-		{
-			expectedSize += FileSize(path);
-
-			program.QueueWork([](void* aArg)
-			{
-				StringView filePath = *static_cast<StringView*>(aArg);
-
-				// Println(L"Loading file %...", filePath);
-
-				ReadFileAwaitable readFileTask(filePath);
-				Await awaitable(readFileTask);
-
-				awaitablesExecuted.fetch_add(1);
-
-				awaitable.Execute();
-
-				Array<u8> data = readFileTask.RetrieveReturnedData();
-
-				// Println(L"Read % bytes from ", data.GetLength(), filePath);
-
-				sizeSum.fetch_add(data.GetLength());
-
-				awaitablesDone.fetch_add(1);
-
-			}, &path);
-		}
-	}
-
-	program.Run();
-
-	i32 executed = awaitablesExecuted.load();
-	i32 done = awaitablesDone.load();
-
-	Println(L"% (Received)", sizeSum);
-	Println(L"% (Expected)", expectedSize);
-	Println(L"% / %", done, executed);
-
-	// ClientGame game;
-	// game.Run();
-
-	system("pause");
+	ClientGame game;
+	game.Run();
 
 	return 0;
 }

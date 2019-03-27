@@ -38,42 +38,16 @@ public:
 		Return(this->myObjectsData[aIndex]);
 	}
 
-	void DispatchTick(const Time aDeltaTime) override
+	void DispatchTick(const FrameData& aFrameData) override
 	{
 		// Skip classes that does not override the function
 		if (typeid(&Component::Tick) == typeid(&T::Tick))
 			return;
 
-		this->IteratePotentialIndices([this, aDeltaTime](const u16 aIndex)
+		this->IteratePotentialIndices([this, &aFrameData](const u16 aIndex)
 		{
 			if (IsTickEnabled(aIndex))
-				this->myObjectsData[aIndex].T::Tick(aDeltaTime);
-		});
-	}
-
-	void DispatchDraw2D(RenderTarget& aRenderTarget) override
-	{
-		// Skip classes that does not override the function
-		if (typeid(&Component::Draw2D) == typeid(&T::Draw2D))
-			return;
-
-		this->IteratePotentialIndices([this, &aRenderTarget](const u16 aIndex)
-		{
-			if (IsVisible(aIndex))
-				this->myObjectsData[aIndex].T::Draw2D(aRenderTarget);
-		});
-	}
-
-	void DispatchDraw3D(RenderTarget& aRenderTarget) override
-	{
-		// Skip classes that does not override the function
-		if (typeid(&Component::Draw3D) == typeid(&T::Draw3D))
-			return;
-
-		this->IteratePotentialIndices([this, &aRenderTarget](const u16 aIndex)
-		{
-			if (IsVisible(aIndex))
-				this->myObjectsData[aIndex].T::Draw3D(aRenderTarget);
+				this->myObjectsData[aIndex].T::Tick(aFrameData);
 		});
 	}
 };

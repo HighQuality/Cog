@@ -133,6 +133,7 @@
     <ClInclude Include="ClientTestComponent.h" />
     <ClInclude Include="CogClientGame.h" />
     <ClInclude Include="DrawCall.h" />
+    <ClInclude Include="GpuCommand.h" />
     <ClInclude Include="ImageWidget.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="Material.h" />

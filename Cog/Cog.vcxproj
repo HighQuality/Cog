@@ -111,7 +111,6 @@
     <ClInclude Include="EngineComponentList.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="CogGame.h" />
-    <ClInclude Include="FileLoader.h" />
     <ClInclude Include="GameThreadCallback.h" />
     <ClInclude Include="ImageResource.h" />
     <ClInclude Include="InheritComponent.h" />
@@ -127,6 +126,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectFactory.h" />
     <ClInclude Include="ObjectFactoryChunk.h" />
+    <ClInclude Include="FrameData.h" />
     <ClInclude Include="Widget.h" />
   </ItemGroup>
   <ItemGroup>
@@ -136,7 +136,6 @@
     <ClCompile Include="EngineComponentList.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityInitializer.cpp" />
-    <ClCompile Include="FileLoader.cpp" />
     <ClCompile Include="ImageResource.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
