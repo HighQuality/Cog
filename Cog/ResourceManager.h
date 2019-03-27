@@ -3,6 +3,7 @@
 #include <BinaryData.h>
 #include <ThreadPool.h>
 #include "Resource.h"
+#include <EventList.h>
 
 class Resource;
 class ThreadPool;

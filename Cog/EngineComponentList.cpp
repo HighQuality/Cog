@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "EngineComponentList.h"
-#include "ComponentFactory.h"
 #include "TestComponent.h"
 
 void EngineComponentList::RegisterComponents()

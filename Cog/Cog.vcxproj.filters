@@ -2,11 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ComponentFactory.h" />
-    <ClInclude Include="ComponentFactoryChunk.h" />
     <ClInclude Include="Component.h" />
-    <ClInclude Include="BaseComponentFactory.h" />
-    <ClInclude Include="BaseComponentFactoryChunk.h" />
     <ClInclude Include="Pointer.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="CogGame.h" />
@@ -20,17 +16,14 @@
     <ClInclude Include="EngineComponentList.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityInitializer.h" />
-    <ClInclude Include="EntityFactory.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="ObjectFactoryChunk.h" />
-    <ClInclude Include="BaseObjectFactoryChunk.h" />
-    <ClInclude Include="BaseObjectFactory.h" />
-    <ClInclude Include="ObjectFactory.h" />
     <ClInclude Include="Widget.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ImageResource.h" />
     <ClInclude Include="FrameData.h" />
+    <ClInclude Include="ComponentFactory.h" />
+    <ClInclude Include="Transform2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -46,5 +39,6 @@
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ImageResource.cpp" />
+    <ClCompile Include="Transform2D.cpp" />
   </ItemGroup>
 </Project>

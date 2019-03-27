@@ -35,7 +35,9 @@ Program::Program()
 
 	// Wait fo rall threads to start sleeping
 	std::unique_lock<std::mutex> lck(myWakeMainMutex);
-	myWakeMainNotify.wait(lck, [this]() { return myIsMainRunning; });
+	
+	while (!myIsMainRunning)
+		myWakeMainNotify.wait(lck);
 }
 
 Program::~Program()
@@ -49,6 +51,8 @@ Program::~Program()
 	{
 		std::unique_lock<std::mutex> lck(myWorkMutex);
 		myIsStopping = true;
+		// Worker threads don't run while this is true
+		myIsMainRunning = false;
 	}
 
 	myWorkNotify.notify_all();
@@ -57,6 +61,8 @@ Program::~Program()
 
 	for (std::thread& thread : myWorkers)
 		thread.join();
+
+	myIsMainRunning = true;
 
 	Println(L"Finished stopping worker threads!");
 
@@ -144,70 +150,82 @@ Program& Program::Create()
 	return *gProgram;
 }
 
+void Program::Destroy()
+{
+	CHECK(gProgram != nullptr);
+	delete gProgram;
+	gProgram = nullptr;
+}
+
+
 void Program::FiberMain()
 {
 	Fiber* currentFiber = Fiber::GetCurrentlyExecutingFiber();
 
-	std::unique_lock<std::mutex> lck(myWorkMutex);
-
-	while (!myIsStopping)
 	{
-		if (myHighPrioWorkQueue.GetLength() > 0)
+		std::unique_lock<std::mutex> lck(myWorkMutex);
+
+		while (!myIsStopping)
 		{
-			QueuedWork work = myHighPrioWorkQueue.RemoveAt(0);
-			lck.unlock();
-
-			work.function(work.argument);
-
-			lck.lock();
-			continue;
-		}
-
-		if (myQueuedFibers.GetLength() > 0)
-		{
-			Fiber* fiberToExecute = myQueuedFibers.Pop();
-			lck.unlock();
-
-			FiberResumeData resumeData(FiberResumeType::ResumeFromAwait);
-			resumeData.resumeFromAwaitData.sleepingFiber = currentFiber;
-			fiberToExecute->Resume(resumeData);
-
-			lck.lock();
-			continue;
-		}
-
-		if (myWorkQueue.GetLength() > 0)
-		{
-			QueuedWork work = myWorkQueue.RemoveAt(0);
-			lck.unlock();
-
-			work.function(work.argument);
-
-			lck.lock();
-			continue;
-		}
-
-		++mySleepingThreads;
-
-		if (mySleepingThreads == myNumWorkers)
-		{
+			if (myHighPrioWorkQueue.GetLength() > 0)
 			{
-				// Could probably be changed to a memory barrier
-				std::unique_lock<std::mutex> mainLock(myWakeMainMutex);
-				myIsMainRunning = true;
+				QueuedWork work = myHighPrioWorkQueue.RemoveAt(0);
+				lck.unlock();
+
+				work.function(work.argument);
+
+				lck.lock();
+				continue;
 			}
 
-			myWakeMainNotify.notify_one();
+			if (myQueuedFibers.GetLength() > 0)
+			{
+				Fiber* fiberToExecute = myQueuedFibers.Pop();
+				lck.unlock();
+
+				FiberResumeData resumeData(FiberResumeType::ResumeFromAwait);
+				resumeData.resumeFromAwaitData.sleepingFiber = currentFiber;
+				fiberToExecute->Resume(resumeData);
+
+				lck.lock();
+				continue;
+			}
+
+			if (myWorkQueue.GetLength() > 0)
+			{
+				QueuedWork work = myWorkQueue.RemoveAt(0);
+				lck.unlock();
+
+				work.function(work.argument);
+
+				lck.lock();
+				continue;
+			}
+
+			++mySleepingThreads;
+
+			if (mySleepingThreads == myNumWorkers)
+			{
+				{
+					// Could probably be changed to a memory barrier
+					std::unique_lock<std::mutex> mainLock(myWakeMainMutex);
+					myIsMainRunning = true;
+				}
+
+				myWakeMainNotify.notify_one();
+			}
+
+			do
+			{
+				myWorkNotify.wait(lck);
+
+			} while (myIsMainRunning);
+
+			--mySleepingThreads;
 		}
-
-	relock:
-		myWorkNotify.wait(lck);
-
-		if (myIsMainRunning)
-			goto relock;
-
-		--mySleepingThreads;
 	}
+
+	UtilitiesTLS::GetThisThreadsStartingFiber()->Resume(FiberResumeData(FiberResumeType::Exiting));
 }
 
 void Program::WorkerThread(const i32 aThreadIndex)
@@ -257,7 +275,7 @@ bool Program::IsInManagedThread() const
 	return gIsCogThread;
 }
 
-void Program::RegisterUnusedFiber(Fiber* aFiber)
+void Program::RegisterUnusedFiber(Fiber * aFiber)
 {
 	// Println(L"Registering fiber % as unused", aFiber->GetName());
 
@@ -277,9 +295,9 @@ void Program::QueueFiber(Fiber * aFiber)
 void Program::QueueBackgroundWork(void(*aFunction)(void*), void* aArgument)
 {
 	myBackgroundWorkThreadPool->QueueSingle([aFunction, aArgument]()
-	{
-		aFunction(aArgument);
-	});
+		{
+			aFunction(aArgument);
+		});
 }
 
 void* Program::AllocateRaw(TypeID<void> aTypeID, BaseFactory & (*aFactoryAllocator)())
@@ -323,11 +341,11 @@ Fiber* Program::GetUnusedFiber()
 	Fiber* newFiber = new Fiber(
 		Format(L"Fiber %", newFiberIndex).View(),
 		[](void* aArg)
-	{
-		Program& program = *static_cast<Program*>(aArg);
-		program.FiberMain();
+		{
+			Program& program = *static_cast<Program*>(aArg);
+			program.FiberMain();
 
-	}, this);
+		}, this);
 
 	return newFiber;
 }

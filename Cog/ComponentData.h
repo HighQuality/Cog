@@ -1,6 +1,6 @@
 #pragma once
 
-class BaseComponentFactory;
+class BaseFactory;
 
 class ComponentData
 {

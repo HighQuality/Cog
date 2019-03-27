@@ -1,13 +1,7 @@
 #include "pch.h"
 #include "Component.h"
 
-Component::~Component()
+void Component::Destroy()
 {
-	myChunk = nullptr;
-	myChunkIndex = 0;
-}
-
-void Component::SetTickEnabled(const bool aShouldTick)
-{
-	myChunk->SetTickEnabled(myChunkIndex, aShouldTick);
+	FATAL(L"You may not call Destroy directly on components, only their owning entity may be destroyed");
 }

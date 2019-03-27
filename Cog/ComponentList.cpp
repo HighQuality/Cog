@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "ComponentList.h"
-#include "ComponentFactory.h"
+
+#include "Transform2D.h"
 
 void ComponentList::RegisterComponents()
 {
+	DECLARE_COMPONENT(Transform2D);
 }
 
 void ComponentList::BuildList()

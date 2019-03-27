@@ -1,23 +1,31 @@
 #include "pch.h"
 #include "Object.h"
+#include <FactoryChunk.h>
 
-Object::Object()
-{
-}
+Object::Object() = default;
 
-Object::~Object()
-{
-	myChunk = nullptr;
-	myChunkIndex = 0;
-}
+Object::~Object() = default;
 
 void Object::Destroy()
 {
-	CHECK(IsInGameThread());
-	Destroyed();
-	myChunk->ReturnByID(myChunkIndex);
+	if (IsPendingDestroy())
+		return;
+
+	GetGame().ScheduleDestruction(*this);
 }
 
 void Object::Destroyed()
 {
+}
+
+void Object::SetActivated(bool aIsActivated)
+{
+	myChunk->SetActivated(myChunkIndex, aIsActivated);
+}
+
+void Object::ReturnToAllocator()
+{
+	Destroyed();
+
+	myChunk->ReturnByIndex(myChunkIndex);
 }

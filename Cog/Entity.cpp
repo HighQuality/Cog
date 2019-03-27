@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "Entity.h"
 #include "Component.h"
-#include "BaseComponentFactory.h"
 #include "Widget.h"
+#include "ComponentFactory.h"
 
 Entity::Entity()
 {
@@ -22,13 +22,11 @@ Entity::~Entity()
 		{
 			if (!container.isInitialRegistration)
 				continue;
-			container.component->myChunk->ReturnByID(container.component->myChunkIndex);
+			container.component->myChunk->ReturnByIndex(container.component->myChunkIndex);
 		}
 		componentList.Clear();
 	}
 	myComponentTypes.Clear();
-
-	myChunk = nullptr;
 }
 
 static thread_local Array<Component*> newComponents;
@@ -92,7 +90,7 @@ Component& Entity::CreateComponentByID(TypeID<Component> aRequestedTypeID)
 {
 	BaseComponentFactory& factory = GetGame().FindOrCreateComponentFactory(aRequestedTypeID);
 	Component& component = factory.AllocateGeneric();
-	component.myChunk->AssignEntity(component.myChunkIndex, *this);
+	component.SetEntity(this);
 
 	const TypeID<Component> createdTypeID = factory.GetTypeID();
 
@@ -129,11 +127,4 @@ EntityInitializer Entity::CreateChild()
 	Entity& entity = GetGame().AllocateEntity();
 	entity.myParent = this;
 	return EntityInitializer(entity);
-}
-
-void Entity::Destroy()
-{
-	CHECK(IsInGameThread());
-
-	myChunk->Return(*this);
 }

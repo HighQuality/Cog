@@ -1,11 +1,6 @@
 ﻿#pragma once
-#include "Entity.h"
-#include "Component.h"
 #include "Object.h"
-#include "EntityFactory.h"
-#include "BaseComponentFactoryChunk.h"
-#include "BaseObjectFactoryChunk.h"
-#include "EntityFactory.h"
+#include "FactoryChunk.h"
 
 template <typename T>
 class Ptr final
@@ -59,7 +54,7 @@ public:
 	operator T*() const
 	{
 		if (IsValid())
-			return myPointer;
+			return reinterpret_cast<T*>(myPointer);
 		return nullptr;
 	}
 
@@ -74,34 +69,12 @@ private:
 		if (!myPointer)
 			return 0;
 
-		if constexpr (IsDerivedFrom<T, Component>)
-		{
-			const Component& component = *reinterpret_cast<const Component*>(myPointer);
-			if (const auto* chunk = component.myChunk)
-				return chunk->FindGeneration(component.myChunkIndex);
-			return 0;
-		}
-		else if constexpr (IsDerivedFrom<T, Object>)
-		{
-			const Object& object = *reinterpret_cast<const Object*>(myPointer);
-			if (const auto* chunk = object.myChunk)
-				return chunk->FindGeneration(object.myChunkIndex);
-			return 0;
-		}
-		else if constexpr (IsDerivedFrom<T, Entity>)
-		{
-			const Entity& entity = *reinterpret_cast<const Entity*>(myPointer);
-			if (const auto* chunk = entity.myChunk)
-				return chunk->FindGeneration(entity);
-			return 0;
-		}
-		else
-		{
-			static_assert(false, "Ptr can only be used to point on entities, components and objects");
-			abort();
-		}
+		const Object& component = *reinterpret_cast<const Object*>(myPointer);
+		if (const BaseFactoryChunk* chunk = component.myChunk)
+			return chunk->FindGeneration(component.myChunkIndex);
+		return 0;
 	}
 
-	mutable T* myPointer;
+	mutable Object* myPointer;
 	mutable u16 myGeneration;
 };

@@ -1,9 +1,6 @@
 ﻿#pragma once
 #include "Entity.h"
 
-template <typename t>
-class ComponentFactory;
-class BaseComponentFactory;
 class Component;
 
 class EntityInitializer
@@ -21,23 +18,23 @@ public:
 	EntityInitializer(EntityInitializer&& aOther)
 	{
 		// Moved after initialization, this is probably not intended as the receiver would have no use for it.
-		ENSURE(!wasInitialized);
+		ENSURE(!myWasInitialized);
 		*this = Move(aOther);
 	}
 
 	EntityInitializer& operator=(EntityInitializer&& aOther)
 	{
-		CHECK(!aOther.wasMoved);
-		wasMoved = false;
-		wasInitialized = aOther.wasInitialized;
+		CHECK(!aOther.myWasMoved);
+		myWasMoved = false;
+		myWasInitialized = aOther.myWasInitialized;
 		myEntity = aOther.myEntity;
-		aOther.wasMoved = true;
+		aOther.myWasMoved = true;
 		return *this;
 	}
 
 	~EntityInitializer()
 	{
-		if (!wasMoved)
+		if (!myWasMoved)
 		{
 			InitializeEntity();
 		}
@@ -61,7 +58,7 @@ public:
 	{
 		Entity& entity = *myEntity;
 		InitializeEntity();
-		wasMoved = true;
+		myWasMoved = true;
 		return entity;
 	}
 
@@ -69,6 +66,6 @@ private:
 	void InitializeEntity();
 
 	Entity* myEntity;
-	bool wasMoved = false;
-	bool wasInitialized = false;
+	bool myWasMoved = false;
+	bool myWasInitialized = false;
 };

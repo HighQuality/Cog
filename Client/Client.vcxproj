@@ -122,6 +122,7 @@
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="SpriteComponent.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertexShader.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SpriteComponent.h" />
     <ClInclude Include="StandardVertex.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VertexBuffer.h" />

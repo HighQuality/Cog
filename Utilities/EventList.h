@@ -22,7 +22,7 @@ public:
 		list.Add(Move(aElement));
 	}
 
-	void Submit(const T& aElement)
+	FORCEINLINE void Submit(const T& aElement)
 	{
 		Submit(T(aElement));
 	}
@@ -70,7 +70,7 @@ public:
 	}
 
 private:
-	Array<T>& FindLocalList()
+	FORCEINLINE Array<T>& FindLocalList()
 	{
 		return myLocalElements[ThreadID::Get().GetInteger()];
 	}

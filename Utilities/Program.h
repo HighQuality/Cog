@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 #include "TypeID.h"
 #include "ThreadID.h"
 #include "BaseFactory.h"
@@ -43,6 +43,7 @@ public:
 	void Run(bool aPrintDebugInfo);
 
 	static Program& Create();
+	static void Destroy();
 
 	static Program& Get();
 

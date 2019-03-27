@@ -98,15 +98,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BaseComponentFactory.h" />
-    <ClInclude Include="BaseComponentFactoryChunk.h" />
-    <ClInclude Include="BaseObjectFactory.h" />
-    <ClInclude Include="BaseObjectFactoryChunk.h" />
     <ClInclude Include="Casts.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentData.h" />
     <ClInclude Include="ComponentFactory.h" />
-    <ClInclude Include="ComponentFactoryChunk.h" />
     <ClInclude Include="ComponentList.h" />
     <ClInclude Include="EngineComponentList.h" />
     <ClInclude Include="Event.h" />
@@ -115,7 +110,6 @@
     <ClInclude Include="ImageResource.h" />
     <ClInclude Include="InheritComponent.h" />
     <ClInclude Include="Entity.h" />
-    <ClInclude Include="EntityFactory.h" />
     <ClInclude Include="ObjectFunctionView.h" />
     <ClInclude Include="EntityInitializer.h" />
     <ClInclude Include="pch.h" />
@@ -124,9 +118,8 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="TestComponent.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="ObjectFactory.h" />
-    <ClInclude Include="ObjectFactoryChunk.h" />
     <ClInclude Include="FrameData.h" />
+    <ClInclude Include="Transform2D.h" />
     <ClInclude Include="Widget.h" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +138,7 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="TestComponent.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Transform2D.cpp" />
     <ClCompile Include="Widget.cpp" />
   </ItemGroup>
   <ItemGroup>

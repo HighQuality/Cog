@@ -1,63 +1,63 @@
 #pragma once
-#include "BaseComponentFactoryChunk.h"
 #include "CogGame.h"
 #include "InheritComponent.h"
 #include <FunctionView.h>
+#include "Object.h"
 
 class RenderTarget;
-class BaseComponentFactoryChunk;
 class Entity;
 class EntityInitializer;
 class CogGame;
 
-class Component
+class ComponentChunkedData : public ChunkedData
 {
 public:
-	using Base = void;
+	using Base = ChunkedData;
 
-	virtual ~Component();
+	ComponentChunkedData(i32 aElements)
+	{
+		myEntity.Resize(aElements);
+	}
 
-	Component(const Component&) = delete;
-	Component(Component&&) = delete;
+	void DefaultInitializeIndex(const u16 aIndex) override
+	{
+		myEntity[aIndex] = nullptr;	
+	}
 
-	Component& operator=(const Component&) = delete;
-	Component& operator=(Component&&) = delete;
-	
-	FORCEINLINE bool IsTickEnabled() const { return myChunk->IsTickEnabled(myChunkIndex); }
+private:
+	friend class Component;
+	Array<Entity*> myEntity;
+};
 
-	// TODO: Should these return const references if we are const?
-	FORCEINLINE Entity& GetEntity() const { return myChunk->FindEntity(myChunkIndex); }
-	
-	FORCEINLINE Entity& GetParent() const { return GetEntity().GetParent(); }
-	FORCEINLINE Entity* TryGetParent() const { return GetEntity().TryGetParent(); }
-	FORCEINLINE bool HasParent() const { return GetEntity().HasParent(); }
+class Component : public Object
+{
+	DECLARE_CHUNKED_DATA(ComponentChunkedData);
+
+	DECLARE_CHUNKED_PROPERTY_ACCESSORS(Entity, private, public);
+
+public:
+	using Base = Object;
+
+	virtual void Tick(const FrameData& aTickData) {  }
+
+	FORCEINLINE Entity* GetParent() const { return GetEntity()->GetParent(); }
 
 	template <typename T>
-	FORCEINLINE T& CreateWidget() { return GetEntity().CreateWidget<T>(); }
+	FORCEINLINE T& CreateWidget() { return GetEntity()->CreateWidget<T>(); }
 
 	FORCEINLINE virtual void GetBaseClasses(const FunctionView<void(const TypeID<Component>&)>& aFunction) const { }
+
+	void Destroy() override;
 
 protected:
 	Component() = default;
 
-	virtual void Tick(const FrameData& aTickData) {  }
-
-	void SetTickEnabled(const bool aShouldTick);
 
 	virtual void Initialize() {  }
 
 	friend Entity;
 	virtual void ResolveDependencies(EntityInitializer& aInitializer) {  }
 
-private:
 	template <typename T>
-	friend class ComponentFactoryChunk;
-	
-	template <typename T>
-	friend class Ptr;
-
-	friend Entity;
-	
-	BaseComponentFactoryChunk* myChunk;
-	u16 myChunkIndex;
+	friend class ComponentFactory;
 };

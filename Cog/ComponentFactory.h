@@ -1,33 +1,80 @@
-﻿#pragma once
-#include "Factory.h"
-#include "BaseComponentFactory.h"
-#include "ComponentFactoryChunk.h"
+#pragma once
+#include <Program.h>
+#include <FactoryChunk.h>
 
-template <typename T>
-class ComponentFactory final : public FactoryImplementation<T, ComponentFactoryChunk<T>>, public BaseComponentFactory
+struct FrameData;
+class Component;
+
+class BaseComponentFactory
 {
 public:
-	using Base = FactoryImplementation<T, ComponentFactoryChunk<T>>;
+	BaseComponentFactory(const TypeID<Component>& aTypeID)
+	{
+		myTypeID = aTypeID;
+	}
 
-	ComponentFactory(TypeID<Component> componentTypeID)
-		: BaseComponentFactory(componentTypeID)
+	virtual ~BaseComponentFactory() = default;
+
+	virtual Component& AllocateGeneric() = 0;
+	virtual void ReturnGeneric(const Component& aComponent) = 0;
+
+	virtual void DispatchTick() = 0;
+
+	const TypeID<Component>& GetTypeID() const { return myTypeID; }
+
+private:
+	TypeID<Component> myTypeID;
+};
+
+template <typename T>
+class ComponentFactory : public BaseComponentFactory
+{
+public:
+	using Base = BaseComponentFactory;
+
+	ComponentFactory()
+		: Base(TypeID<Component>::Resolve<T>())
 	{
 	}
 
-	void IterateChunks(FunctionView<void(BaseComponentFactoryChunk&)> aCallback) override
+	~ComponentFactory() = default;
+
+	DELETE_COPYCONSTRUCTORS_AND_MOVES(ComponentFactory);
+
+	void DispatchTick() override
 	{
-		for (ComponentFactoryChunk<T>* chunk : this->myChunks)
-			aCallback(*chunk);
+		myFactory.IterateChunks([](FactoryChunk<T> & aChunk)
+			{
+				gProgram->QueueWork<FactoryChunk<T>>([](FactoryChunk<T> * aChunk)
+				{
+					const FrameData& frameData = GetGame().GetFrameData();
+
+					aChunk->ForEach([&frameData](T & aComponent)
+						{
+							aComponent.T::Tick(frameData);
+						});
+				}, &aChunk);
+			});
 	}
-	
-protected:
+
+
+	template <typename TCallback>
+	void IterateChunks(TCallback aCallback)
+	{
+		myFactory.IterateChunks(Move(aCallback));
+	}
+
+
 	Component& AllocateGeneric() override
 	{
-		return *static_cast<Component*>(this->AllocateRawObject());
+		return myFactory.Allocate();
 	}
 
 	void ReturnGeneric(const Component& aComponent) override
 	{
-		this->ReturnRawObject(static_cast<const void*>(&aComponent));
+		myFactory.Return(static_cast<const T&>(aComponent));
 	}
+
+private:
+	Factory<T> myFactory;
 };

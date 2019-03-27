@@ -19,6 +19,7 @@
     <ClCompile Include="ClientComponentList.cpp" />
     <ClCompile Include="ImageWidget.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="SpriteComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -43,5 +44,6 @@
     <ClInclude Include="ImageWidget.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="GpuCommand.h" />
+    <ClInclude Include="SpriteComponent.h" />
   </ItemGroup>
 </Project>

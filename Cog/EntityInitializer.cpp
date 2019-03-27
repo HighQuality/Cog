@@ -5,8 +5,8 @@
 void EntityInitializer::InitializeEntity()
 {
 	// Double initialization
-	CHECK(!wasInitialized);
-	wasInitialized = true;
+	CHECK(!myWasInitialized);
+	myWasInitialized = true;
 
 	myEntity->ResolveDependencies(*this);
 	myEntity->Initialize();

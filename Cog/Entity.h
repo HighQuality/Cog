@@ -1,36 +1,26 @@
 #pragma once
 #include "TypeID.h"
+#include "Object.h"
 
-class BaseComponentFactory;
 class Component;
 class Widget;
-class EntityFactoryChunk;
 class EntityInitializer;
 class CogGame;
+class BaseComponentFactory;
 
-template <typename T>
-class ComponentFactory;
-
-class Entity final
+class Entity final : public Object
 {
 public:
+	using Base = Object;
+
 	Entity();
 	~Entity();
 
-	Entity(const Entity&) = delete;
-	Entity(Entity&&) = delete;
-
-	Entity& operator=(const Entity&) = delete;
-	Entity& operator=(Entity&&) = delete;
-
 	// TODO: Should these return const references if we are const?
-	FORCEINLINE Entity& GetParent() const { return *myParent; }
-	FORCEINLINE Entity* TryGetParent() const { return myParent; }
-	FORCEINLINE bool HasParent() const { return myParent != nullptr; }
+	FORCEINLINE Entity* GetParent() const { return myParent; }
 
 	EntityInitializer CreateChild();
-	void Destroy();
-	
+
 	template <typename T>
 	T& CreateWidget()
 	{
@@ -102,8 +92,6 @@ protected:
 	void Initialize();
 
 private:
-	friend EntityFactoryChunk;
-
 	template <typename T>
 	friend class Ptr;
 
@@ -115,7 +103,6 @@ private:
 	Component& CreateComponentByID(TypeID<Component> aRequestedTypeID);
 
 	Entity* myParent = nullptr;
-	EntityFactoryChunk* myChunk = nullptr;
 
 	struct ComponentContainer
 	{

@@ -1,15 +1,23 @@
 #pragma once
-#include "EventList.h"
 #include "ObjectFunctionView.h"
 #include "ThreadID.h"
-#include "ObjectFactory.h"
 #include "ResourceManager.h"
+#include <Factory.h>
 
+template <typename TSignature>
+class FunctionView;
+
+template <typename TReturn, typename... TArgs>
+class FunctionView<TReturn(TArgs...)>;
+
+template <typename T>
+class ComponentFactory;
+
+class BaseFactory;
 class ThreadPool;
-class EntityFactory;
-class BaseComponentFactory;
 class Component;
 class Entity;
+class Object;
 class ComponentList;
 class Widget;
 struct FrameData;
@@ -26,6 +34,12 @@ public:
 
 	virtual void Run();
 
+	template <typename T>
+	ComponentFactory<T>& FindOrCreateComponentFactory()
+	{
+		return static_cast<ComponentFactory<T>&>(FindOrCreateComponentFactory(TypeID<Component>::Resolve<T>()));
+	}
+
 	BaseComponentFactory& FindOrCreateComponentFactory(TypeID<Component> aComponentType);
 
 	EntityInitializer CreateEntity();
@@ -33,16 +47,17 @@ public:
 	template <typename T>
 	T& CreateObject()
 	{
+		static_assert(!IsDerivedFrom<T, Entity>, L"Use CreateEntity to create entities!");
+		static_assert(!IsDerivedFrom<T, Component>, L"Components may only be created on entities!");
+
 		const auto objectTypeID = TypeID<Object>::Resolve<T>();
 		
-		BaseObjectFactory& factory = FindOrCreateObjectFactory(objectTypeID, [&objectTypeID]() { return new ObjectFactory<T>(objectTypeID); });
+		BaseFactory& factory = FindOrCreateObjectFactory(objectTypeID, [&objectTypeID]() { return new Factory<T>(); });
 
-		T& object = CastChecked<T>(factory.AllocateGeneric());
+		T& object = *static_cast<T*>(factory.AllocateRawObject());
 
 		if constexpr(IsDerivedFrom<T, Widget>)
-		{
 			NewWidgetCreated(object);
-		}
 
 		return object;
 	}
@@ -52,7 +67,7 @@ public:
 		return *myResourceManager;
 	}
 	
-	static CogGame& GetCogGame()
+	FORCEINLINE static CogGame& GetCogGame()
 	{
 		return *ourGame;
 	}
@@ -61,6 +76,8 @@ public:
 	{
 		return myGameThreadID == ThreadID::Get();
 	}
+
+	FORCEINLINE const FrameData& GetFrameData() const { return *myFrameData; }
 
 protected:
 	virtual void SynchronizedTick(const Time& aDeltaTime);
@@ -78,7 +95,7 @@ protected:
 		AssignComponentList(*list);
 	}
 
-	BaseObjectFactory& FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseObjectFactory*()>& aFactoryCreator);
+	BaseFactory& FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseFactory*()>& aFactoryCreator);
 
 	Array<BaseComponentFactory*> myComponentFactories;
 	
@@ -88,14 +105,18 @@ private:
 	void CreateResourceManager();
 	void AssignComponentList(const ComponentList& aComponents);
 	virtual void UpdateFrameData(FrameData& aData, const Time& aDeltaTime);
+	void TickDestroys();
 
 	friend Entity;
+	friend Object;
 
-	// Only to be used by Entity::CreateChild, use CreateEntity instead
+	void ScheduleDestruction(Object& aObject);
+
+	// Only to be used by Entity::CreateChild and CreateEntity, use CreateEntity instead
 	Entity& AllocateEntity();
 
-	EntityFactory* myEntityFactory;
-	Array<BaseObjectFactory*> myObjectFactories;
+	BaseFactory* myEntityFactory;
+	Array<BaseFactory*> myObjectFactories;
 
 	const ThreadID& myGameThreadID;
 
@@ -103,11 +124,14 @@ private:
 
 	Ptr<ResourceManager> myResourceManager;
 
+	std::mutex myDestroyMutex;
+	Array<Array<Object*>> myScheduledDestroys;
+
 	static CogGame* ourGame;
 };
 
 template <typename TGameType = CogGame>
-TGameType& GetGame()
+FORCEINLINE TGameType& GetGame()
 {
 	return CastChecked<TGameType>(CogGame::GetCogGame());
 }

@@ -8,13 +8,12 @@
 #include "StandardVertex.h"
 #include "VertexBuffer.h"
 #include "InputLayout.h"
-#include <BaseComponentFactory.h>
-#include <ThreadPool.h>
 #include "RenderTarget.h"
 #include <Widget.h>
 #include <Program.h>
 #include <Await.h>
 #include "GpuCommand.h"
+#include "SpriteComponent.h"
 
 CogClientGame::CogClientGame()
 {
@@ -141,7 +140,16 @@ void CogClientGame::GpuExec()
 	Array<GpuCommand>& gpuCommands = *myCurrentlyExecutingGpuCommands;
 
 	myRenderer->ClearBackbuffer();
-	
+
+	for (GpuCommand& command : gpuCommands)
+	{
+		switch (command.type)
+		{
+		case GpuCommandType::DrawSprite:
+			command.drawSpriteData.sprite->GpuExec();
+		}
+	}
+
 	myRenderer->Draw();
 	
 	myRenderer->Present();
@@ -173,7 +181,7 @@ void CogClientGame::DispatchTick()
 {
 	Base::DispatchTick();
 	
-	gProgram->QueueHighPrioWork<FrameData>([](FrameData* aTickData)
+	gProgram->QueueWork<FrameData>([](FrameData* aTickData)
 	{
 		NO_AWAITS;
 

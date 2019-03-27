@@ -3,30 +3,39 @@
 #include "FactoryChunk.h"
 
 template <typename T, typename TChunkType = FactoryChunk<T>>
-class FactoryImplementation : public BaseFactory
+class Factory : public BaseFactory
 {
 	using Chunk = TChunkType;
 
 public:
-	FactoryImplementation()
+	using Base = BaseFactory;
+
+	Factory()
 	{
 		myChunks.Add(new Chunk(4));
 	}
 
 	template <typename TCallback>
-	void ForEach(const TCallback& callback) const
+	void ForEach(const TCallback& aCallback) const
 	{
 		for (Chunk* chunk : myChunks)
-			chunk->ForEach(callback);
+			chunk->ForEach(aCallback);
 	}
 
-	void ReturnAll()
+	void ReturnAll() final
 	{
 		for (Chunk* chunk : myChunks)
 			chunk->ReturnAll();
 	}
+
+	template <typename TCallback>
+	void IterateChunks(TCallback aCallback)
+	{
+		for (Chunk* chunk : myChunks)
+			aCallback(*chunk);
+	}
 	
-	virtual T& Allocate()
+	T& Allocate()
 	{
 		for (Chunk* chunk : myChunks)
 		{
@@ -36,9 +45,11 @@ public:
 
 		const u16 oldMaxSize = myChunks.Last()->GetSize();
 		Chunk* newChunk;
-		
-		if (oldMaxSize << 4 > oldMaxSize)
-			newChunk = new Chunk(oldMaxSize << 4);
+
+		const i32 grownSize = oldMaxSize << 4;
+
+		if (grownSize > oldMaxSize)
+			newChunk = new Chunk(grownSize);
 		else
 			newChunk = new Chunk(oldMaxSize);
 
@@ -46,13 +57,13 @@ public:
 		return newChunk->Allocate();
 	}
 	
-	virtual void Return(const T& object)
+	void Return(const T& aObject)
 	{
 		for (Chunk* chunk : myChunks)
 		{
-			if (chunk->DoesObjectOriginateFromHere(object))
+			if (chunk->DoesObjectOriginateFromHere(aObject))
 			{
-				chunk->Return(object);
+				chunk->Return(aObject);
 				return;
 			}
 		}
@@ -60,7 +71,7 @@ public:
 		FATAL(L"Object does not originate from us.");
 	}
 
-	virtual ~FactoryImplementation()
+	~Factory()
 	{
 		for (Chunk* chunk : myChunks)
 			delete chunk;
@@ -80,7 +91,3 @@ public:
 protected:
 	Array<Chunk*> myChunks;
 };
-
-// Specialize this
-template <typename T>
-using Factory = FactoryImplementation<T, FactoryChunk<T>>;
