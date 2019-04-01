@@ -3,6 +3,6 @@
 
 void Transform2DChunkedData::SynchronizedTick()
 {
-	const i32 sizeBytes = myPreviousFramesPosition.GetLength() * sizeof myPreviousFramesPosition[0];
-	memcpy(myPreviousFramesPosition.GetData(), myScheduledPosition.GetData(), sizeBytes);
+	const i32 sizeBytes = GetNumObjects() * sizeof *myPreviousFramesPosition;
+	memcpy(myPreviousFramesPosition, myScheduledPosition, sizeBytes);
 }

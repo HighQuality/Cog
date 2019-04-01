@@ -3,11 +3,15 @@
 #include "ClientGameComponentList.h"
 #include <TestComponent.h>
 
+class Transform2D;
+
 ClientGame::ClientGame()
 {
 	RegisterComponents<ClientGameComponentList>();
 
-	CreateEntity().AddComponent<TestComponent>();
+	auto entity = CreateEntity();
+	entity.AddComponent<TestComponent>();
+	entity.AddComponent<Transform2D>();
 }
 
 ClientGame::~ClientGame()

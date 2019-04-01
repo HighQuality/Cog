@@ -46,7 +46,7 @@ public:
 		const u16 oldMaxSize = myChunks.Last()->GetSize();
 		Chunk* newChunk;
 
-		const i32 grownSize = oldMaxSize << 4;
+		const u16 grownSize = oldMaxSize << 4;
 
 		if (grownSize > oldMaxSize)
 			newChunk = new Chunk(grownSize);

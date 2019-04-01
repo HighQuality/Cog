@@ -14,19 +14,20 @@ class ComponentChunkedData : public ChunkedData
 public:
 	using Base = ChunkedData;
 
-	ComponentChunkedData(i32 aElements)
+	template <typename ...TArgs>
+	ComponentChunkedData(u16 aNumObjects, TArgs& ...aArgs)
+		: Base(aNumObjects, myEntity, aArgs...)
 	{
-		myEntity.Resize(aElements);
 	}
 
 	void DefaultInitializeIndex(const u16 aIndex) override
 	{
-		myEntity[aIndex] = nullptr;	
+		myEntity[aIndex] = nullptr;
 	}
 
 private:
 	friend class Component;
-	Array<Entity*> myEntity;
+	Entity** myEntity;
 };
 
 class Component : public Object
