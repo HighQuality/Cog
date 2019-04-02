@@ -13,6 +13,7 @@ class FunctionView<TReturn(TArgs...)>;
 template <typename T>
 class ComponentFactory;
 
+class MessageSystem;
 class BaseFactory;
 class ThreadPool;
 class Component;
@@ -117,6 +118,7 @@ private:
 
 	BaseFactory* myEntityFactory;
 	Array<BaseFactory*> myObjectFactories;
+	MessageSystem* myMessageSystem;
 
 	const ThreadID& myGameThreadID;
 
@@ -126,6 +128,7 @@ private:
 
 	std::mutex myDestroyMutex;
 	Array<Array<Object*>> myScheduledDestroys;
+
 
 	static CogGame* ourGame;
 };

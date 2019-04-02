@@ -1,6 +1,10 @@
 #pragma once
+#include "MessageSystem.h"
+#include <BackgroundWorkAwaitable.h>
 
 class BaseFactoryChunk;
+
+
 
 class Object
 {
@@ -9,6 +13,8 @@ public:
 
 	Object();
 	virtual ~Object();
+	
+	// void ReceiveRawMessage(void* aMessage, const TypeID<MessageSystem::Message>& aTypeId) const;
 
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(Object);
 
@@ -16,6 +22,12 @@ public:
 	
 	FORCEINLINE bool IsActivated() const;
 	FORCEINLINE bool IsPendingDestroy() const;
+
+	template <typename T>
+	void SendMessage(T aMessage)
+	{
+
+	}
 
 protected:
 	virtual void Destroyed();

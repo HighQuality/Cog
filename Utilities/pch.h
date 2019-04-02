@@ -57,6 +57,7 @@
 #undef GetMessage
 #undef assert
 #undef SendMessage
+#undef PostMessage
 
 #define DELETE_MOVES(Type) Type(Type&&) = delete;\
 	Type& operator=(Type&&) = delete;

@@ -24,6 +24,7 @@
     <ClInclude Include="FrameData.h" />
     <ClInclude Include="ComponentFactory.h" />
     <ClInclude Include="Transform2D.h" />
+    <ClInclude Include="MessageSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -40,5 +41,6 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ImageResource.cpp" />
     <ClCompile Include="Transform2D.cpp" />
+    <ClCompile Include="MessageSystem.cpp" />
   </ItemGroup>
 </Project>

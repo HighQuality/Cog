@@ -8,6 +8,7 @@
 #include <Program.h>
 #include <Await.h>
 #include "Transform2D.h"
+#include "MessageSystem.h"
 
 CogGame* CogGame::ourGame;
 
@@ -19,7 +20,8 @@ bool IsInGameThread()
 CogGame::CogGame()
 	: myGameThreadID(ThreadID::Get()),
 	myEntityFactory(new Factory<Entity>()),
-	myFrameData(new FrameData())
+	myFrameData(new FrameData()),
+	myMessageSystem(new MessageSystem())
 {
 	// Multiple game instances are not allowed under 1 process
 	CHECK(!ourGame);
@@ -44,6 +46,9 @@ CogGame::~CogGame()
 
 	delete myFrameData;
 	myFrameData = nullptr;
+
+	delete myMessageSystem;
+	myMessageSystem = nullptr;
 
 	ourGame = nullptr;
 }
@@ -75,6 +80,7 @@ void CogGame::Run()
 			myResourceManager->Tick();
 
 		SynchronizedTick(deltaTime);
+		
 		TickDestroys();
 	}
 }
@@ -86,10 +92,13 @@ void CogGame::SynchronizedTick(const Time & aDeltaTime)
 	// Execute this frame's work
 	gProgram->Run(false);
 
+	while (myMessageSystem->PostMessages())
+		gProgram->Run(false);
+
 	FindOrCreateComponentFactory<Transform2D>().IterateChunks([](const FactoryChunk<Transform2D> & aChunk)
-		{
-			aChunk.GetChunkedData()->SynchronizedTick();
-		});
+	{
+		aChunk.GetChunkedData()->SynchronizedTick();
+	});
 }
 
 void CogGame::QueueDispatchers(const Time & aDeltaTime)
