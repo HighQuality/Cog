@@ -1,10 +1,6 @@
 #pragma once
-#include "MessageSystem.h"
-#include <BackgroundWorkAwaitable.h>
 
 class BaseFactoryChunk;
-
-
 
 class Object
 {
@@ -18,7 +14,7 @@ public:
 
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(Object);
 
-	virtual void Destroy();
+	virtual bool Destroy();
 	
 	FORCEINLINE bool IsActivated() const;
 	FORCEINLINE bool IsPendingDestroy() const;
@@ -45,7 +41,7 @@ protected:
 	void ReturnToAllocator();
 
 	BaseFactoryChunk* myChunk;
-	u16 myChunkIndex;
+	ChunkIndex myChunkIndex;
 };
 
 #include "FactoryChunk.h"

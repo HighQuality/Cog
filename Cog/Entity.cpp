@@ -10,12 +10,6 @@ Entity::Entity()
 
 Entity::~Entity()
 {
-	for (const Ptr<Widget>& widget : myWidgets)
-	{
-		if (widget)
-			widget->Destroy();
-	}
-
 	for (auto& componentList : myComponentTypes)
 	{
 		for (const ComponentContainer& container : componentList)
@@ -31,6 +25,20 @@ Entity::~Entity()
 
 static thread_local Array<Component*> newComponents;
 static thread_local bool isResolvingDependencies = false;
+
+bool Entity::Destroy()
+{
+	if (!Base::Destroy())
+		return false;
+
+	for (const Ptr<Widget>& widget : myWidgets)
+	{
+		if (widget)
+			widget->Destroy();
+	}
+
+	return true;
+}
 
 void Entity::ResolveDependencies(EntityInitializer& aInitializer)
 {

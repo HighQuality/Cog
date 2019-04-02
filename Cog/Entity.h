@@ -85,6 +85,8 @@ public:
 			aCallback(reinterpret_cast<const T&>(*componentContainer.component));
 	}
 
+	virtual bool Destroy() final;
+
 protected:
 	friend EntityInitializer;
 

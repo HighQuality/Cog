@@ -6,8 +6,8 @@ class Transform2DChunkedData : public ComponentChunkedData
 public:
 	using Base = ComponentChunkedData;
 
-	Transform2DChunkedData(u16 aNumObjects)
-		: Base(aNumObjects, myTestStruct, myPreviousFramesPosition, myScheduledPosition)
+	Transform2DChunkedData()
+		: Base(myTestStruct, myPreviousFramesPosition, myScheduledPosition)
 	{
 	}
 

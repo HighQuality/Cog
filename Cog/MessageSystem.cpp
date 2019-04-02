@@ -14,7 +14,7 @@ MessageSystem::~MessageSystem()
 
 bool MessageSystem::PostMessages()
 {
-	Program& program = *gProgram;
+	// Program& program = *gProgram;
 
 	Array<Message> messages = myMessages.Gather();
 

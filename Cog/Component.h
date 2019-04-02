@@ -15,12 +15,12 @@ public:
 	using Base = ChunkedData;
 
 	template <typename ...TArgs>
-	ComponentChunkedData(u16 aNumObjects, TArgs& ...aArgs)
-		: Base(aNumObjects, myEntity, aArgs...)
+	ComponentChunkedData(TArgs& ...aArgs)
+		: Base(myEntity, aArgs...)
 	{
 	}
 
-	void DefaultInitializeIndex(const u16 aIndex) override
+	void DefaultInitializeIndex(const ChunkIndex aIndex) override
 	{
 		myEntity[aIndex] = nullptr;
 	}
@@ -48,7 +48,7 @@ public:
 
 	FORCEINLINE virtual void GetBaseClasses(const FunctionView<void(const TypeID<Component>&)>& aFunction) const { }
 
-	void Destroy() override;
+	bool Destroy() override;
 
 protected:
 	Component() = default;

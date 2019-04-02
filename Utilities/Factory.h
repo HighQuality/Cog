@@ -12,7 +12,7 @@ public:
 
 	Factory()
 	{
-		myChunks.Add(new Chunk(4));
+		myChunks.Add(&myFirstChunk);
 	}
 
 	template <typename TCallback>
@@ -34,7 +34,7 @@ public:
 		for (Chunk* chunk : myChunks)
 			aCallback(*chunk);
 	}
-	
+
 	T& Allocate()
 	{
 		for (Chunk* chunk : myChunks)
@@ -43,21 +43,12 @@ public:
 				return chunk->Allocate();
 		}
 
-		const u16 oldMaxSize = myChunks.Last()->GetSize();
-		Chunk* newChunk;
-
-		const u16 grownSize = oldMaxSize << 4;
-
-		if (grownSize > oldMaxSize)
-			newChunk = new Chunk(grownSize);
-		else
-			newChunk = new Chunk(oldMaxSize);
-
+		Chunk* newChunk = new Chunk();
 		myChunks.Add(newChunk);
 		return newChunk->Allocate();
 	}
-	
-	void Return(const T& aObject)
+
+	void Return(const T & aObject)
 	{
 		for (Chunk* chunk : myChunks)
 		{
@@ -73,11 +64,12 @@ public:
 
 	~Factory()
 	{
-		for (Chunk* chunk : myChunks)
-			delete chunk;
+		// First chunk is not heap allocated
+		for (i32 i = 1; i < myChunks.GetLength(); ++i)
+			delete myChunks[i];
 		myChunks.Clear();
 	}
-	
+
 	void* AllocateRawObject() final
 	{
 		return &Allocate();
@@ -89,5 +81,6 @@ public:
 	}
 
 protected:
+	Chunk myFirstChunk;
 	Array<Chunk*> myChunks;
 };

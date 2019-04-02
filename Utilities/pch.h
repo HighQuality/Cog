@@ -69,6 +69,8 @@
 
 #include "Types.h"
 
+using ChunkIndex = u8;
+
 #include "UtilitiesTLS.h"
 
 #include "Random.h"

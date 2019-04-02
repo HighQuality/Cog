@@ -6,12 +6,13 @@ Object::Object() = default;
 
 Object::~Object() = default;
 
-void Object::Destroy()
+bool Object::Destroy()
 {
 	if (IsPendingDestroy())
-		return;
+		return false;
 
 	GetGame().ScheduleDestruction(*this);
+	return true;
 }
 
 void Object::Destroyed()
