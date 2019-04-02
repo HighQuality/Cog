@@ -10,14 +10,73 @@ enum class FactoryChunkSlotStatus : u8
 class ChunkedData
 {
 public:
-	ChunkedData() = default;
-	virtual ~ChunkedData() = default;
+	template <typename ...TArgs>
+	ChunkedData(u16 aNumObjects, TArgs& ...aArgs)
+	{
+		myNumObjects = aNumObjects;
+		
+		const Array<i32> sizePerVariable { sizeof(*aArgs)... };
 
+		i32 sizePerObject = 0;
+		for (i32 size : sizePerVariable)
+			sizePerObject += size;
+
+		i32 sizeBytes = aNumObjects * sizePerObject;
+		// Add some padding for per-variable alignment
+		sizeBytes += 32 * sizePerVariable.GetLength();
+
+		if (sizeBytes > 0)
+		{
+			myData = static_cast<u8*>(malloc(sizeBytes));
+			CHECK(myData);
+
+			myDataEnd = myData + sizeBytes;
+
+			(AllocateChunkData(aArgs), ...);
+		}
+	}
+
+	virtual ~ChunkedData()
+	{
+		if (myData)
+		{
+			free(myData);
+			myData = nullptr;
+		}
+	}
+	
 	virtual void DefaultInitializeIndex(const u16 aIndex)
 	{ }
-	
+
 	virtual void DestructIndex(const u16 aIndex)
 	{ }
+
+protected:
+	FORCEINLINE u16 GetNumObjects() const { return myNumObjects; }
+
+private:
+	template <typename T>
+	void AllocateChunkData(T*& aData)
+	{
+		const i32 sizeBytes = sizeof(T) * myNumObjects;
+
+		CHECK(&myData[myDataPointer + sizeBytes] <= myDataEnd);
+
+		T* data = reinterpret_cast<T*>(&myData[myDataPointer]);
+		myDataPointer += sizeBytes;
+
+		// Align next allocation to 32 bytes
+		const u16 mod = myDataPointer % 32;
+		if (mod > 0)
+			myDataPointer += 32 - mod;
+
+		aData = data;
+	}
+
+	u8* myData = nullptr;
+	u8* myDataEnd = nullptr;
+	i32 myDataPointer = 0;
+	u16 myNumObjects = 0;
 };
 
 #define DECLARE_CHUNKED_DATA(TChunkData) \
@@ -28,26 +87,26 @@ public:
 	FORCEINLINE ChunkData* GetChunkedData() const { return static_cast<ChunkData*>(myChunk->GetChunkedData()); }
 
 #define DECLARE_CHUNKED_PROPERTY_ACCESSORS(PropertyName, SetterVisibility, GetterVisibility) \
-	SetterVisibility: void Set##PropertyName(RemoveReference<decltype(ChunkData::my##PropertyName[0])> aNewValue) { GetChunkedData()->my##PropertyName[myChunkIndex] = Move(aNewValue); }\
-	GetterVisibility: const RemoveReference<decltype(ChunkData::my##PropertyName[0])>& Get##PropertyName() const { return GetChunkedData()->my##PropertyName[myChunkIndex]; }\
+	SetterVisibility: FORCEINLINE void Set##PropertyName(RemoveReference<decltype(ChunkData::my##PropertyName[0])> aNewValue) { GetChunkedData()->my##PropertyName[myChunkIndex] = Move(aNewValue); }\
+	GetterVisibility: FORCEINLINE const RemoveReference<decltype(ChunkData::my##PropertyName[0])>& Get##PropertyName() const { return GetChunkedData()->my##PropertyName[myChunkIndex]; }\
 	private:
 
 class BaseFactoryChunk
 {
 public:
-	BaseFactoryChunk(const u16 aSize)
+	BaseFactoryChunk(const u16 aNumObjects)
 	{
-		CHECK(aSize >= 4);
+		CHECK(aNumObjects >= 4);
 
-		mySize = aSize;
+		myNumObjects = aNumObjects;
 		myAllocatedObjects = 0;
 		myMaxOccupiedIndex = 0;
 
-		mySlotsStatus.Resize(mySize);
-		myGeneration.Resize(mySize);
-		myIsPendingDestroy.Resize(mySize);
+		mySlotsStatus.Resize(myNumObjects);
+		myGeneration.Resize(myNumObjects);
+		myIsPendingDestroy.Resize(myNumObjects);
 
-		for (u16 i = 0; i < aSize; ++i)
+		for (u16 i = 0; i < aNumObjects; ++i)
 		{
 			mySlotsStatus[i] = FactoryChunkSlotStatus::Free;
 			myGeneration[i] = 1;
@@ -56,7 +115,7 @@ public:
 	}
 
 	virtual ~BaseFactoryChunk() = default;
-	
+
 	FORCEINLINE bool IsEmpty() const
 	{
 		return myAllocatedObjects == 0;
@@ -64,7 +123,7 @@ public:
 
 	FORCEINLINE bool IsFull() const
 	{
-		return myAllocatedObjects >= mySize;
+		return myAllocatedObjects >= myNumObjects;
 	}
 
 	FORCEINLINE bool IsAllObjectsActivated() const
@@ -76,7 +135,7 @@ public:
 	{
 		return mySlotsStatus[aIndex] == FactoryChunkSlotStatus::Occupied;
 	}
-	
+
 	void SetActivated(const u16 aIndex, const bool aIsActivated)
 	{
 		CHECK(mySlotsStatus[aIndex] != FactoryChunkSlotStatus::Free);
@@ -94,7 +153,7 @@ public:
 				myDeactivatedObjects.fetch_add(1);
 		}
 	}
-	
+
 	FORCEINLINE u16 FindGeneration(const u16 aIndex) const
 	{
 		return myGeneration[aIndex];
@@ -134,22 +193,22 @@ protected:
 	Array<FactoryChunkSlotStatus> mySlotsStatus;
 	Array<u16> myGeneration;
 	Array<bool> myIsPendingDestroy;
-	
+
 	ChunkedData* myChunkedData = nullptr;
 
 	std::atomic<u16> myDeactivatedObjects;
 
-	u16 mySize;
+	u16 myNumObjects;
 	u16 myAllocatedObjects;
-	
+
 	u16 myMaxOccupiedIndex;
 };
 
 
 template <typename T>
-auto CreateChunkedData(const u16 aSize, i32) -> typename T::ChunkData*
+auto CreateChunkedData(const u16 aNumObjects, i32) -> typename T::ChunkData*
 {
-	return new typename T::ChunkData(aSize);
+	return new typename T::ChunkData(aNumObjects);
 }
 
 template <typename T>
@@ -165,12 +224,12 @@ public:
 	using Base = BaseFactoryChunk;
 	using ChunkedDataType = RemovePointer<decltype(CreateChunkedData<T>(1, 0))>;
 
-	FactoryChunk(const u16 aSize)
-		: Base(aSize)
+	FactoryChunk(const u16 aNumObjects)
+		: Base(aNumObjects)
 	{
-		myChunkedData = CreateChunkedData<T>(aSize, 0);
+		myChunkedData = CreateChunkedData<T>(aNumObjects, 0);
 
-		myObjectsData = static_cast<T*>(_aligned_malloc(sizeof(T) * aSize, alignof(T)));
+		myObjectsData = static_cast<T*>(_aligned_malloc(sizeof(T) * aNumObjects, alignof(T)));
 		CHECK(myObjectsData != nullptr);
 	}
 
@@ -183,12 +242,12 @@ public:
 		myChunkedData = nullptr;
 
 		_aligned_free(myObjectsData);
-		mySize = 0;
+		myNumObjects = 0;
 	}
 
 	FORCEINLINE u16 GetSize() const
 	{
-		return mySize;
+		return myNumObjects;
 	}
 
 	template <typename TCallback>
@@ -207,7 +266,7 @@ public:
 		}
 		else
 		{
-			for (u16 i = 0; i < mySize; ++i)
+			for (u16 i = 0; i < myNumObjects; ++i)
 				callback(myObjectsData[i]);
 		}
 	}
@@ -219,7 +278,7 @@ public:
 
 		++myAllocatedObjects;
 
-		for (u16 i = 0; i < mySize; ++i)
+		for (u16 i = 0; i < myNumObjects; ++i)
 		{
 			if (mySlotsStatus[i] == FactoryChunkSlotStatus::Free)
 			{
@@ -231,12 +290,12 @@ public:
 				Object& object = myObjectsData[i];
 
 				InitializeIndex(i);
-				
+
 				new(static_cast<void*>(&object)) T();
-				
+
 				object.myChunk = this;
 				object.myChunkIndex = i;
-				
+
 				return static_cast<T&>(object);
 			}
 		}
@@ -256,7 +315,7 @@ public:
 	virtual void Return(const T& aObject)
 	{
 		const u16 index = IndexOf(aObject);
-		
+
 		const FactoryChunkSlotStatus previousSlotStatus = mySlotsStatus[index];
 
 		// Entity was returned twice or was never allocated
@@ -277,10 +336,10 @@ public:
 		while (myMaxOccupiedIndex > 0 && mySlotsStatus[myMaxOccupiedIndex - 1] == FactoryChunkSlotStatus::Free)
 			--myMaxOccupiedIndex;
 	}
-	
+
 	FORCEINLINE bool DoesObjectOriginateFromHere(const T& aObject) const
 	{
-		return (&aObject >= myObjectsData) && (&aObject < myObjectsData + mySize);
+		return (&aObject >= myObjectsData) && (&aObject < myObjectsData + myNumObjects);
 	}
 
 	void ReturnByIndex(const u16 aIndex) override
@@ -299,6 +358,6 @@ protected:
 		CHECK(DoesObjectOriginateFromHere(aObject));
 		return static_cast<u16>(&aObject - myObjectsData);
 	}
-	
+
 	T* myObjectsData;
 };

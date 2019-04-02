@@ -6,11 +6,9 @@ class Transform2DChunkedData : public ComponentChunkedData
 public:
 	using Base = ComponentChunkedData;
 
-	Transform2DChunkedData(u16 aSize)
-		: Base(aSize)
+	Transform2DChunkedData(u16 aNumObjects)
+		: Base(aNumObjects, myTestStruct, myPreviousFramesPosition, myScheduledPosition)
 	{
-		myPreviousFramesPosition.Resize(aSize);
-		myScheduledPosition.Resize(aSize);
 	}
 
 	void SynchronizedTick();
@@ -18,8 +16,14 @@ public:
 private:
 	friend class Transform2D;
 
-	Array<Vec2> myPreviousFramesPosition;
-	Array<Vec2> myScheduledPosition;
+	struct TestStruct
+	{
+		u16 c[3];
+	};
+
+	TestStruct* myTestStruct;
+	Vec2* myPreviousFramesPosition;
+	Vec2* myScheduledPosition;
 };
 
 class Transform2D : public InheritComponent<Component>
