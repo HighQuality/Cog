@@ -1,4 +1,6 @@
-﻿/*
+﻿COG_IGNORE_HEADER
+
+/*
 * Vectorized AVX2 version of the PCG32 random number generator developed by
 * Wenzel Jakob (June 2016)
 *

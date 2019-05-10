@@ -1,3 +1,5 @@
+COG_IGNORE_HEADER
+
 #pragma once
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 

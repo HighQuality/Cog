@@ -1,3 +1,5 @@
+COG_IGNORE_HEADER
+
 // Copyright (c) 2011 Google, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy

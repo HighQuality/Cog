@@ -2,11 +2,12 @@
 #include "Object.h"
 #include <Utilities/FactoryChunk.h>
 
+// Non-owning weak pointer to a Object, becomes null when object is destroyed
 template <typename T>
 class Ptr final
 {
 public:
-	Ptr()
+	FORCEINLINE Ptr()
 	{
 		myPointer = nullptr;
 		myGeneration = 0;
@@ -22,7 +23,7 @@ public:
 		}
 	}
 
-	Ptr(T& aPointer)
+	FORCEINLINE Ptr(T& aPointer)
 		: Ptr(&aPointer)
 	{
 	}
@@ -37,7 +38,7 @@ public:
 		return myPointer != aOther.myPointer;
 	}
 
-	explicit operator bool() const { return IsValid(); }
+	FORCEINLINE explicit operator bool() const { return IsValid(); }
 
 	bool IsValid() const
 	{
@@ -51,20 +52,20 @@ public:
 		return false;
 	}
 
-	operator T*() const
+	FORCEINLINE operator T*() const
 	{
 		if (IsValid())
 			return reinterpret_cast<T*>(myPointer);
 		return nullptr;
 	}
 
-	T* operator->() const
+	FORCEINLINE T* operator->() const
 	{
 		return *this;
 	}
 
 private:
-	u16 ResolveGeneration() const
+	FORCEINLINE u16 ResolveGeneration() const
 	{
 		if (!myPointer)
 			return 0;

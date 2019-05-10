@@ -1,4 +1,6 @@
-﻿/*
+﻿COG_IGNORE_HEADER
+
+/*
 * Tiny self-contained version of the PCG Random Number Generation for C++
 * put together from pieces of the much larger C/C++ codebase.
 * Wenzel Jakob, February 2015

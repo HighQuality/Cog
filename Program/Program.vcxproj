@@ -44,7 +44,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);..\temp\GeneratedCode\;$(IncludePath)</IncludePath>
     <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)temp\$(Configuration)_$(Platform)\</IntDir>
@@ -52,7 +52,7 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);..\temp\GeneratedCode\;$(IncludePath)</IncludePath>
     <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)temp\$(Configuration)_$(Platform)\</IntDir>
