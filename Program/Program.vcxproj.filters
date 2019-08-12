@@ -1,32 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Utilities\Await.cpp" />
-    <ClCompile Include="Utilities\Awaitable.cpp" />
-    <ClCompile Include="Utilities\AwaitableWorkItem.cpp" />
-    <ClCompile Include="Utilities\ByteColor.cpp" />
-    <ClCompile Include="Utilities\Convert.cpp" />
-    <ClCompile Include="Utilities\DebugAsserts.cpp" />
-    <ClCompile Include="Utilities\Directory.cpp" />
-    <ClCompile Include="Utilities\Fiber.cpp" />
-    <ClCompile Include="Utilities\File.cpp" />
-    <ClCompile Include="Utilities\Filesystem.cpp" />
-    <ClCompile Include="Utilities\FilesystemEntry.cpp" />
-    <ClCompile Include="Utilities\HeapAllocator.cpp" />
-    <ClCompile Include="Utilities\HttpClient.cpp" />
-    <ClCompile Include="Utilities\Image.cpp" />
-    <ClCompile Include="Utilities\LinearColor.cpp" />
-    <ClCompile Include="Utilities\Program.cpp" />
-    <ClCompile Include="Utilities\ReadFileAwaitable.cpp" />
-    <ClCompile Include="Utilities\StackAllocator.cpp" />
-    <ClCompile Include="Utilities\StackAllocatorBlock.cpp" />
-    <ClCompile Include="Utilities\Stopwatch.cpp" />
-    <ClCompile Include="Utilities\ThreadID.cpp" />
-    <ClCompile Include="Utilities\ThreadPool.cpp" />
-    <ClCompile Include="Utilities\UtilitiesTLS.cpp" />
-    <ClCompile Include="Utilities\Vec2.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Utilities\External\CityHash\city.cc" />
     <ClCompile Include="ServerGame\ServerGame.cpp" />
     <ClCompile Include="ServerGame\ServerGameComponentList.cpp" />
     <ClCompile Include="Server\CogServerGame.cpp" />
@@ -68,78 +43,9 @@
     <ClCompile Include="Client\VertexShader.cpp" />
     <ClCompile Include="Client\Window.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Utilities\External\lodepng.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Utilities\Angle.h" />
-    <ClInclude Include="Utilities\Append.h" />
-    <ClInclude Include="Utilities\ArraySlice.h" />
-    <ClInclude Include="Utilities\ArrayView.h" />
-    <ClInclude Include="Utilities\Await.h" />
-    <ClInclude Include="Utilities\Awaitable.h" />
-    <ClInclude Include="Utilities\AwaitableWorkItem.h" />
-    <ClInclude Include="Utilities\BackgroundWorkAwaitable.h" />
-    <ClInclude Include="Utilities\Barrier.h" />
-    <ClInclude Include="Utilities\BaseFactory.h" />
-    <ClInclude Include="Utilities\BinaryData.h" />
-    <ClInclude Include="Utilities\Bitfield.h" />
-    <ClInclude Include="Utilities\Bitset.h" />
-    <ClInclude Include="Utilities\BitsetForEachTables.h" />
-    <ClInclude Include="Utilities\ByteColor.h" />
-    <ClInclude Include="Utilities\CogArray.h" />
-    <ClInclude Include="Utilities\CogMath.h" />
-    <ClInclude Include="Utilities\CogStack.h" />
-    <ClInclude Include="Utilities\CogString.h" />
-    <ClInclude Include="Utilities\CogStringSlice.h" />
-    <ClInclude Include="Utilities\CogStringView.h" />
-    <ClInclude Include="Utilities\CogTime.h" />
-    <ClInclude Include="Utilities\Convert.h" />
-    <ClInclude Include="Utilities\DebugAsserts.h" />
-    <ClInclude Include="Utilities\Directory.h" />
-    <ClInclude Include="Utilities\EventList.h" />
-    <ClInclude Include="Utilities\Factory.h" />
-    <ClInclude Include="Utilities\FactoryChunk.h" />
-    <ClInclude Include="Utilities\Fiber.h" />
-    <ClInclude Include="Utilities\FiberHandle.h" />
-    <ClInclude Include="Utilities\FiberLocalStorage.h" />
-    <ClInclude Include="Utilities\FiberResumeData.h" />
-    <ClInclude Include="Utilities\File.h" />
-    <ClInclude Include="Utilities\FilesystemEntry.h" />
-    <ClInclude Include="Utilities\Format.h" />
-    <ClInclude Include="Utilities\Function.h" />
-    <ClInclude Include="Utilities\FunctionView.h" />
-    <ClInclude Include="Utilities\Hashing.h" />
-    <ClInclude Include="Utilities\HeapAllocator.h" />
-    <ClInclude Include="Utilities\HttpClient.h" />
-    <ClInclude Include="Utilities\Image.h" />
-    <ClInclude Include="Utilities\InlineVirtualObject.h" />
-    <ClInclude Include="Utilities\LinearColor.h" />
-    <ClInclude Include="Utilities\Map.h" />
-    <ClInclude Include="Utilities\MemberFunctionPointer.h" />
-    <ClInclude Include="Utilities\MemoryBlock.h" />
-    <ClInclude Include="Utilities\Optional.h" />
-    <ClInclude Include="Utilities\Program.h" />
-    <ClInclude Include="Utilities\Random.h" />
-    <ClInclude Include="Utilities\ReadFileAwaitable.h" />
-    <ClInclude Include="Utilities\Semaphore.h" />
-    <ClInclude Include="Utilities\StackAllocator.h" />
-    <ClInclude Include="Utilities\StackAllocatorBlock.h" />
-    <ClInclude Include="Utilities\Stopwatch.h" />
-    <ClInclude Include="Utilities\ThreadID.h" />
-    <ClInclude Include="Utilities\ThreadLocalStack.h" />
-    <ClInclude Include="Utilities\ThreadPool.h" />
-    <ClInclude Include="Utilities\TypeID.h" />
-    <ClInclude Include="Utilities\Types.h" />
-    <ClInclude Include="Utilities\TypeTraits.h" />
-    <ClInclude Include="Utilities\UtilitiesTLS.h" />
-    <ClInclude Include="Utilities\Vec2.h" />
-    <ClInclude Include="Utilities\Vec4.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Utilities\External\CityHash\city.h" />
-    <ClInclude Include="Utilities\External\CityHash\citycrc.h" />
-    <ClInclude Include="Utilities\External\CityHash\config.h" />
-    <ClInclude Include="Utilities\External\pcg32.h" />
-    <ClInclude Include="Utilities\External\pcg32_8.h" />
     <ClInclude Include="ServerGame\ServerGame.h" />
     <ClInclude Include="ServerGame\ServerGameComponentList.h" />
     <ClInclude Include="Server\CogServerGame.h" />
@@ -193,10 +99,5 @@
     <ClInclude Include="Client\VertexShader.h" />
     <ClInclude Include="Client\Window.h" />
     <ClInclude Include="Client\WindowEvent.h" />
-    <ClInclude Include="Utilities\External\lodepng.h" />
-    <ClInclude Include="Utilities\External\json.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="Utilities\NatvisFile.natvis" />
   </ItemGroup>
 </Project>
