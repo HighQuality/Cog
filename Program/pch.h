@@ -17,9 +17,6 @@
 #include <utility>
 #include <array>
 
-// When the header tools comes by this it stops parsing the rest of the header, mainly useful for large third party headers that we do not need to consider for code generation
-#define COG_IGNORE_HEADER
-
 #ifdef _MSC_VER
 #pragma warning ( disable : 4100 ) // Unreferenced formal parameter
 #pragma warning ( disable : 4505 ) // Unreferenced local function has been removed
@@ -77,11 +74,6 @@
 
 using ChunkIndex = u8;
 
-#define COGTYPE(...)
-#define GENERATED_BODY_IMPL_INNER(HeaderFile, Line) GENERATED_BODY_ ## HeaderFile ## Line
-#define GENERATED_BODY_IMPL(HeaderFile, Line) GENERATED_BODY_IMPL_INNER(HeaderFile, Line)
-#define GENERATED_BODY() GENERATED_BODY_IMPL(CURRENT_HEADER_FILE, __LINE__)
-
 #include <Utilities/UtilitiesTLS.h>
 
 #include <Utilities/Random.h>
@@ -123,7 +115,7 @@ TTo CastBoundsChecked(const TFrom value)
 	return static_cast<TTo>(value);
 }
 
-// These are wrapped in ifndef so they can be overriden via compiler settings
+// These are wrapped in ifndef so they can be overridden via compiler settings
 #ifndef PRODUCTION
 #define PRODUCTION 0
 #endif

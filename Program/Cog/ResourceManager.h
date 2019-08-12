@@ -48,7 +48,7 @@ public:
 
 			if (Ptr<Resource>* alreadyLoadedResource = myLoadedResources.Find(resourcePath.View()))
 			{
-				if (alreadyLoadedResource->IsValid())
+				if (CheckResourcePtrValid(*alreadyLoadedResource))
 				{
 					Resource& resource = **alreadyLoadedResource;
 					resource.RegisterCallback(callback);
@@ -66,6 +66,8 @@ public:
 	void Tick();
 
 private:
+	static bool CheckResourcePtrValid(const Ptr<Resource>& ResourcePtr);
+
 	static CogGame& GetCogGame();
 
 	EventList<Function<void()>> myScheduledLoads;

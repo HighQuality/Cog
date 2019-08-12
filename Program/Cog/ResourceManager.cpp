@@ -15,6 +15,11 @@ void ResourceManager::Tick()
 		loader();
 }
 
+bool ResourceManager::CheckResourcePtrValid(const Ptr<Resource>& ResourcePtr)
+{
+	return ResourcePtr.IsValid();
+}
+
 CogGame& ResourceManager::GetCogGame()
 {
 	return GetGame();
