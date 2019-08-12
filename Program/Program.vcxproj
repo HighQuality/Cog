@@ -45,17 +45,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);..\temp\GeneratedCode\;$(IncludePath)</IncludePath>
-    <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);..\lib\$(Configuration)_$(Platform)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)temp\$(Configuration)_$(Platform)\</IntDir>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
     <TargetName>$(ProjectName)_$(Configuration)_$(Platform)</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);..\temp\GeneratedCode\;$(IncludePath)</IncludePath>
-    <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);..\lib\$(Configuration)_$(Platform)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)temp\$(Configuration)_$(Platform)\</IntDir>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
     <TargetName>$(ProjectName)_$(Configuration)_$(Platform)</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -64,7 +64,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -78,12 +78,12 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ObjectFileName>$(IntDir)%(RelativeDir)\</ObjectFileName>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <AdditionalDependencies>libcurl.lib;snappy.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Core.lib;libcurl.lib;snappy.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
@@ -94,7 +94,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -106,7 +106,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>true</SupportJustMyCode>
       <ObjectFileName>$(IntDir)%(RelativeDir)\</ObjectFileName>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
@@ -114,7 +114,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <AdditionalDependencies>libcurl.lib;snappy.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Core.lib;libcurl.lib;snappy.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
@@ -319,6 +319,11 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="Utilities\NatvisFile.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.vcxproj">
+      <Project>{80d74723-c2f4-4b70-aa6a-940d7fcc6e91}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
