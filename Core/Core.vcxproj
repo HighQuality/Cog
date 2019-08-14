@@ -105,7 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Containers\Random.cpp" />
+    <ClCompile Include="Math\Random.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -114,7 +114,7 @@
     <ClCompile Include="Threading\Fibers\Awaitable.cpp" />
     <ClCompile Include="Threading\ThreadPool\AwaitableWorkItem.cpp" />
     <ClCompile Include="Images\ByteColor.cpp" />
-    <ClCompile Include="Utilities\Convert.cpp" />
+    <ClCompile Include="TypeFundamentals\Convert.cpp" />
     <ClCompile Include="Debug\DebugAsserts.cpp" />
     <ClCompile Include="Filesystem\Directory.cpp" />
     <ClCompile Include="External\CityHash\city.cc" />
@@ -122,14 +122,10 @@
     <ClCompile Include="Threading\Fibers\Fiber.cpp" />
     <ClCompile Include="Filesystem\File.cpp" />
     <ClCompile Include="Filesystem\FilesystemEntry.cpp" />
-    <ClCompile Include="Memory\HeapAllocator.cpp" />
     <ClCompile Include="Web\HttpClient.cpp" />
     <ClCompile Include="Images\Image.cpp" />
     <ClCompile Include="Images\LinearColor.cpp" />
-    <ClCompile Include="Utilities\Program.cpp" />
-    <ClCompile Include="Utilities\ReadFileAwaitable.cpp" />
-    <ClCompile Include="Utilities\StackAllocator.cpp" />
-    <ClCompile Include="Utilities\StackAllocatorBlock.cpp" />
+    <ClCompile Include="Threading\Fibers\ReadFileAwaitable.cpp" />
     <ClCompile Include="Time\Stopwatch.cpp" />
     <ClCompile Include="Threading\ThreadID.cpp" />
     <ClCompile Include="Threading\ThreadPool\ThreadPool.cpp" />
@@ -137,9 +133,11 @@
     <ClCompile Include="Math\Vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Math\CogTime.h" />
+    <ClInclude Include="Math\Random.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Math\Angle.h" />
-    <ClInclude Include="Utilities\Append.h" />
+    <ClInclude Include="String\Append.h" />
     <ClInclude Include="Containers\ArraySlice.h" />
     <ClInclude Include="Containers\ArrayView.h" />
     <ClInclude Include="Threading\Fibers\Await.h" />
@@ -156,14 +154,14 @@
     <ClInclude Include="Containers\CogArray.h" />
     <ClInclude Include="Math\CogMath.h" />
     <ClInclude Include="Containers\CogStack.h" />
-    <ClInclude Include="Containers\CogString.h" />
-    <ClInclude Include="Containers\CogStringSlice.h" />
-    <ClInclude Include="Containers\CogStringView.h" />
+    <ClInclude Include="String\CogString.h" />
+    <ClInclude Include="String\CogStringSlice.h" />
+    <ClInclude Include="String\CogStringView.h" />
     <ClInclude Include="Time\CogTime.h" />
-    <ClInclude Include="Utilities\Convert.h" />
+    <ClInclude Include="TypeFundamentals\Convert.h" />
     <ClInclude Include="Debug\DebugAsserts.h" />
     <ClInclude Include="Filesystem\Directory.h" />
-    <ClInclude Include="Utilities\EventList.h" />
+    <ClInclude Include="Containers\EventList.h" />
     <ClInclude Include="External\CityHash\city.h" />
     <ClInclude Include="External\CityHash\citycrc.h" />
     <ClInclude Include="External\CityHash\config.h" />
@@ -179,25 +177,20 @@
     <ClInclude Include="Threading\Fibers\FiberResumeData.h" />
     <ClInclude Include="Filesystem\File.h" />
     <ClInclude Include="Filesystem\FilesystemEntry.h" />
-    <ClInclude Include="Utilities\Format.h" />
-    <ClInclude Include="Utilities\Function.h" />
-    <ClInclude Include="Utilities\FunctionView.h" />
-    <ClInclude Include="Utilities\Hashing.h" />
-    <ClInclude Include="Memory\HeapAllocator.h" />
+    <ClInclude Include="String\Format.h" />
+    <ClInclude Include="Function\Function.h" />
+    <ClInclude Include="Function\FunctionView.h" />
+    <ClInclude Include="Containers\Hashing.h" />
     <ClInclude Include="Web\HttpClient.h" />
     <ClInclude Include="Images\Image.h" />
     <ClInclude Include="Memory\InlineVirtualObject.h" />
     <ClInclude Include="Images\LinearColor.h" />
     <ClInclude Include="Containers\Map.h" />
-    <ClInclude Include="Utilities\MemberFunctionPointer.h" />
+    <ClInclude Include="Function\MemberFunctionPointer.h" />
     <ClInclude Include="Memory\MemoryBlock.h" />
     <ClInclude Include="TypeFundamentals\Optional.h" />
-    <ClInclude Include="Utilities\Program.h" />
-    <ClInclude Include="Math\Random.h" />
-    <ClInclude Include="Utilities\ReadFileAwaitable.h" />
+    <ClInclude Include="Threading\Fibers\ReadFileAwaitable.h" />
     <ClInclude Include="Threading\Semaphore.h" />
-    <ClInclude Include="Utilities\StackAllocator.h" />
-    <ClInclude Include="Utilities\StackAllocatorBlock.h" />
     <ClInclude Include="Time\Stopwatch.h" />
     <ClInclude Include="Threading\ThreadID.h" />
     <ClInclude Include="Threading\ThreadLocalStack.h" />
@@ -210,7 +203,7 @@
     <ClInclude Include="Math\Vec4.h" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="Utilities\NatvisFile.natvis" />
+    <Natvis Include="NatvisFile.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

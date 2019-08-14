@@ -44,7 +44,7 @@ protected:
 	ChunkIndex myChunkIndex;
 };
 
-#include <Utilities/FactoryChunk.h>
+#include <Memory/FactoryChunk.h>
 
 FORCEINLINE bool Object::IsActivated() const { return myChunk->IsActivated(myChunkIndex); }
 FORCEINLINE bool Object::IsPendingDestroy() const { return myChunk->IsPendingDestroy(myChunkIndex); }

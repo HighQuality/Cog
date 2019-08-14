@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+struct LinearColor;
+
 struct ByteColor
 {
 	u8 r;

@@ -1,5 +1,5 @@
 #pragma once
-#include "CogArray.h"
+#include "Containers/CogArray.h"
 #include "CogStringView.h"
 
 class String : public Array<Char, ArrayHeapAllocator<ArraySlice<Char>, Char>, true>

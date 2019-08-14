@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "CogGame.h"
 
-#include <Utilities/Stopwatch.h>
-#include <Utilities/Program.h>
-#include <Utilities/Await.h>
+#include <Time/Stopwatch.h>
+#include <Threading/Fibers/Await.h>
+#include "Program.h"
 
 #include "Component.h"
 #include "Entity.h"

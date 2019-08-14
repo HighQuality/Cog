@@ -44,7 +44,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);..\temp\GeneratedCode\;$(IncludePath)</IncludePath>
+    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);..\Core\;$(IncludePath)</IncludePath>
     <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);..\lib\$(Configuration)_$(Platform)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
@@ -52,7 +52,7 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);..\temp\GeneratedCode\;$(IncludePath)</IncludePath>
+    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);..\Core\;$(IncludePath)</IncludePath>
     <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);..\lib\$(Configuration)_$(Platform)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
@@ -156,6 +156,7 @@
     <ClCompile Include="Game\Game.cpp" />
     <ClCompile Include="Game\GameComponentList.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Program.cpp" />
     <ClCompile Include="ServerGame\ServerGame.cpp" />
     <ClCompile Include="ServerGame\ServerGameComponentList.cpp" />
     <ClCompile Include="Server\CogServerGame.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="Cog\Widget.h" />
     <ClInclude Include="Game\Game.h" />
     <ClInclude Include="Game\GameComponentList.h" />
+    <ClInclude Include="Program.h" />
     <ClInclude Include="ServerGame\ServerGame.h" />
     <ClInclude Include="ServerGame\ServerGameComponentList.h" />
     <ClInclude Include="Server\CogServerGame.h" />

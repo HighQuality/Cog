@@ -1,6 +1,6 @@
 #pragma once
-#include <Utilities/Factory.h>
-#include <Utilities/ThreadID.h>
+#include <Memory/Factory.h>
+#include <Threading/ThreadID.h>
 #include "ObjectFunctionView.h"
 #include "ResourceManager.h"
 

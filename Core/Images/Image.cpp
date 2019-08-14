@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Image.h"
-#include "External/lodepng.h"
+#include "LinearColor.h"
+#include <External/lodepng.h>
 
 Image::Image()
 {

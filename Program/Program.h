@@ -1,12 +1,10 @@
  #pragma once
-#include "TypeID.h"
-#include "ThreadID.h"
-#include "BaseFactory.h"
-#include "CogStack.h"
-#include "FunctionView.h"
-#include "Function.h"
-#include "Await.h"
-#include "Stopwatch.h"
+#include <TypeFundamentals/TypeID.h>
+#include <Threading/ThreadID.h>
+#include <Memory/BaseFactory.h>
+#include <Function/Function.h>
+#include <Threading/Fibers/Await.h>
+#include <Time/Stopwatch.h>
 
 class ThreadPool;
 class Fiber;

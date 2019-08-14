@@ -1,13 +1,16 @@
 #include "pch.h"
 #include "UtilitiesTLS.h"
-#include "ThreadID.h"
-#include "FiberResumeData.h"
+#include <Threading/ThreadID.h>
+#include <Threading/Fibers/FiberResumeData.h>
+#include <External/pcg32.h>
 
 static thread_local Fiber* ourThisThreadsStartingFiber = nullptr;
 static thread_local ThreadID* ourThreadID = nullptr;
 static thread_local String ourThreadName;
 static thread_local FiberResumeData ourFiberResumeData;
 static thread_local bool ourProhibitAwaits = true;
+
+static thread_local pcg32 ourRandomEngine(time(nullptr));
 
 struct TlsDestruct
 {
@@ -71,5 +74,10 @@ namespace UtilitiesTLS
 	NOINLINE bool GetProhibitAwaits()
 	{
 		return ourProhibitAwaits;
+	}
+
+	NOINLINE pcg32& GetRandomEngine()
+	{
+		return ourRandomEngine;
 	}
 }

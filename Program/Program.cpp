@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "Program.h"
-#include "Fiber.h"
-#include "Stopwatch.h"
-#include "Awaitable.h"
-#include "ThreadPool.h"
+#include <Threading/Fibers/Fiber.h>
+#include <Time/Stopwatch.h>
+#include <Threading/Fibers/Awaitable.h>
+#include <Threading/ThreadPool/ThreadPool.h>
 
 Program* gProgram = nullptr;
 

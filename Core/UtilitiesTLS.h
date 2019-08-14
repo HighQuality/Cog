@@ -5,6 +5,7 @@ class ThreadID;
 class String;
 class StringView;
 struct FiberResumeData;
+struct pcg32;
 
 namespace UtilitiesTLS
 {
@@ -22,4 +23,6 @@ namespace UtilitiesTLS
 	
 	NOINLINE void SetProhibitAwaits(bool aProhibitAwaits);
 	NOINLINE bool GetProhibitAwaits();
+
+	NOINLINE pcg32& GetRandomEngine();
 }

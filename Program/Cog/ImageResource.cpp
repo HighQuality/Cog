@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ImageResource.h"
-#include <Utilities/External/lodepng.h>
-#include <Utilities/Image.h>
+#include <External/lodepng.h>
+#include <Images/Image.h>
 
 void ImageResource::BeginLoad(const StringView& aResourcePath)
 {

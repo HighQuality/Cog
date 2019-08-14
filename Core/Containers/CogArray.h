@@ -1,6 +1,5 @@
 #pragma once
 #include "ArraySlice.h"
-#include "CogMath.h"
 
 template <typename TInheritance, typename TElementType>
 class ArrayHeapAllocator : public TInheritance

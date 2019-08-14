@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ThreadID.h"
+#include <Threading/ThreadID.h>
 
 template <typename T>
 class EventList

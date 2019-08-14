@@ -1,5 +1,5 @@
 #pragma once
-#include <Utilities/TypeID.h>
+#include <TypeFundamentals/TypeID.h>
 #include "Object.h"
 
 class Component;

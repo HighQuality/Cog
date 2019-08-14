@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <Utilities/Image.h>
+#include <Images/Image.h>
 #include "Texture.h"
 #include "RenderEngine.h"
 

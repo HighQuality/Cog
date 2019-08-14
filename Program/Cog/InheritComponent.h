@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <Utilities/FunctionView.h>
 
 template <typename TComponent>
 class InheritComponent : public TComponent

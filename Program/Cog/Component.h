@@ -1,5 +1,5 @@
 #pragma once
-#include <Utilities/FunctionView.h>
+#include <Function/FunctionView.h>
 #include "CogGame.h"
 #include "InheritComponent.h"
 #include "Object.h"

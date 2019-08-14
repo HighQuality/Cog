@@ -1,6 +1,6 @@
 #pragma once
-#include "FunctionView.h"
-#include "CogTime.h"
+#include <Function/FunctionView.h>
+#include <Time/CogTime.h>
 
 class Stopwatch
 {

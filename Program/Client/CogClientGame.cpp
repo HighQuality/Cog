@@ -2,8 +2,9 @@
 #include "CogClientGame.h"
 
 #include <Cog/Widget.h>
-#include <Utilities/Program.h>
-#include <Utilities/Await.h>
+#include <Threading/Fibers/Await.h>
+
+#include "Program.h"
 
 #include "Window.h"
 #include "RenderEngine.h"

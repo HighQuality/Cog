@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Object.h"
-#include <Utilities/FactoryChunk.h>
+#include <Memory/FactoryChunk.h>
 
 // Non-owning weak pointer to a Object, becomes null when object is destroyed
 template <typename T>

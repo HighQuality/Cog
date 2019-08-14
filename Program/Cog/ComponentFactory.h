@@ -1,6 +1,6 @@
 #pragma once
-#include <Utilities/Program.h>
-#include <Utilities/FactoryChunk.h>
+#include "Program.h"
+#include <Memory/FactoryChunk.h>
 
 struct FrameData;
 class Component;

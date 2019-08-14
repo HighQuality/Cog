@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Barrier.h"
+#include <Threading/Barrier.h>
 
 class WorkItemBase
 {

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include <Utilities/InlineVirtualObject.h>
-#include <Utilities/MemberFunctionPointer.h>
+#include <Memory/InlineVirtualObject.h>
+#include <Function/MemberFunctionPointer.h>
 #include "Pointer.h"
 
 template <typename TFunc>

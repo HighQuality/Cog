@@ -1,8 +1,8 @@
 #pragma once
-#include <Utilities/Function.h>
-#include <Utilities/BinaryData.h>
-#include <Utilities/ThreadPool.h>
-#include <Utilities/EventList.h>
+#include <Function/Function.h>
+#include <Containers/BinaryData.h>
+#include <Threading/ThreadPool/ThreadPool.h>
+#include <Containers/EventList.h>
 #include "Resource.h"
 
 class Resource;

@@ -1,5 +1,5 @@
 #pragma once
-#include "CogString.h"
+#include <String/CogString.h>
 
 template <typename T>
 FORCEINLINE size_t HashOf(const T & aValue)

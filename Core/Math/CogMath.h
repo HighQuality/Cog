@@ -1,5 +1,5 @@
 #pragma once
-#include "Types.h"
+#include "TypeFundamentals/Types.h"
 
 constexpr f32 Pi = 3.14159265358979323846f;
 constexpr f32 TwoPi = Pi * 2.f;

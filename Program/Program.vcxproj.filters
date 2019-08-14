@@ -43,6 +43,7 @@
     <ClCompile Include="Client\VertexShader.cpp" />
     <ClCompile Include="Client\Window.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Program.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -99,5 +100,6 @@
     <ClInclude Include="Client\VertexShader.h" />
     <ClInclude Include="Client\Window.h" />
     <ClInclude Include="Client\WindowEvent.h" />
+    <ClInclude Include="Program.h" />
   </ItemGroup>
 </Project>

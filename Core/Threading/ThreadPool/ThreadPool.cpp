@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "ThreadPool.h"
-#include "Semaphore.h"
+#include <Threading/Semaphore.h>
 
 std::unique_ptr<ThreadPool> ThreadPool::ourThreadPool;
 
