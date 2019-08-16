@@ -48,7 +48,7 @@
     <IncludePath>..\Core\;..\WindowsPlatform\;..\Game\;..\extlibs\libcurl\include;..\extlibs\snappy\include;$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_$(Configuration)_$(Platform)</TargetName>
     <LibraryPath>..\lib\$(Configuration)_$(Platform);..\extlibs\libcurl\lib\$(Configuration);..\extlibs\snappy\lib\$(Configuration);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
@@ -70,7 +70,6 @@
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
@@ -85,7 +84,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>Core.lib;WindowsPlatform.lib;Game.lib;libcurl.lib;snappy.lib;wldap32.lib;crypt32.lib;Ws2_32.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
