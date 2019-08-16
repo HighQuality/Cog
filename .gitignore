@@ -326,4 +326,3 @@ temp/
 lib/
 
 !extlibs/**
-!bin/libcurl.dll
