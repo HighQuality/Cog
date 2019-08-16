@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{E917E597-B199-4DF4-847D-47EB033ED93F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Game</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Game</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>..\Core\;..\WindowsPlatform\;..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);..\lib\$(Configuration)_$(Platform)\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)lib\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>..\Core\;..\WindowsPlatform\;..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>..\extlibs\libcurl\lib;..\extlibs\snappy\lib\$(Configuration);..\lib\$(Configuration)_$(Platform)\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)lib\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ObjectFileName>$(IntDir)%(RelativeDir)\</ObjectFileName>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalDependencies>Core.lib;WindowsPlatform.lib;libcurl.lib;snappy.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <ObjectFileName>$(IntDir)%(RelativeDir)\</ObjectFileName>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalDependencies>Core.lib;WindowsPlatform.lib;libcurl.lib;snappy.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ClientGame\ClientGame.cpp" />
+    <ClCompile Include="ClientGame\ClientGameComponentList.cpp" />
+    <ClCompile Include="Client\Buffer.cpp" />
+    <ClCompile Include="Client\ClientComponentList.cpp" />
+    <ClCompile Include="Client\ClientTestComponent.cpp" />
+    <ClCompile Include="Client\CogClientGame.cpp" />
+    <ClCompile Include="Client\DrawCall.cpp" />
+    <ClCompile Include="Client\ImageWidget.cpp" />
+    <ClCompile Include="Client\InputLayout.cpp" />
+    <ClCompile Include="Client\Material.cpp" />
+    <ClCompile Include="Client\PixelShader.cpp" />
+    <ClCompile Include="Client\RenderEngine.cpp" />
+    <ClCompile Include="Client\RenderTarget.cpp" />
+    <ClCompile Include="Client\RenderTexture.cpp" />
+    <ClCompile Include="Client\Shader.cpp" />
+    <ClCompile Include="Client\SpriteComponent.cpp" />
+    <ClCompile Include="Client\Texture.cpp" />
+    <ClCompile Include="Client\VertexBuffer.cpp" />
+    <ClCompile Include="Client\VertexShader.cpp" />
+    <ClCompile Include="Client\Window.cpp" />
+    <ClCompile Include="Cog\CogGame.cpp" />
+    <ClCompile Include="Cog\Component.cpp" />
+    <ClCompile Include="Cog\ComponentList.cpp" />
+    <ClCompile Include="Cog\EngineComponentList.cpp" />
+    <ClCompile Include="Cog\Entity.cpp" />
+    <ClCompile Include="Cog\EntityInitializer.cpp" />
+    <ClCompile Include="Cog\ImageResource.cpp" />
+    <ClCompile Include="Cog\MessageSystem.cpp" />
+    <ClCompile Include="Cog\Object.cpp" />
+    <ClCompile Include="Cog\Resource.cpp" />
+    <ClCompile Include="Cog\ResourceManager.cpp" />
+    <ClCompile Include="Cog\TestComponent.cpp" />
+    <ClCompile Include="Cog\Transform2D.cpp" />
+    <ClCompile Include="Cog\Widget.cpp" />
+    <ClCompile Include="Game\Game.cpp" />
+    <ClCompile Include="Game\GameComponentList.cpp" />
+    <ClCompile Include="ServerGame\ServerGame.cpp" />
+    <ClCompile Include="ServerGame\ServerGameComponentList.cpp" />
+    <ClCompile Include="Server\CogServerGame.cpp" />
+    <ClCompile Include="Server\ServerComponentList.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ClientGame\ClientGame.h" />
+    <ClInclude Include="ClientGame\ClientGameComponentList.h" />
+    <ClInclude Include="Client\Buffer.h" />
+    <ClInclude Include="Client\ClientComponentList.h" />
+    <ClInclude Include="Client\ClientTestComponent.h" />
+    <ClInclude Include="Client\CogClientGame.h" />
+    <ClInclude Include="Client\DrawCall.h" />
+    <ClInclude Include="Client\GpuCommand.h" />
+    <ClInclude Include="Client\ImageWidget.h" />
+    <ClInclude Include="Client\InputLayout.h" />
+    <ClInclude Include="Client\Material.h" />
+    <ClInclude Include="Client\PixelShader.h" />
+    <ClInclude Include="Client\RenderEngine.h" />
+    <ClInclude Include="Client\RenderingMode.h" />
+    <ClInclude Include="Client\RenderTarget.h" />
+    <ClInclude Include="Client\RenderTexture.h" />
+    <ClInclude Include="Client\Shader.h" />
+    <ClInclude Include="Client\SpriteComponent.h" />
+    <ClInclude Include="Client\StandardVertex.h" />
+    <ClInclude Include="Client\Texture.h" />
+    <ClInclude Include="Client\VertexBuffer.h" />
+    <ClInclude Include="Client\VertexShader.h" />
+    <ClInclude Include="Client\Window.h" />
+    <ClInclude Include="Client\WindowEvent.h" />
+    <ClInclude Include="Cog\Casts.h" />
+    <ClInclude Include="Cog\CogGame.h" />
+    <ClInclude Include="Cog\Component.h" />
+    <ClInclude Include="Cog\ComponentData.h" />
+    <ClInclude Include="Cog\ComponentFactory.h" />
+    <ClInclude Include="Cog\ComponentList.h" />
+    <ClInclude Include="Cog\EngineComponentList.h" />
+    <ClInclude Include="Cog\Entity.h" />
+    <ClInclude Include="Cog\EntityInitializer.h" />
+    <ClInclude Include="Cog\Event.h" />
+    <ClInclude Include="Cog\FrameData.h" />
+    <ClInclude Include="Cog\GameThreadCallback.h" />
+    <ClInclude Include="Cog\ImageResource.h" />
+    <ClInclude Include="Cog\InheritComponent.h" />
+    <ClInclude Include="Cog\MessageSystem.h" />
+    <ClInclude Include="Cog\Object.h" />
+    <ClInclude Include="Cog\ObjectFunctionView.h" />
+    <ClInclude Include="Cog\Pointer.h" />
+    <ClInclude Include="Cog\Resource.h" />
+    <ClInclude Include="Cog\ResourceManager.h" />
+    <ClInclude Include="Cog\TestComponent.h" />
+    <ClInclude Include="Cog\Transform2D.h" />
+    <ClInclude Include="Cog\Widget.h" />
+    <ClInclude Include="exported_pch.h" />
+    <ClInclude Include="Game\Game.h" />
+    <ClInclude Include="Game\GameComponentList.h" />
+    <ClInclude Include="ServerGame\ServerGame.h" />
+    <ClInclude Include="ServerGame\ServerGameComponentList.h" />
+    <ClInclude Include="Server\CogServerGame.h" />
+    <ClInclude Include="Server\ServerComponentList.h" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WindowsPlatform\WindowsPlatform.vcxproj">
+      <Project>{853c766d-cf9f-4af3-9605-48833c39d5d8}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

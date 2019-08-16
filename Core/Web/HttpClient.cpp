@@ -16,7 +16,7 @@ struct LibCurlInitializer
 
 };
 
-inline LibCurlInitializer initializer;
+static LibCurlInitializer _libcurlinitializer;
 
 HttpDownload::HttpDownload()
 {

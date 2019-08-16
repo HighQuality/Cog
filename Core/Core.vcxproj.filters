@@ -24,6 +24,7 @@
     <ClCompile Include="Math\Random.cpp" />
     <ClCompile Include="TypeFundamentals\Convert.cpp" />
     <ClCompile Include="Threading\Fibers\ReadFileAwaitable.cpp" />
+    <ClCompile Include="Program.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -94,6 +95,8 @@
     <ClInclude Include="Function\FunctionView.h" />
     <ClInclude Include="Function\MemberFunctionPointer.h" />
     <ClInclude Include="Function\Function.h" />
+    <ClInclude Include="Program.h" />
+    <ClInclude Include="exported_pch.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />
