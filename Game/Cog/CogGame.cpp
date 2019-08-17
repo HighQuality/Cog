@@ -21,9 +21,9 @@ bool IsInGameThread()
 
 CogGame::CogGame()
 	: myGameThreadID(ThreadID::Get()),
-	myEntityFactory(new Factory<Entity>()),
-	myFrameData(new FrameData()),
-	myMessageSystem(new MessageSystem())
+	myEntityFactory(MakeUnique<Factory<Entity>>()),
+	myFrameData(MakeUnique<FrameData>()),
+	myMessageSystem(MakeUnique<MessageSystem>())
 {
 	// Multiple game instances are not allowed under 1 process
 	CHECK(!ourGame);
@@ -40,17 +40,6 @@ CogGame::~CogGame()
 	for (BaseComponentFactory* factory : myComponentFactories)
 		delete factory;
 	myComponentFactories.Clear();
-
-	delete myEntityFactory;
-
-	delete myComponentList;
-	myComponentList = nullptr;
-
-	delete myFrameData;
-	myFrameData = nullptr;
-
-	delete myMessageSystem;
-	myMessageSystem = nullptr;
 
 	ourGame = nullptr;
 }
@@ -176,9 +165,9 @@ void CogGame::CreateResourceManager()
 	myResourceManager = CreateObject<ResourceManager>();
 }
 
-void CogGame::AssignComponentList(const ComponentList & aComponents)
+void CogGame::AssignComponentList(UniquePtr<const ComponentList> aComponents)
 {
-	myComponentList = &aComponents;
+	myComponentList = Move(aComponents);
 }
 
 void CogGame::UpdateFrameData(FrameData & aData, const Time & aDeltaTime)

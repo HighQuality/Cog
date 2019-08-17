@@ -91,20 +91,20 @@ protected:
 	template <typename T>
 	void RegisterComponents()
 	{
-		T* list = new T();
+		UniquePtr<T> list = MakeUnique<T>();
 		list->BuildList();
-		AssignComponentList(*list);
+		AssignComponentList(Move(list));
 	}
 
 	BaseFactory& FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseFactory*()>& aFactoryCreator);
 
 	Array<BaseComponentFactory*> myComponentFactories;
 	
-	FrameData* myFrameData = nullptr;
+	UniquePtr<FrameData> myFrameData;
 
 private:
 	void CreateResourceManager();
-	void AssignComponentList(const ComponentList& aComponents);
+	void AssignComponentList(UniquePtr<const ComponentList> aComponents);
 	virtual void UpdateFrameData(FrameData& aData, const Time& aDeltaTime);
 	void TickDestroys();
 
@@ -116,13 +116,13 @@ private:
 	// Only to be used by Entity::CreateChild and CreateEntity, use CreateEntity instead
 	Entity& AllocateEntity();
 
-	BaseFactory* myEntityFactory;
+	UniquePtr<BaseFactory> myEntityFactory;
 	Array<BaseFactory*> myObjectFactories;
-	MessageSystem* myMessageSystem;
+	UniquePtr<MessageSystem> myMessageSystem;
 
 	const ThreadID& myGameThreadID;
 
-	const ComponentList* myComponentList = nullptr;
+	UniquePtr<const ComponentList> myComponentList;
 
 	Ptr<ResourceManager> myResourceManager;
 

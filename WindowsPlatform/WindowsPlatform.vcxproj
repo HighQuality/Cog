@@ -45,12 +45,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)lib\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
-    <IncludePath>..\Core\;..\extlibs\libcurl\include;..\extlibs\snappy\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\Core\;..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)lib\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
-    <IncludePath>..\Core\;..\extlibs\libcurl\include;..\extlibs\snappy\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\Core\;..\extlibs\libcurl\include;..\extlibs\snappy\include;$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

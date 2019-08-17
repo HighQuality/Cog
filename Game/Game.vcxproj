@@ -126,26 +126,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ClientGame\ClientGame.cpp" />
-    <ClCompile Include="ClientGame\ClientGameComponentList.cpp" />
-    <ClCompile Include="Client\Buffer.cpp" />
-    <ClCompile Include="Client\ClientComponentList.cpp" />
-    <ClCompile Include="Client\ClientTestComponent.cpp" />
-    <ClCompile Include="Client\CogClientGame.cpp" />
-    <ClCompile Include="Client\DrawCall.cpp" />
-    <ClCompile Include="Client\ImageWidget.cpp" />
-    <ClCompile Include="Client\InputLayout.cpp" />
-    <ClCompile Include="Client\Material.cpp" />
-    <ClCompile Include="Client\PixelShader.cpp" />
-    <ClCompile Include="Client\RenderEngine.cpp" />
-    <ClCompile Include="Client\RenderTarget.cpp" />
-    <ClCompile Include="Client\RenderTexture.cpp" />
-    <ClCompile Include="Client\Shader.cpp" />
-    <ClCompile Include="Client\SpriteComponent.cpp" />
-    <ClCompile Include="Client\Texture.cpp" />
-    <ClCompile Include="Client\VertexBuffer.cpp" />
-    <ClCompile Include="Client\VertexShader.cpp" />
-    <ClCompile Include="Client\Window.cpp" />
     <ClCompile Include="Cog\CogGame.cpp" />
     <ClCompile Include="Cog\Component.cpp" />
     <ClCompile Include="Cog\ComponentList.cpp" />
@@ -162,40 +142,12 @@
     <ClCompile Include="Cog\Widget.cpp" />
     <ClCompile Include="Game\Game.cpp" />
     <ClCompile Include="Game\GameComponentList.cpp" />
-    <ClCompile Include="ServerGame\ServerGame.cpp" />
-    <ClCompile Include="ServerGame\ServerGameComponentList.cpp" />
-    <ClCompile Include="Server\CogServerGame.cpp" />
-    <ClCompile Include="Server\ServerComponentList.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClientGame\ClientGame.h" />
-    <ClInclude Include="ClientGame\ClientGameComponentList.h" />
-    <ClInclude Include="Client\Buffer.h" />
-    <ClInclude Include="Client\ClientComponentList.h" />
-    <ClInclude Include="Client\ClientTestComponent.h" />
-    <ClInclude Include="Client\CogClientGame.h" />
-    <ClInclude Include="Client\DrawCall.h" />
-    <ClInclude Include="Client\GpuCommand.h" />
-    <ClInclude Include="Client\ImageWidget.h" />
-    <ClInclude Include="Client\InputLayout.h" />
-    <ClInclude Include="Client\Material.h" />
-    <ClInclude Include="Client\PixelShader.h" />
-    <ClInclude Include="Client\RenderEngine.h" />
-    <ClInclude Include="Client\RenderingMode.h" />
-    <ClInclude Include="Client\RenderTarget.h" />
-    <ClInclude Include="Client\RenderTexture.h" />
-    <ClInclude Include="Client\Shader.h" />
-    <ClInclude Include="Client\SpriteComponent.h" />
-    <ClInclude Include="Client\StandardVertex.h" />
-    <ClInclude Include="Client\Texture.h" />
-    <ClInclude Include="Client\VertexBuffer.h" />
-    <ClInclude Include="Client\VertexShader.h" />
-    <ClInclude Include="Client\Window.h" />
-    <ClInclude Include="Client\WindowEvent.h" />
     <ClInclude Include="Cog\Casts.h" />
     <ClInclude Include="Cog\CogGame.h" />
     <ClInclude Include="Cog\Component.h" />
@@ -222,10 +174,6 @@
     <ClInclude Include="exported_pch.h" />
     <ClInclude Include="Game\Game.h" />
     <ClInclude Include="Game\GameComponentList.h" />
-    <ClInclude Include="ServerGame\ServerGame.h" />
-    <ClInclude Include="ServerGame\ServerGameComponentList.h" />
-    <ClInclude Include="Server\CogServerGame.h" />
-    <ClInclude Include="Server\ServerComponentList.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

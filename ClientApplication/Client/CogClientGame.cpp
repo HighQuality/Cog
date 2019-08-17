@@ -20,26 +20,14 @@
 
 CogClientGame::CogClientGame()
 {
-	myNextFramesGpuCommands = new EventList<GpuCommand>();
-	myCurrentlyExecutingGpuCommands = new Array<GpuCommand>();
+	myNextFramesGpuCommands = MakeUnique<EventList<GpuCommand>>();
+	myCurrentlyExecutingGpuCommands = MakeUnique<Array<GpuCommand>>();
 
-	myWindow = new Window();
-	myRenderer = nullptr;
+	myWindow = MakeUnique<Window>();
 }
 
 CogClientGame::~CogClientGame()
 {
-	delete myWindow;
-	myWindow = nullptr;
-
-	delete myRenderer;
-	myRenderer = nullptr;
-
-	delete myNextFramesGpuCommands;
-	myNextFramesGpuCommands = nullptr;
-
-	delete myCurrentlyExecutingGpuCommands;
-	myCurrentlyExecutingGpuCommands = nullptr;
 }
 
 bool CogClientGame::ShouldKeepRunning() const
@@ -57,7 +45,7 @@ void CogClientGame::Run()
 	renderingMode.fullscreen = false;
 	renderingMode.vsync = true;
 
-	myRenderer = new RenderEngine(myWindow->GetHandle(), renderingMode);
+	myRenderer = MakeUnique<RenderEngine>(myWindow->GetHandle(), renderingMode);
 
 	myCamera = &CreateCamera();
 

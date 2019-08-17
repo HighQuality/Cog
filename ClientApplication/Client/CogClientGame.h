@@ -31,10 +31,10 @@ private:
 
 	Entity& CreateCamera();
 	
-	Window* myWindow = nullptr;
-	RenderEngine* myRenderer = nullptr;
-	EventList<struct GpuCommand>* myNextFramesGpuCommands;
-	Array<struct GpuCommand>* myCurrentlyExecutingGpuCommands;
+	UniquePtr<Window> myWindow;
+	UniquePtr<RenderEngine> myRenderer;
+	UniquePtr<EventList<struct GpuCommand>> myNextFramesGpuCommands;
+	UniquePtr<Array<struct GpuCommand>> myCurrentlyExecutingGpuCommands;
 
 	Array<Ptr<Widget>> myWidgets;
 

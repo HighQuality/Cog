@@ -79,6 +79,8 @@
 #undef SendMessage
 #undef PostMessage
 
+#include <Memory/UniquePtr.h>
+
 #define DELETE_MOVES(Type) Type(Type&&) = delete;\
 	Type& operator=(Type&&) = delete;
 

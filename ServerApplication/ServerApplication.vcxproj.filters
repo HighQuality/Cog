@@ -3,8 +3,16 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ServerGame\ServerGame.cpp" />
+    <ClCompile Include="ServerGame\ServerGameComponentList.cpp" />
+    <ClCompile Include="Server\CogServerGame.cpp" />
+    <ClCompile Include="Server\ServerComponentList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ServerGame\ServerGame.h" />
+    <ClInclude Include="ServerGame\ServerGameComponentList.h" />
+    <ClInclude Include="Server\CogServerGame.h" />
+    <ClInclude Include="Server\ServerComponentList.h" />
   </ItemGroup>
 </Project>

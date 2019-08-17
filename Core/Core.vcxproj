@@ -189,6 +189,7 @@
     <ClInclude Include="Function\Function.h" />
     <ClInclude Include="Function\FunctionView.h" />
     <ClInclude Include="Containers\Hashing.h" />
+    <ClInclude Include="Memory\UniquePtr.h" />
     <ClInclude Include="Web\HttpClient.h" />
     <ClInclude Include="Images\Image.h" />
     <ClInclude Include="Memory\InlineVirtualObject.h" />
