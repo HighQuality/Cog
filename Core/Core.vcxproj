@@ -139,6 +139,7 @@
     <ClCompile Include="Math\Vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Containers\TypeMap.h" />
     <ClInclude Include="exported_pch.h" />
     <ClInclude Include="Math\CogTime.h" />
     <ClInclude Include="Math\Random.h" />

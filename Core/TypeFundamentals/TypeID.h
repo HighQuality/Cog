@@ -3,7 +3,6 @@
 template <typename TBase>
 class TypeID
 {
-
 	static u16 ourIDCounter;
 
 	u16 myID = 0;

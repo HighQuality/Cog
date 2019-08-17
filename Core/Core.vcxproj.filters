@@ -98,6 +98,7 @@
     <ClInclude Include="Program.h" />
     <ClInclude Include="exported_pch.h" />
     <ClInclude Include="Memory\UniquePtr.h" />
+    <ClInclude Include="Containers\TypeMap.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

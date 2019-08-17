@@ -52,8 +52,7 @@ public:
 
 protected:
 	Component() = default;
-
-
+	
 	virtual void Initialize() {  }
 
 	friend Entity;
