@@ -123,16 +123,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ServerGame\ServerGame.cpp" />
-    <ClCompile Include="ServerGame\ServerGameComponentList.cpp" />
-    <ClCompile Include="Server\CogServerGame.cpp" />
-    <ClCompile Include="Server\ServerComponentList.cpp" />
+    <ClCompile Include="Server\ServerTypeList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="ServerGame\ServerGame.h" />
-    <ClInclude Include="ServerGame\ServerGameComponentList.h" />
-    <ClInclude Include="Server\CogServerGame.h" />
-    <ClInclude Include="Server\ServerComponentList.h" />
+    <ClInclude Include="Server\ServerTypeList.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Game\Game.vcxproj">

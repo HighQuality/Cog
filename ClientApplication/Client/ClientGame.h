@@ -5,13 +5,13 @@ class Window;
 class RenderEngine;
 class BaseObjectFactory;
 
-class CogClientGame : public Game
+class ClientGame : public Game
 {
 public:
 	using Base = Game;
 
-	CogClientGame();
-	~CogClientGame();
+	ClientGame();
+	~ClientGame();
 
 	bool ShouldKeepRunning() const override;
 
@@ -22,14 +22,13 @@ protected:
 
 	void DispatchTick() override;
 	
-	void NewWidgetCreated(Widget& aWidget) override;
 	void UpdateFrameData(FrameData& aData, const Time& aDeltaTime) override;
 
 private:
 	void ProcessInput();
 	void GpuExec();
 
-	Entity& CreateCamera();
+	Object& CreateCamera();
 	
 	UniquePtr<Window> myWindow;
 	UniquePtr<RenderEngine> myRenderer;
@@ -38,6 +37,6 @@ private:
 
 	Array<Ptr<Widget>> myWidgets;
 
-	Ptr<Entity> myCamera;
+	Ptr<Object> myCamera;
 };
 

@@ -1,7 +1,6 @@
 #include "pch.h"
-#include "CogClientGame.h"
+#include "ClientGame.h"
 
-#include <Cog/Widget.h>
 #include <Threading/Fibers/Await.h>
 
 #include "Program.h"
@@ -18,24 +17,26 @@
 #include "GpuCommand.h"
 #include "SpriteComponent.h"
 
-CogClientGame::CogClientGame()
+ClientGame::ClientGame()
 {
+	RegisterTypes<ClientTypeList>();
+
 	myNextFramesGpuCommands = MakeUnique<EventList<GpuCommand>>();
 	myCurrentlyExecutingGpuCommands = MakeUnique<Array<GpuCommand>>();
 
 	myWindow = MakeUnique<Window>();
 }
 
-CogClientGame::~CogClientGame()
+ClientGame::~ClientGame()
 {
 }
 
-bool CogClientGame::ShouldKeepRunning() const
+bool ClientGame::ShouldKeepRunning() const
 {
 	return myWindow && myWindow->IsOpen();
 }
 
-void CogClientGame::Run()
+void ClientGame::Run()
 {
 	myWindow->Open();
 
@@ -82,7 +83,7 @@ void CogClientGame::Run()
 	Base::Run();
 }
 
-void CogClientGame::SynchronizedTick(const Time& aDeltaTime)
+void ClientGame::SynchronizedTick(const Time& aDeltaTime)
 {
 	for (i32 i = 0; i < myWidgets.GetLength(); ++i)
 	{
@@ -102,7 +103,7 @@ void CogClientGame::SynchronizedTick(const Time& aDeltaTime)
 	Base::SynchronizedTick(aDeltaTime);
 }
 
-void CogClientGame::ProcessInput()
+void ClientGame::ProcessInput()
 {
 	myWindow->ProcessMessages();
 
@@ -126,7 +127,7 @@ void CogClientGame::ProcessInput()
 	}
 }
 
-void CogClientGame::GpuExec()
+void ClientGame::GpuExec()
 {
 	Array<GpuCommand>& gpuCommands = *myCurrentlyExecutingGpuCommands;
 
@@ -146,29 +147,28 @@ void CogClientGame::GpuExec()
 	myRenderer->Present();
 }
 
-void CogClientGame::NewWidgetCreated(Widget& aWidget)
+void ClientGame::NewWidgetCreated(Widget& aWidget)
 {
 	myWidgets.Add(aWidget);
 }
 
-void CogClientGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
+void ClientGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
 {
 	aData.gpuCommands = myNextFramesGpuCommands;
 }
 
-Entity& CogClientGame::CreateCamera()
+Object& ClientGame::CreateCamera()
 {
-	EntityInitializer camera = CreateEntity();
-	RenderTarget& renderTarget = camera.AddComponent<RenderTarget>();
-	Entity& cameraObject = camera.Initialize();
+	Object& camera = CreateObject<Object>();
+	// RenderTarget& renderTarget = camera.CreateChild<RenderTarget>();
+	// 
+	// myRenderer->OnBackbufferRecreated.Subscribe(renderTarget, &RenderTarget::SetRenderTexture);
+	// renderTarget.SetRenderTexture(myRenderer->GetBackbuffer());
 
-	myRenderer->OnBackbufferRecreated.Subscribe(renderTarget, &RenderTarget::SetRenderTexture);
-	renderTarget.SetRenderTexture(myRenderer->GetBackbuffer());
-
-	return cameraObject;
+	return camera;
 }
 
-void CogClientGame::DispatchTick()
+void ClientGame::DispatchTick()
 {
 	Base::DispatchTick();
 	
@@ -176,7 +176,7 @@ void CogClientGame::DispatchTick()
 	{
 		NO_AWAITS;
 
-		CogClientGame& game = GetGame<CogClientGame>();
+		ClientGame& game = GetGame<ClientGame>();
 		for (Ptr<Widget>& widget : game.myWidgets)
 		{
 			if (widget)
@@ -184,5 +184,5 @@ void CogClientGame::DispatchTick()
 		}
 	}, myFrameData);
 	
-	Program::Get().QueueHighPrioWork<CogClientGame>([](CogClientGame* This) { This->GpuExec(); }, this);
+	Program::Get().QueueHighPrioWork<ClientGame>([](ClientGame* This) { This->GpuExec(); }, this);
 }

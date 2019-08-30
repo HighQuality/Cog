@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Object.h"
 #include <Memory/FactoryChunk.h>
+#include "CogGame.h"
 
 Object::Object() = default;
 

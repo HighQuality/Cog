@@ -10,17 +10,11 @@ class FunctionView;
 template <typename TReturn, typename... TArgs>
 class FunctionView<TReturn(TArgs...)>;
 
-template <typename T>
-class ComponentFactory;
-
 class MessageSystem;
 class BaseFactory;
 class ThreadPool;
-class Component;
-class Entity;
 class Object;
-class ComponentList;
-class Widget;
+class TypeList;
 struct FrameData;
 
 class CogGame
@@ -36,29 +30,13 @@ public:
 	virtual void Run();
 
 	template <typename T>
-	ComponentFactory<T>& FindOrCreateComponentFactory()
-	{
-		return static_cast<ComponentFactory<T>&>(FindOrCreateComponentFactory(TypeID<Component>::Resolve<T>()));
-	}
-
-	BaseComponentFactory& FindOrCreateComponentFactory(TypeID<Component> aComponentType);
-
-	EntityInitializer CreateEntity();
-
-	template <typename T>
 	T& CreateObject()
 	{
-		static_assert(!IsDerivedFrom<T, Entity>, L"Use CreateEntity to create entities!");
-		static_assert(!IsDerivedFrom<T, Component>, L"Components may only be created on entities!");
-
 		const auto objectTypeID = TypeID<Object>::Resolve<T>();
 		
 		BaseFactory& factory = FindOrCreateObjectFactory(objectTypeID, [&objectTypeID]() { return new Factory<T>(); });
 
 		T& object = *static_cast<T*>(factory.AllocateRawObject());
-
-		if constexpr(IsDerivedFrom<T, Widget>)
-			NewWidgetCreated(object);
 
 		return object;
 	}
@@ -86,43 +64,35 @@ protected:
 	virtual void QueueDispatchers(const Time& aDeltaTime);
 	virtual void DispatchTick();
 
-	virtual void NewWidgetCreated(Widget& aWidget) = 0;
-
 	template <typename T>
-	void RegisterComponents()
+	void RegisterTypes()
 	{
 		UniquePtr<T> list = MakeUnique<T>();
 		list->BuildList();
-		AssignComponentList(Move(list));
+		AssignTypeList(Move(list));
 	}
 
 	BaseFactory& FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseFactory*()>& aFactoryCreator);
 
-	Array<BaseComponentFactory*> myComponentFactories;
-	
 	UniquePtr<FrameData> myFrameData;
 
 private:
 	void CreateResourceManager();
-	void AssignComponentList(UniquePtr<const ComponentList> aComponents);
+	void AssignTypeList(UniquePtr<const TypeList> aTypeList);
 	virtual void UpdateFrameData(FrameData& aData, const Time& aDeltaTime);
 	void TickDestroys();
 
-	friend Entity;
+	friend Object;
 	friend Object;
 
 	void ScheduleDestruction(Object& aObject);
 
-	// Only to be used by Entity::CreateChild and CreateEntity, use CreateEntity instead
-	Entity& AllocateEntity();
-
-	UniquePtr<BaseFactory> myEntityFactory;
 	Array<BaseFactory*> myObjectFactories;
 	UniquePtr<MessageSystem> myMessageSystem;
 
 	const ThreadID& myGameThreadID;
 
-	UniquePtr<const ComponentList> myComponentList;
+	UniquePtr<const TypeList> myTypeList;
 
 	Ptr<ResourceManager> myResourceManager;
 

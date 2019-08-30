@@ -127,21 +127,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Cog\CogGame.cpp" />
-    <ClCompile Include="Cog\Component.cpp" />
-    <ClCompile Include="Cog\ComponentList.cpp" />
-    <ClCompile Include="Cog\EngineComponentList.cpp" />
-    <ClCompile Include="Cog\Entity.cpp" />
-    <ClCompile Include="Cog\EntityInitializer.cpp" />
+    <ClCompile Include="Cog\TypeList.cpp" />
+    <ClCompile Include="Cog\EngineTypeList.cpp" />
     <ClCompile Include="Cog\ImageResource.cpp" />
     <ClCompile Include="Cog\MessageSystem.cpp" />
     <ClCompile Include="Cog\Object.cpp" />
     <ClCompile Include="Cog\Resource.cpp" />
     <ClCompile Include="Cog\ResourceManager.cpp" />
-    <ClCompile Include="Cog\TestComponent.cpp" />
-    <ClCompile Include="Cog\Transform2D.cpp" />
-    <ClCompile Include="Cog\Widget.cpp" />
     <ClCompile Include="Game\Game.cpp" />
-    <ClCompile Include="Game\GameComponentList.cpp" />
+    <ClCompile Include="Game\GameTypeList.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -150,30 +144,23 @@
   <ItemGroup>
     <ClInclude Include="Cog\Casts.h" />
     <ClInclude Include="Cog\CogGame.h" />
-    <ClInclude Include="Cog\Component.h" />
-    <ClInclude Include="Cog\ComponentData.h" />
-    <ClInclude Include="Cog\ComponentFactory.h" />
-    <ClInclude Include="Cog\ComponentList.h" />
-    <ClInclude Include="Cog\EngineComponentList.h" />
-    <ClInclude Include="Cog\Entity.h" />
-    <ClInclude Include="Cog\EntityInitializer.h" />
+    <ClInclude Include="Cog\TypeData.h" />
+    <ClInclude Include="Cog\TypeList.h" />
+    <ClInclude Include="Cog\EngineTypeList.h" />
     <ClInclude Include="Cog\Event.h" />
     <ClInclude Include="Cog\FrameData.h" />
     <ClInclude Include="Cog\GameThreadCallback.h" />
     <ClInclude Include="Cog\ImageResource.h" />
-    <ClInclude Include="Cog\InheritComponent.h" />
+    <ClInclude Include="Cog\InheritType.h" />
     <ClInclude Include="Cog\MessageSystem.h" />
     <ClInclude Include="Cog\Object.h" />
     <ClInclude Include="Cog\ObjectFunctionView.h" />
     <ClInclude Include="Cog\Pointer.h" />
     <ClInclude Include="Cog\Resource.h" />
     <ClInclude Include="Cog\ResourceManager.h" />
-    <ClInclude Include="Cog\TestComponent.h" />
-    <ClInclude Include="Cog\Transform2D.h" />
-    <ClInclude Include="Cog\Widget.h" />
     <ClInclude Include="exported_pch.h" />
     <ClInclude Include="Game\Game.h" />
-    <ClInclude Include="Game\GameComponentList.h" />
+    <ClInclude Include="Game\GameTypeList.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

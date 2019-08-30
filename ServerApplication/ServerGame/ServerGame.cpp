@@ -1,10 +1,15 @@
 #include "pch.h"
 #include "ServerGame.h"
-#include "ServerGameComponentList.h"
+#include "ServerTypeList.h"
 
 ServerGame::ServerGame()
 {
-	RegisterComponents<ServerGameComponentList>();
+	RegisterTypes<ServerTypeList>();
+}
+
+bool ServerGame::ShouldKeepRunning() const
+{
+	return true;
 }
 
 ServerGame::~ServerGame()

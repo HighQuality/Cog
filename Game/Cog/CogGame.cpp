@@ -5,11 +5,8 @@
 #include <Threading/Fibers/Await.h>
 #include "Program.h"
 
-#include "Component.h"
-#include "Entity.h"
-#include "ComponentList.h"
+#include "TypeList.h"
 #include "ResourceManager.h"
-#include "Transform2D.h"
 #include "MessageSystem.h"
 
 CogGame* CogGame::ourGame;
@@ -21,7 +18,6 @@ bool IsInGameThread()
 
 CogGame::CogGame()
 	: myGameThreadID(ThreadID::Get()),
-	myEntityFactory(MakeUnique<Factory<Entity>>()),
 	myFrameData(MakeUnique<FrameData>()),
 	myMessageSystem(MakeUnique<MessageSystem>())
 {
@@ -35,12 +31,6 @@ CogGame::CogGame()
 
 CogGame::~CogGame()
 {
-	myEntityFactory->ReturnAll();
-
-	for (BaseComponentFactory* factory : myComponentFactories)
-		delete factory;
-	myComponentFactories.Clear();
-
 	ourGame = nullptr;
 }
 
@@ -85,11 +75,6 @@ void CogGame::SynchronizedTick(const Time & aDeltaTime)
 
 	while (myMessageSystem->PostMessages())
 		gProgram->Run(false);
-
-	FindOrCreateComponentFactory<Transform2D>().IterateChunks([](const FactoryChunk<Transform2D> & aChunk)
-	{
-		aChunk.GetChunkedData()->SynchronizedTick();
-	});
 }
 
 void CogGame::QueueDispatchers(const Time & aDeltaTime)
@@ -102,39 +87,8 @@ void CogGame::QueueDispatchers(const Time & aDeltaTime)
 		}, this);
 }
 
-BaseComponentFactory& CogGame::FindOrCreateComponentFactory(const TypeID<Component> aComponentType)
-{
-	myComponentFactories.Resize(TypeID<Component>::MaxUnderlyingInteger());
-
-	BaseComponentFactory*& factory = myComponentFactories[aComponentType.GetUnderlyingInteger()];
-
-	if (factory == nullptr)
-	{
-		const ComponentData& componentData = myComponentList->GetComponentData(aComponentType);
-
-		if (const ComponentData * specializationData = componentData.GetSpecialization())
-			factory = specializationData->AllocateFactory();
-		else
-			factory = componentData.AllocateFactory();
-	}
-
-	return *factory;
-}
-
 void CogGame::DispatchTick()
 {
-	gProgram->QueueWork<CogGame>([](CogGame * aGame)
-		{
-			NO_AWAITS;
-
-			for (BaseComponentFactory* factory : aGame->myComponentFactories)
-			{
-				if (!factory)
-					continue;
-
-				factory->DispatchTick();
-			}
-		}, this);
 }
 
 BaseFactory& CogGame::FindOrCreateObjectFactory(const TypeID<Object> & aObjectType, const FunctionView<BaseFactory * ()> & aFactoryCreator)
@@ -148,26 +102,14 @@ BaseFactory& CogGame::FindOrCreateObjectFactory(const TypeID<Object> & aObjectTy
 	return *factory;
 }
 
-EntityInitializer CogGame::CreateEntity()
-{
-	CHECK(IsInGameThread());
-	return EntityInitializer(AllocateEntity());
-}
-
-Entity& CogGame::AllocateEntity()
-{
-	CHECK(IsInGameThread());
-	return *static_cast<Entity*>(myEntityFactory->AllocateRawObject());
-}
-
 void CogGame::CreateResourceManager()
 {
 	myResourceManager = CreateObject<ResourceManager>();
 }
 
-void CogGame::AssignComponentList(UniquePtr<const ComponentList> aComponents)
+void CogGame::AssignTypeList(UniquePtr<const TypeList> aTypeList)
 {
-	myComponentList = Move(aComponents);
+	myTypeList = Move(aTypeList);
 }
 
 void CogGame::UpdateFrameData(FrameData & aData, const Time & aDeltaTime)
