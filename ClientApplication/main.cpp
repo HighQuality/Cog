@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Program.h"
-#include <ClientGame/ClientGame.h>
+#include <Client/ClientGame.h>
 
 int main()
 {

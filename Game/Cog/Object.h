@@ -25,6 +25,11 @@ public:
 
 	}
 
+	virtual void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const
+	{
+		aFunction(TypeID<Object>::Resolve<Object>());
+	}
+
 protected:
 	virtual void Destroyed();
 

@@ -2,7 +2,7 @@
 #include "RenderTexture.h"
 #include "DrawCall.h"
 
-class RenderTarget : public InheritComponent<Component>
+class RenderTarget : public InheritType<Object>
 {
 public:
 	void SetRenderTexture(const std::shared_ptr<RenderTexture>& aNewRenderTexture);

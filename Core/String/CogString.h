@@ -58,7 +58,7 @@ public:
 
 	FORCEINLINE void CheckEndsWithZero() const
 	{
-		if (!ENSURE(this->myData[this->myLength] == L'\0'))
+		if (!this->myData[this->myLength] == L'\0')
 			abort();
 	}
 

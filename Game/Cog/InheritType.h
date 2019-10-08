@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+class Object;
+
 template <typename TBase>
 class InheritType : public TBase
 {

@@ -14,8 +14,8 @@
 #include "VertexBuffer.h"
 #include "InputLayout.h"
 #include "RenderTarget.h"
+#include "ClientTypeList.h"
 #include "GpuCommand.h"
-#include "SpriteComponent.h"
 
 ClientGame::ClientGame()
 {
@@ -85,15 +85,6 @@ void ClientGame::Run()
 
 void ClientGame::SynchronizedTick(const Time& aDeltaTime)
 {
-	for (i32 i = 0; i < myWidgets.GetLength(); ++i)
-	{
-		if (!myWidgets[i])
-		{
-			myWidgets.RemoveAtSwap(i);
-			--i;
-		}
-	}
-
 	ProcessInput();
 
 	// Gather the previous frame's GPU commands into a list for us to execute this frame
@@ -129,32 +120,17 @@ void ClientGame::ProcessInput()
 
 void ClientGame::GpuExec()
 {
-	Array<GpuCommand>& gpuCommands = *myCurrentlyExecutingGpuCommands;
+	// Array<GpuCommand>& gpuCommands = *myCurrentlyExecutingGpuCommands;
 
 	myRenderer->ClearBackbuffer();
-
-	for (GpuCommand& command : gpuCommands)
-	{
-		switch (command.type)
-		{
-		case GpuCommandType::DrawSprite:
-			command.drawSpriteData.sprite->GpuExec();
-		}
-	}
-
+	
 	myRenderer->Draw();
 	
 	myRenderer->Present();
 }
 
-void ClientGame::NewWidgetCreated(Widget& aWidget)
-{
-	myWidgets.Add(aWidget);
-}
-
 void ClientGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
 {
-	aData.gpuCommands = myNextFramesGpuCommands;
 }
 
 Object& ClientGame::CreateCamera()
@@ -171,18 +147,6 @@ Object& ClientGame::CreateCamera()
 void ClientGame::DispatchTick()
 {
 	Base::DispatchTick();
-	
-	gProgram->QueueWork<FrameData>([](FrameData* aTickData)
-	{
-		NO_AWAITS;
-
-		ClientGame& game = GetGame<ClientGame>();
-		for (Ptr<Widget>& widget : game.myWidgets)
-		{
-			if (widget)
-				widget->Tick(*aTickData);
-		}
-	}, myFrameData);
 	
 	Program::Get().QueueHighPrioWork<ClientGame>([](ClientGame* This) { This->GpuExec(); }, this);
 }

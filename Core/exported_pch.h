@@ -60,11 +60,6 @@
 #include <utility>
 #include <array>
 
-#include <External/CityHash/city.h>
-
-#include <TypeFundamentals/Types.h>
-#include <TypeFundamentals/TypeTraits.h>
-
 #include <Windows.h>
 
 #undef GetObject
@@ -79,6 +74,29 @@
 #undef SendMessage
 #undef PostMessage
 
+#include <External/CityHash/city.h>
+
+#include <TypeFundamentals/Types.h>
+#include <TypeFundamentals/TypeTraits.h>
+
+#include <Math/CogMath.h>
+#include <Math/Random.h>
+
+#include <Containers/ArrayView.h>
+#include <Containers/ArraySlice.h>
+#include <Containers/CogArray.h>
+
+#include <String/CogStringView.h>
+#include <String/CogStringSlice.h>
+#include <String/CogString.h>
+
+#include <Debug/DebugAsserts.h>
+
+#include <TypeFundamentals/TypeID.h>
+
+#include <Function/Function.h>
+#include <Function/FunctionView.h>
+
 #include <Memory/UniquePtr.h>
 
 #define DELETE_MOVES(Type) Type(Type&&) = delete;\
@@ -91,20 +109,9 @@
 
 #include <UtilitiesTLS.h>
 
-#include <Math/Random.h>
-#include <Debug/DebugAsserts.h>
-#include <Math/CogMath.h>
 
 #include <Images/ByteColor.h>
 #include <Images/LinearColor.h>
-
-#include <Containers/ArrayView.h>
-#include <Containers/ArraySlice.h>
-#include <Containers/CogArray.h>
-
-#include <String/CogStringView.h>
-#include <String/CogStringSlice.h>
-#include <String/CogString.h>
 
 #include <String/Format.h>
 
@@ -115,8 +122,6 @@
 #include <Math/Vec4.h>
 
 #include <Time/CogTime.h>
-
-#include <Function/FunctionView.h>
 
 template <typename ...TArgs>
 void Println(const TArgs& ...aArgs)

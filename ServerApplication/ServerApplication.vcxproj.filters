@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="ServerGame\ServerGame.cpp" />
     <ClCompile Include="Server\ServerTypeList.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Server\ServerGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ServerGame\ServerGame.h" />
     <ClInclude Include="Server\ServerTypeList.h" />
+    <ClInclude Include="Server\ServerGame.h" />
   </ItemGroup>
 </Project>

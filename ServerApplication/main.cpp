@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Program.h"
-#include <ServerGame/ServerGame.h>
+#include <Server/ServerGame.h>
 
 int main()
 {

@@ -122,7 +122,6 @@
     <ClCompile Include="Client\ClientTypeList.cpp" />
     <ClCompile Include="Client\ClientGame.cpp" />
     <ClCompile Include="Client\DrawCall.cpp" />
-    <ClCompile Include="Client\ImageWidget.cpp" />
     <ClCompile Include="Client\InputLayout.cpp" />
     <ClCompile Include="Client\Material.cpp" />
     <ClCompile Include="Client\PixelShader.cpp" />
@@ -146,7 +145,6 @@
     <ClInclude Include="Client\ClientGame.h" />
     <ClInclude Include="Client\DrawCall.h" />
     <ClInclude Include="Client\GpuCommand.h" />
-    <ClInclude Include="Client\ImageWidget.h" />
     <ClInclude Include="Client\InputLayout.h" />
     <ClInclude Include="Client\Material.h" />
     <ClInclude Include="Client\PixelShader.h" />

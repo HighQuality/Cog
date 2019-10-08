@@ -73,6 +73,8 @@ void ErrorLog(StringView aMessage);
 #define ENSURE(condition) true
 #endif
 
+#include <String/CogStringView.h>
+
 template <typename TTo, typename TFrom>
 FORCEINLINE TTo OverflowCheckedCast(TFrom aValue)
 {

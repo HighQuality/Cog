@@ -35,8 +35,6 @@ private:
 	UniquePtr<EventList<struct GpuCommand>> myNextFramesGpuCommands;
 	UniquePtr<Array<struct GpuCommand>> myCurrentlyExecutingGpuCommands;
 
-	Array<Ptr<Widget>> myWidgets;
-
 	Ptr<Object> myCamera;
 };
 

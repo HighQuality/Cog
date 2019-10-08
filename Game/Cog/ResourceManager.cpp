@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ResourceManager.h"
+#include <Cog\CogGame.h>
 
 ResourceManager::ResourceManager()
 {

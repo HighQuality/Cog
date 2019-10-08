@@ -105,7 +105,7 @@ public:
 		T* data = this->myData;
 		const i32 length = this->myLength;
 
-		const i32 randomIndex = RandInteger(0, length);
+		const i32 randomIndex = RandomIndex(length);
 		const i32 pivotIndex = length - 1;
 		if (randomIndex != pivotIndex)
 			Swap(data[randomIndex], data[pivotIndex]);
