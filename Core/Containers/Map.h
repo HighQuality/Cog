@@ -68,7 +68,7 @@ public:
 		return &((*myBuckets)[myBucketIndex][myValueIndex]);
 	}
 
-	FORCEINLINE value_type operator*() const
+	FORCEINLINE reference operator*() const
 	{
 		return (*myBuckets)[myBucketIndex][myValueIndex];
 	}
@@ -158,7 +158,7 @@ public:
 		return &((*myBuckets)[myBucketIndex][myValueIndex]);
 	}
 
-	FORCEINLINE value_type operator*() const
+	FORCEINLINE reference operator*() const
 	{
 		return (*myBuckets)[myBucketIndex][myValueIndex];
 	}
@@ -241,10 +241,10 @@ public:
 	using const_iterator = ConstMapIterator<Pair>;
 
 	iterator begin() { return iterator(&myBuckets); }
-	const_iterator begin() const { return const_iterator(&const_cast<Map*>(this)->myBuckets); }
+	const_iterator begin() const { return const_iterator(&myBuckets); }
 
 	iterator end() { return iterator(&myBuckets, myBuckets.GetLength(), 0); }
-	const_iterator end() const { return const_iterator(&const_cast<Map*>(this)->myBuckets, myBuckets.GetLength(), 0); }
+	const_iterator end() const { return const_iterator(&myBuckets, myBuckets.GetLength(), 0); }
 
 	FORCEINLINE Map() = default;
 	FORCEINLINE ~Map() = default;

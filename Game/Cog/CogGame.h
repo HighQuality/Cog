@@ -29,17 +29,7 @@ public:
 
 	virtual void Run();
 
-	template <typename T>
-	T& CreateObject()
-	{
-		const auto objectTypeID = TypeID<Object>::Resolve<T>();
-		
-		BaseFactory& factory = FindOrCreateObjectFactory(objectTypeID, [&objectTypeID]() { return new Factory<T>(); });
-
-		T& object = *static_cast<T*>(factory.AllocateRawObject());
-
-		return object;
-	}
+	Object& CreateObjectByType(TypeID<Object> aType);
 
 	ResourceManager& GetResourceManager() const
 	{

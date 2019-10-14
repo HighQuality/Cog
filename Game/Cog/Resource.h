@@ -5,10 +5,9 @@
 
 using ResourceLoaderFunction = ObjectFunctionView<void(const ArrayView<u8>&, BinaryData&)>;
 
-class Resource : public Object
+class Resource : public InheritType<Object>
 {
 public:
-	using Base = Object;
 
 protected:
 	Resource() = default;

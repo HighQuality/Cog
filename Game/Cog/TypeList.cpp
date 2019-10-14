@@ -3,23 +3,18 @@
 
 void TypeList::RegisterTypes()
 {
+	Internal_AddType(TypeID<Object>::Resolve<Object>().GetUnderlyingInteger(), L"Object", &CreateObjectFactory<Object>, nullptr);
 }
 
 void TypeList::BuildList()
 {
 	RegisterTypes();
 
-	// TODO: Rewrite after fixing map/array problem
-	Array<u16> components;
-
-	for (const auto& pair : myIDToData)
-		components.Add(pair.key);
-
-	for (const u16 id : components)
+	for (auto& pair : myIDToData)
 	{
-		TypeData& component = myIDToData[id];
+		TypeData& type = pair.value;
 
-		const StringView& specializationOf = component.GetSpecializationOf();
+		const StringView& specializationOf = type.GetSpecializationOf();
 
 		if (specializationOf.GetLength() > 0)
 		{
@@ -28,13 +23,19 @@ void TypeList::BuildList()
 				TypeData* base = myIDToData.Find(*specializationOfID);
 				CHECK(base);
 				CHECK(!base->GetSpecialization());
-				base->SetSpecialization(component);
+				base->SetSpecialization(type);
 			}
 			else
 			{
-				FATAL(L"Component % specializes an unknown component: %", component.GetName(), specializationOf);
+				FATAL(L"Component % specializes an unknown component: %", type.GetName(), specializationOf);
 			}
 		}
+	}
+
+	for (auto& pair : myIDToData)
+	{
+		if (!pair.value.HasOutermostSpecialization())
+			pair.value.AssignOutermostSpecialization();
 	}
 }
 

@@ -12,7 +12,7 @@ public:
 	void SetSpecializationOf(const StringView& aSpecializationOf) { mySpecializationOf = aSpecializationOf; }
 
 	const TypeData* GetSpecialization() const { return mySpecialization; }
-	void SetSpecialization(const TypeData& aSpecialization) { mySpecialization = &aSpecialization; }
+	void SetSpecialization(TypeData& aSpecialization) { mySpecialization = &aSpecialization; }
 
 	void SetFactoryAllocator(BaseFactory*(*aFactoryAllocator)()) { myFactoryAllocator = aFactoryAllocator; }
 
@@ -29,8 +29,32 @@ public:
 		return !(*this == aRight);
 	}
 
+	const TypeData& GetOutermostSpecialization() const
+	{
+		CHECK(myOutermostSpecialization);
+		return *myOutermostSpecialization;
+	}
+
 private:
-	const TypeData* mySpecialization = nullptr;
+	bool HasOutermostSpecialization() const { return myOutermostSpecialization != nullptr; }
+
+	FORCEINLINE const TypeData& AssignOutermostSpecialization()
+	{
+		if (!mySpecialization)
+		{
+			myOutermostSpecialization = this;
+			return *this;
+		}
+
+		myOutermostSpecialization = &mySpecialization->AssignOutermostSpecialization();
+		return *myOutermostSpecialization;
+	}
+
+	friend class TypeList;
+
+	const TypeData* myOutermostSpecialization = nullptr;
+	
+	TypeData* mySpecialization = nullptr;
 	StringView myName; 
 	StringView mySpecializationOf;
 	BaseFactory*(*myFactoryAllocator)() = nullptr;

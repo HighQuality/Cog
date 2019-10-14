@@ -16,6 +16,11 @@ bool IsInGameThread()
 	return GetGame().IsInGameThread();
 }
 
+Object& NewObjectByType(const TypeID<Object> aTypeID)
+{
+	return CogGame::GetCogGame().CreateObjectByType(aTypeID);
+}
+
 CogGame::CogGame()
 	: myGameThreadID(ThreadID::Get()),
 	myFrameData(MakeUnique<FrameData>()),
@@ -66,6 +71,13 @@ void CogGame::Run()
 	}
 }
 
+Object& CogGame::CreateObjectByType(const TypeID<Object> aType)
+{
+	BaseFactory& factory = FindOrCreateObjectFactory(aType, [this, &aType]() { return myTypeList->GetTypeData(aType).AllocateFactory(); });
+
+	return *static_cast<Object*>(factory.AllocateRawObject());
+}
+
 void CogGame::SynchronizedTick(const Time & aDeltaTime)
 {
 	QueueDispatchers(aDeltaTime);
@@ -104,7 +116,7 @@ BaseFactory& CogGame::FindOrCreateObjectFactory(const TypeID<Object> & aObjectTy
 
 void CogGame::CreateResourceManager()
 {
-	myResourceManager = CreateObject<ResourceManager>();
+	myResourceManager = NewObject<ResourceManager>();
 }
 
 void CogGame::AssignTypeList(UniquePtr<const TypeList> aTypeList)

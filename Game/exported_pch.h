@@ -13,3 +13,11 @@ bool IsInGameThread();
 #include <Cog/Casts.h>
 #include <Cog/Pointer.h>
 #include <Cog/FrameData.h>
+
+Object& NewObjectByType(TypeID<Object> aTypeID);
+
+template <typename T>
+T& NewObject()
+{
+	return static_cast<T&>(NewObjectByType(TypeID<Object>::Resolve<T>()));
+}

@@ -1,4 +1,5 @@
 #pragma once
+#include "InheritType.h"
 
 class BaseFactoryChunk;
 

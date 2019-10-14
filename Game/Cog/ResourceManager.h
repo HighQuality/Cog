@@ -9,11 +9,9 @@ class Resource;
 class ThreadPool;
 class CogGame;
 
-class ResourceManager : public Object
+class ResourceManager : public InheritType<Object>
 {
 public:
-	using Base = Object;
-
 	ResourceManager();
 	~ResourceManager();
 

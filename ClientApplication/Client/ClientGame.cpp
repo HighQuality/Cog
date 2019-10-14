@@ -135,7 +135,7 @@ void ClientGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
 
 Object& ClientGame::CreateCamera()
 {
-	Object& camera = CreateObject<Object>();
+	Object& camera = NewObject<Object>();
 	// RenderTarget& renderTarget = camera.CreateChild<RenderTarget>();
 	// 
 	// myRenderer->OnBackbufferRecreated.Subscribe(renderTarget, &RenderTarget::SetRenderTexture);

@@ -42,15 +42,15 @@ public:
 		return GetTypeData(TypeID<Object>::Resolve<T>());
 	}
 
-	FORCEINLINE const TypeData& GetTypeData(const TypeID<Object>& aTypeID) const
+	FORCEINLINE const TypeData& GetTypeData(const TypeID<Object>& aTypeID, const bool aOutermost = true) const
 	{
 		const auto* data = myIDToData.Find(aTypeID.GetUnderlyingInteger());
 		if (!data)
 			FATAL(L"This type has not been registered");
-		return *data;
+		return aOutermost ? data->GetOutermostSpecialization() : *data;
 	}
 
-	FORCEINLINE const TypeData& GetTypeData(const StringView& aTypeName) const
+	FORCEINLINE const TypeData& GetTypeData(const StringView& aTypeName, const bool aOutermost = true) const
 	{
 		const auto* id = myTypeNameToID.Find(aTypeName);
 		if (!id)
@@ -58,7 +58,7 @@ public:
 		const auto* data = myIDToData.Find(*id);
 		if (!data)
 			FATAL(L"This type has not been registered");
-		return *data;
+		return aOutermost ? data->GetOutermostSpecialization() : *data;
 	}
 
 protected:
