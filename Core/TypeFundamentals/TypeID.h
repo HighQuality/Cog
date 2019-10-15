@@ -6,18 +6,24 @@ class TypeID
 	static u16 ourIDCounter;
 
 	u16 myID = 0;
+	const std::type_info& myTypeInfo;
 
-	explicit TypeID(u16 aID)
+	explicit TypeID(u16 aID, const std::type_info& aTypeInfo)
+		: myTypeInfo(aTypeInfo)
 	{
 		myID = aID;
 	}
+	
+	~TypeID() = default;
 
 public:
 	using CounterType = u16;
 	
-	TypeID()
-	{
-	}
+	TypeID() = delete;
+	TypeID(const TypeID&) = delete;
+	TypeID& operator=(const TypeID&) = delete;
+	TypeID(TypeID&&) = delete;
+	TypeID& operator=(TypeID&&) = delete;
 
 	static u16 MaxUnderlyingInteger()
 	{
@@ -25,20 +31,21 @@ public:
 	}
 
 	template <typename TType>
-	static TypeID Resolve()
+	static const TypeID& Resolve()
 	{
-		static u16 resolvedID = ourIDCounter++;
-		return TypeID(resolvedID);
+		static TypeID type(ourIDCounter++, typeid(TType));
+		return type;
 	}
 
 	u16 GetUnderlyingInteger() const { return myID; }
+	const char* GetTypeInfoName() const { return myTypeInfo.name(); }
 
-	bool operator==(TypeID aOther)
+	bool operator==(const TypeID& aOther)
 	{
 		return myID == aOther.myID;
 	}
 
-	bool operator!=(TypeID aOther)
+	bool operator!=(const TypeID& aOther)
 	{
 		return myID != aOther.myID;
 	}

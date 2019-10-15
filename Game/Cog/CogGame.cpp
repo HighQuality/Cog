@@ -16,7 +16,7 @@ bool IsInGameThread()
 	return GetGame().IsInGameThread();
 }
 
-Object& NewObjectByType(const TypeID<Object> aTypeID)
+Object& NewObjectByType(const TypeID<Object>& aTypeID)
 {
 	return CogGame::GetCogGame().CreateObjectByType(aTypeID);
 }
@@ -71,7 +71,7 @@ void CogGame::Run()
 	}
 }
 
-Object& CogGame::CreateObjectByType(const TypeID<Object> aType)
+Object& CogGame::CreateObjectByType(const TypeID<Object>& aType)
 {
 	BaseFactory& factory = FindOrCreateObjectFactory(aType, [this, &aType]() { return myTypeList->GetTypeData(aType).AllocateFactory(); });
 
@@ -103,7 +103,7 @@ void CogGame::DispatchTick()
 {
 }
 
-BaseFactory& CogGame::FindOrCreateObjectFactory(const TypeID<Object> & aObjectType, const FunctionView<BaseFactory * ()> & aFactoryCreator)
+BaseFactory& CogGame::FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseFactory*()>& aFactoryCreator)
 {
 	CHECK(IsInGameThread());
 	const u16 index = aObjectType.GetUnderlyingInteger();

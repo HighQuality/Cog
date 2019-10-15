@@ -18,7 +18,7 @@ public:
 		msg.target = &aTarget;
 		msg.message = LinearAllocate(aMessageData);
 		msg.destructMessage = [](void* aData) { static_cast<T*>(aData)->~T(); };
-		msg.messageTypeId = TypeID<Message>::Resolve<T>();
+		msg.messageTypeId = &TypeID<Message>::Resolve<T>();
 
 		SubmitMessage(Move(msg));
 	}
@@ -31,7 +31,7 @@ private:
 		const Object* target;
 		void* message;
 		void(*destructMessage)(void*);
-		TypeID<Message> messageTypeId;
+		const TypeID<Message>* messageTypeId;
 	};
 
 	void SubmitMessage(Message aMessage);

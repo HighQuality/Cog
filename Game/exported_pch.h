@@ -14,7 +14,7 @@ bool IsInGameThread();
 #include <Cog/Pointer.h>
 #include <Cog/FrameData.h>
 
-Object& NewObjectByType(TypeID<Object> aTypeID);
+Object& NewObjectByType(const TypeID<Object>& aTypeID);
 
 template <typename T>
 T& NewObject()

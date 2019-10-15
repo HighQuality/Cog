@@ -29,7 +29,7 @@ public:
 
 	virtual void Run();
 
-	Object& CreateObjectByType(TypeID<Object> aType);
+	Object& CreateObjectByType(const TypeID<Object>& aType);
 
 	ResourceManager& GetResourceManager() const
 	{
