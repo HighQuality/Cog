@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="Cog\Casts.h" />
     <ClInclude Include="Cog\CogGame.h" />
+    <ClInclude Include="Cog\Class.h" />
     <ClInclude Include="Cog\TypeData.h" />
     <ClInclude Include="Cog\TypeList.h" />
     <ClInclude Include="Cog\EngineTypeList.h" />

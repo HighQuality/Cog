@@ -68,18 +68,16 @@ private:
 	{
 		std::unique_lock<std::mutex> lck(ourMutex);
 
-		ThreadIDInteger index = MaxOf<ThreadIDInteger>;
-
 		for (ThreadIDInteger i = 1; i < MaxThreadID; ++i)
 		{
 			if (ourThreadIDs[i] == this)
 			{
-				index = i;
-				break;
+				ourThreadIDs[i] = nullptr;
+				return;
 			}
 		}
 
-		ourThreadIDs[index] = nullptr;
+		FATAL(L"ThreadID not found on destruction!");
 	}
 
 	ThreadIDInteger myID;

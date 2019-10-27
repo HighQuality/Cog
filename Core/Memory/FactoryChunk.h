@@ -98,6 +98,9 @@ class BaseFactoryChunk
 {
 public:
 	BaseFactoryChunk()
+		: mySlotsStatus{},
+		myGeneration{},
+		myIsPendingDestroy{}
 	{
 		for (i32 i = 0; i < NumChunkObjects; ++i)
 		{

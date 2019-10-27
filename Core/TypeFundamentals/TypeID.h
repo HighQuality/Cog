@@ -25,10 +25,7 @@ public:
 	TypeID(TypeID&&) = delete;
 	TypeID& operator=(TypeID&&) = delete;
 
-	static u16 MaxUnderlyingInteger()
-	{
-		return ourIDCounter;
-	}
+	FORCEINLINE static u16 MaxUnderlyingInteger() { return ourIDCounter; }
 
 	template <typename TType>
 	static const TypeID& Resolve()
@@ -37,8 +34,8 @@ public:
 		return type;
 	}
 
-	u16 GetUnderlyingInteger() const { return myID; }
-	const char* GetTypeInfoName() const { return myTypeInfo.name(); }
+	FORCEINLINE u16 GetUnderlyingInteger() const { return myID; }
+	FORCEINLINE const char* GetTypeInfoName() const { return myTypeInfo.name(); }
 
 	bool operator==(const TypeID& aOther)
 	{

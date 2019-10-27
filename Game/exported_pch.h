@@ -11,13 +11,14 @@ bool IsInGameThread();
 #include <Cog/InheritType.h>
 
 #include <Cog/Casts.h>
+#include <Cog/Class.h>
 #include <Cog/Pointer.h>
 #include <Cog/FrameData.h>
 
 Object& NewObjectByType(const TypeID<Object>& aTypeID);
 
 template <typename T>
-T& NewObject()
+T& NewObject(const Class<Object>& aType = Class<Object>())
 {
-	return static_cast<T&>(NewObjectByType(TypeID<Object>::Resolve<T>()));
+	return (T&)NewObjectByType(aType);
 }

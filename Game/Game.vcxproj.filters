@@ -34,5 +34,6 @@
     <ClInclude Include="Cog\TypeData.h" />
     <ClInclude Include="Cog\InheritType.h" />
     <ClInclude Include="Cog\Object.h" />
+    <ClInclude Include="Cog\Class.h" />
   </ItemGroup>
 </Project>
