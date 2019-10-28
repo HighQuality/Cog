@@ -14,13 +14,10 @@
 #include "VertexBuffer.h"
 #include "InputLayout.h"
 #include "RenderTarget.h"
-#include "ClientTypeList.h"
 #include "GpuCommand.h"
 
 ClientGame::ClientGame()
 {
-	RegisterTypes<ClientTypeList>();
-
 	myNextFramesGpuCommands = MakeUnique<EventList<GpuCommand>>();
 	myCurrentlyExecutingGpuCommands = MakeUnique<Array<GpuCommand>>();
 
@@ -29,6 +26,7 @@ ClientGame::ClientGame()
 
 ClientGame::~ClientGame()
 {
+	myCamera->Destroy();
 }
 
 bool ClientGame::ShouldKeepRunning() const

@@ -5,7 +5,6 @@
 #include <Threading/Fibers/Await.h>
 #include "Program.h"
 
-#include "TypeList.h"
 #include "ResourceManager.h"
 #include "MessageSystem.h"
 
@@ -16,9 +15,20 @@ bool IsInGameThread()
 	return GetGame().IsInGameThread();
 }
 
-Object& NewObjectByType(const TypeID<Object>& aTypeID)
+void RegisterTypeList(UniquePtr<TypeList>(*aTypeListCreator)());
+
+void InnerRunGame(UniquePtr<TypeList>(*aTypeListCreator)())
 {
-	return CogGame::GetCogGame().CreateObjectByType(aTypeID);
+	RegisterTypeList(aTypeListCreator);
+
+	Program::Create();
+
+	CogGame& game = NewObject<CogGame>();
+	game.Run();
+
+	game.ReturnToAllocator();
+
+	Program::Destroy();
 }
 
 CogGame::CogGame()
@@ -36,6 +46,11 @@ CogGame::CogGame()
 
 CogGame::~CogGame()
 {
+	myResourceManager->Destroy();
+
+	for (i32 i = 0; i < myScheduledDestroys.GetLength(); ++i)
+		TickDestroys();
+
 	ourGame = nullptr;
 }
 
@@ -66,19 +81,12 @@ void CogGame::Run()
 			myResourceManager->Tick();
 
 		SynchronizedTick(deltaTime);
-		
+
 		TickDestroys();
 	}
 }
 
-Object& CogGame::CreateObjectByType(const TypeID<Object>& aType)
-{
-	BaseFactory& factory = FindOrCreateObjectFactory(aType, [this, &aType]() { return myTypeList->GetTypeData(aType).AllocateFactory(); });
-
-	return *static_cast<Object*>(factory.AllocateRawObject());
-}
-
-void CogGame::SynchronizedTick(const Time & aDeltaTime)
+void CogGame::SynchronizedTick(const Time& aDeltaTime)
 {
 	QueueDispatchers(aDeltaTime);
 
@@ -89,11 +97,11 @@ void CogGame::SynchronizedTick(const Time & aDeltaTime)
 		gProgram->Run(false);
 }
 
-void CogGame::QueueDispatchers(const Time & aDeltaTime)
+void CogGame::QueueDispatchers(const Time& aDeltaTime)
 {
 	UpdateFrameData(*myFrameData, aDeltaTime);
 
-	gProgram->QueueHighPrioWork<CogGame>([](CogGame * aGame)
+	gProgram->QueueHighPrioWork<CogGame>([](CogGame* aGame)
 		{
 			aGame->DispatchTick();
 		}, this);
@@ -103,28 +111,12 @@ void CogGame::DispatchTick()
 {
 }
 
-BaseFactory& CogGame::FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, const FunctionView<BaseFactory*()>& aFactoryCreator)
-{
-	CHECK(IsInGameThread());
-	const u16 index = aObjectType.GetUnderlyingInteger();
-	myObjectFactories.Resize(TypeID<Object>::MaxUnderlyingInteger());
-	auto& factory = myObjectFactories[index];
-	if (!factory)
-		factory = aFactoryCreator();
-	return *factory;
-}
-
 void CogGame::CreateResourceManager()
 {
 	myResourceManager = NewObject<ResourceManager>();
 }
 
-void CogGame::AssignTypeList(UniquePtr<const TypeList> aTypeList)
-{
-	myTypeList = Move(aTypeList);
-}
-
-void CogGame::UpdateFrameData(FrameData & aData, const Time & aDeltaTime)
+void CogGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
 {
 	aData.deltaTime = aDeltaTime;
 }

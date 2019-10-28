@@ -1,11 +1,9 @@
 #pragma once
 #include <Cog/CogGame.h>
 
-class Game : public CogGame
+class Game : public InheritType<CogGame>
 {
 public:
-	using Base = CogGame;
-
 	Game();
 	~Game();
 };

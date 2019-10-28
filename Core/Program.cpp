@@ -35,7 +35,7 @@ Program::Program()
 
 	// Wait fo rall threads to start sleeping
 	std::unique_lock<std::mutex> lck(myWakeMainMutex);
-	
+
 	while (!myIsMainRunning)
 		myWakeMainNotify.wait(lck);
 }

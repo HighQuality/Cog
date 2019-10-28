@@ -39,7 +39,7 @@ void TypeList::BuildList()
 	}
 }
 
-TypeData& TypeList::Internal_AddType(const u16 aTypeID, const StringView& aTypeName, BaseFactory*(*aFactoryAllocator)(), nullptr_t)
+TypeData& TypeList::Internal_AddType(const u16 aTypeID, const StringView& aTypeName, UniquePtr<BaseFactory>(*aFactoryAllocator)(), nullptr_t)
 {
 	CHECK(aTypeName.GetLength() > 0);
 
@@ -58,7 +58,7 @@ TypeData& TypeList::Internal_AddType(const u16 aTypeID, const StringView& aTypeN
 	return data;
 }
 
-void TypeList::Internal_AddSpecialization(const StringView& aBaseName, const u16 aTypeID, const StringView& aSpecializationName, BaseFactory*(*aFactoryAllocator)(), nullptr_t)
+void TypeList::Internal_AddSpecialization(const StringView& aBaseName, const u16 aTypeID, const StringView& aSpecializationName, UniquePtr<BaseFactory>(*aFactoryAllocator)(), nullptr_t)
 {
 	TypeData& componentData = Internal_AddType(aTypeID, aSpecializationName, aFactoryAllocator, nullptr);
 	componentData.SetSpecializationOf(aBaseName);

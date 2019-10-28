@@ -16,7 +16,9 @@ public:
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(Object);
 
 	virtual bool Destroy();
-	
+
+	void ReturnToAllocator();
+
 	FORCEINLINE bool IsActivated() const;
 	FORCEINLINE bool IsPendingDestroy() const;
 
@@ -44,7 +46,6 @@ protected:
 
 	friend class CogGame;
 
-	void ReturnToAllocator();
 
 	BaseFactoryChunk* myChunk;
 	ChunkIndex myChunkIndex;

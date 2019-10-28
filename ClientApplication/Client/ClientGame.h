@@ -5,11 +5,9 @@ class Window;
 class RenderEngine;
 class BaseObjectFactory;
 
-class ClientGame : public Game
+class ClientGame : public InheritType<Game>
 {
 public:
-	using Base = Game;
-
 	ClientGame();
 	~ClientGame();
 

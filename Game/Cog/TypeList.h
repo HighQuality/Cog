@@ -4,10 +4,16 @@
 
 class Object;
 
-template <typename TComponentType>
-BaseFactory* CreateObjectFactory()
+template <typename TComponentType, EnableIf<!std::is_abstract_v<TComponentType>, int> = 0>
+UniquePtr<BaseFactory> CreateObjectFactory()
 {
-	return new Factory<TComponentType>();
+	return MakeUnique<Factory<TComponentType>>();
+}
+
+template <typename TComponentType, EnableIf<std::is_abstract_v<TComponentType>, int> = 0>
+UniquePtr<BaseFactory> CreateObjectFactory()
+{
+	FATAL(L"Can't instantiate object of abstract type");
 }
 
 #define CHECK_BASE_DECLARED(TType) \
@@ -63,8 +69,8 @@ public:
 
 protected:
 	// Use macros "REGISTER_TYPE" and "REGISTER_TYPE_SPECIALIZATION" instead
-	TypeData& Internal_AddType(u16 aTypeID, const StringView& aTypeName, BaseFactory*(*aFactoryAllocator)(), nullptr_t);
-	void Internal_AddSpecialization(const StringView& aBaseName, u16 aTypeID, const StringView& aSpecializationName, BaseFactory*(*aFactoryAllocator)(), nullptr_t);
+	TypeData& Internal_AddType(u16 aTypeID, const StringView& aTypeName, UniquePtr<BaseFactory>(*aFactoryAllocator)(), nullptr_t);
+	void Internal_AddSpecialization(const StringView& aBaseName, u16 aTypeID, const StringView& aSpecializationName, UniquePtr<BaseFactory>(*aFactoryAllocator)(), nullptr_t);
 
 	virtual void RegisterTypes();
 

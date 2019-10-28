@@ -15,10 +15,20 @@ bool IsInGameThread();
 #include <Cog/Pointer.h>
 #include <Cog/FrameData.h>
 
+class TypeList;
+
+void InnerRunGame(UniquePtr<TypeList>(*aTypeListCreator)());
+
+template <typename TTypeList>
+void RunGame()
+{
+	InnerRunGame([]() -> UniquePtr<TypeList> { return MakeUnique<TTypeList>(); });
+}
+
 Object& NewObjectByType(const TypeID<Object>& aTypeID);
 
 template <typename T>
-T& NewObject(const Class<Object>& aType = Class<Object>())
+T& NewObject(const Class<T>& aType = Class<T>())
 {
 	return (T&)NewObjectByType(aType);
 }

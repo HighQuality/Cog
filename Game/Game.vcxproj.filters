@@ -12,6 +12,7 @@
     <ClCompile Include="Cog\EngineTypeList.cpp" />
     <ClCompile Include="Game\GameTypeList.cpp" />
     <ClCompile Include="Cog\Object.cpp" />
+    <ClCompile Include="Cog\ObjectPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -35,5 +36,6 @@
     <ClInclude Include="Cog\InheritType.h" />
     <ClInclude Include="Cog\Object.h" />
     <ClInclude Include="Cog\Class.h" />
+    <ClInclude Include="Cog\ObjectPool.h" />
   </ItemGroup>
 </Project>

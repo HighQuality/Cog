@@ -14,9 +14,9 @@ public:
 	const TypeData* GetSpecialization() const { return mySpecialization; }
 	void SetSpecialization(TypeData& aSpecialization) { mySpecialization = &aSpecialization; }
 
-	void SetFactoryAllocator(BaseFactory*(*aFactoryAllocator)()) { myFactoryAllocator = aFactoryAllocator; }
+	void SetFactoryAllocator(UniquePtr<BaseFactory>(*aFactoryAllocator)()) { myFactoryAllocator = aFactoryAllocator; }
 
-	BaseFactory* AllocateFactory() const { return myFactoryAllocator(); }
+	UniquePtr<BaseFactory> AllocateFactory() const { return myFactoryAllocator(); }
 
 	bool operator==(const TypeData& aRight) const
 	{
@@ -57,5 +57,5 @@ private:
 	TypeData* mySpecialization = nullptr;
 	StringView myName; 
 	StringView mySpecializationOf;
-	BaseFactory*(*myFactoryAllocator)() = nullptr;
+	UniquePtr<BaseFactory>(*myFactoryAllocator)() = nullptr;
 };

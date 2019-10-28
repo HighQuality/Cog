@@ -1,11 +1,9 @@
 #pragma once
 #include <Game/Game.h>
 
-class ServerGame final : public Game
+class ServerGame final : public InheritType<Game>
 {
 public:
-	using Base = Game;
-
 	bool ShouldKeepRunning() const override;
 
 	ServerGame();

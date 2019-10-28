@@ -1,13 +1,8 @@
 #include "pch.h"
 #include "Program.h"
-#include <Client/ClientGame.h>
+#include "Client/ClientTypeList.h"
 
 int main()
 {
-	Program::Create();
-
-	ClientGame game;
-	game.Run();
-
-	Program::Destroy();
+	RunGame<ClientTypeList>();
 }

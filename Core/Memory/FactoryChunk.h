@@ -179,6 +179,7 @@ public:
 		if (myChunkedData)
 			myChunkedData->DefaultInitializeIndex(aIndex);
 
+		myIsPendingDestroy[aIndex] = false;
 		++myGeneration[aIndex];
 	}
 
