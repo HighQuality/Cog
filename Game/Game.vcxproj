@@ -91,6 +91,9 @@
       <AdditionalDependencies>Core.lib;WindowsPlatform.lib;libcurl.lib;snappy.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
+    <PreBuildEvent>
+      <Command>..\temp\bin\HeaderTool_$(Configuration)_$(Platform).exe $(ProjectDir)HeaderTool.json</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -124,6 +127,9 @@
       <AdditionalDependencies>Core.lib;WindowsPlatform.lib;libcurl.lib;snappy.lib;D3D11.lib;D3DCompiler.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
+    <PreBuildEvent>
+      <Command>..\temp\bin\HeaderTool_$(Configuration)_$(Platform).exe $(ProjectDir)HeaderTool.json</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Cog\CogGame.cpp" />
@@ -167,9 +173,18 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core\Core.vcxproj">
+      <Project>{80d74723-c2f4-4b70-aa6a-940d7fcc6e91}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\HeaderTool\HeaderTool.vcxproj">
+      <Project>{db5323be-3b8e-432c-9e86-1e4f373a0b61}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\WindowsPlatform\WindowsPlatform.vcxproj">
       <Project>{853c766d-cf9f-4af3-9605-48833c39d5d8}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HeaderTool.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

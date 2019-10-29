@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClientApplication", "Client
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerApplication", "ServerApplication\ServerApplication.vcxproj", "{0FA02028-1FB3-46C5-83C8-CDAE7056DE0F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeaderTool", "HeaderTool\HeaderTool.vcxproj", "{DB5323BE-3B8E-432C-9E86-1E4F373A0B61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{0FA02028-1FB3-46C5-83C8-CDAE7056DE0F}.Debug|x64.Build.0 = Debug|x64
 		{0FA02028-1FB3-46C5-83C8-CDAE7056DE0F}.Release|x64.ActiveCfg = Release|x64
 		{0FA02028-1FB3-46C5-83C8-CDAE7056DE0F}.Release|x64.Build.0 = Release|x64
+		{DB5323BE-3B8E-432C-9E86-1E4F373A0B61}.Debug|x64.ActiveCfg = Debug|x64
+		{DB5323BE-3B8E-432C-9E86-1E4F373A0B61}.Debug|x64.Build.0 = Debug|x64
+		{DB5323BE-3B8E-432C-9E86-1E4F373A0B61}.Release|x64.ActiveCfg = Release|x64
+		{DB5323BE-3B8E-432C-9E86-1E4F373A0B61}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

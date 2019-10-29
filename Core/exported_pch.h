@@ -9,6 +9,8 @@
 #define ARRAY_BOUNDSCHECK !PRODUCTION
 #endif
 
+#define JSON_NOEXCEPTION
+
 #ifdef _MSC_VER
 
 #pragma warning ( disable : 4100 ) // Unreferenced formal parameter

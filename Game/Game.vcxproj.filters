@@ -38,4 +38,7 @@
     <ClInclude Include="Cog\Class.h" />
     <ClInclude Include="Cog\ObjectPool.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="HeaderTool.json" />
+  </ItemGroup>
 </Project>
