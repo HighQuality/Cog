@@ -25,6 +25,8 @@
     <ClCompile Include="TypeFundamentals\Convert.cpp" />
     <ClCompile Include="Threading\Fibers\ReadFileAwaitable.cpp" />
     <ClCompile Include="Program.cpp" />
+    <ClCompile Include="String\WordReader.cpp" />
+    <ClCompile Include="String\GroupingWordReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -99,6 +101,10 @@
     <ClInclude Include="exported_pch.h" />
     <ClInclude Include="Memory\UniquePtr.h" />
     <ClInclude Include="Containers\TypeMap.h" />
+    <ClInclude Include="String\WordReader.h" />
+    <ClInclude Include="String\GroupingWordReader.h" />
+    <ClInclude Include="Utilities\Defer.h" />
+    <ClInclude Include="Utilities\BringIntoScope.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

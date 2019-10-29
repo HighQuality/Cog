@@ -22,6 +22,11 @@ inline void Append(String& aString, const StringSlice& aValue)
 	aString.Append(aValue);
 }
 
+inline void Append(String& aString, const Char aCharacter)
+{
+	aString.Add(aCharacter);
+}
+
 inline void Append(String& aString, const char* aValue)
 {
 	const i32 appendLength = static_cast<i32>(strlen(aValue));

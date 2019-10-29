@@ -82,6 +82,8 @@ public:
 		return std::wstring(GetData(), GetLength());
 	}
 
+	FORCEINLINE explicit operator bool() const { return GetLength() > 0; }
+
 	DECLARE_ARRAY_SLICE_FUNCTIONS(StringView);
 
 

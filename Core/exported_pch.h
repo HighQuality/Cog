@@ -76,6 +76,9 @@
 
 #include <External/CityHash/city.h>
 
+#include "Utilities/Defer.h"
+#include "Utilities/BringIntoScope.h"
+
 #include <TypeFundamentals/Types.h>
 #include <TypeFundamentals/TypeTraits.h>
 

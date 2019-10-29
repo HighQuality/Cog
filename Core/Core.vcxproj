@@ -110,6 +110,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="String\GroupingWordReader.cpp" />
     <ClCompile Include="Math\Random.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -137,10 +138,12 @@
     <ClCompile Include="Threading\ThreadPool\ThreadPool.cpp" />
     <ClCompile Include="UtilitiesTLS.cpp" />
     <ClCompile Include="Math\Vec2.cpp" />
+    <ClCompile Include="String\WordReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Containers\TypeMap.h" />
     <ClInclude Include="exported_pch.h" />
+    <ClInclude Include="String\GroupingWordReader.h" />
     <ClInclude Include="Math\CogTime.h" />
     <ClInclude Include="Math\Random.h" />
     <ClInclude Include="pch.h" />
@@ -191,6 +194,8 @@
     <ClInclude Include="Function\FunctionView.h" />
     <ClInclude Include="Containers\Hashing.h" />
     <ClInclude Include="Memory\UniquePtr.h" />
+    <ClInclude Include="Utilities\BringIntoScope.h" />
+    <ClInclude Include="Utilities\Defer.h" />
     <ClInclude Include="Web\HttpClient.h" />
     <ClInclude Include="Images\Image.h" />
     <ClInclude Include="Memory\InlineVirtualObject.h" />
@@ -211,6 +216,7 @@
     <ClInclude Include="UtilitiesTLS.h" />
     <ClInclude Include="Math\Vec2.h" />
     <ClInclude Include="Math\Vec4.h" />
+    <ClInclude Include="String\WordReader.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />
