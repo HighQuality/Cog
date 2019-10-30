@@ -5,6 +5,7 @@
 
 using ResourceLoaderFunction = ObjectFunctionView<void(const ArrayView<u8>&, BinaryData&)>;
 
+COGTYPE(SuperFast, ReallyCool, Abc)
 class Resource : public InheritType<Object>
 {
 public:

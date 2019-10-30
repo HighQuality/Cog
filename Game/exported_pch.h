@@ -2,6 +2,8 @@
 
 #include "../WindowsPlatform/exported_pch.h"
 
+#define COGTYPE(...)
+
 using ChunkIndex = u8;
 
 bool IsInGameThread();

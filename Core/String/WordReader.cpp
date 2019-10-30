@@ -93,7 +93,7 @@ void WordReader::Forward(const i32 aOffset)
 
 bool WordReader::IsWhitespace(const Char aCharacter)
 {
-	return iswspace(aCharacter);
+	return iswspace(aCharacter) || aCharacter == L'\0';
 }
 
 bool WordReader::IsLetterOrDigit(const Char aCharacter)
