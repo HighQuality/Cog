@@ -21,20 +21,27 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 			character = L'/';
 	}
 
-	if (projectDirectory.ClampedSliceFromEnd(1) == L"/")
-		projectDirectory.Pop();
+	if (projectDirectory.ClampedSliceFromEnd(1) != L"/")
+		projectDirectory.Add(L'/');
+	
+	const std::string projectDirectoryStd(projectDirectory);
+	std::ifstream f(projectDirectoryStd + "HeaderTool.json");
+	if (!f.is_open())
+	{
+		Println(L"Failed to open configuration file %", StringView(argv[1]));
+		return 2;
+	}
+	
+	nlohmann::json document;
+	f >> document;
+	
+	std::string typeList = document["type-list"].get<std::string>();
+	std::string typeIncludeFile = document["type-include-file"].get<std::string>();
 
-	// std::ifstream f(projectDirectory.GetData());
-	// if (!f.is_open())
-	// {
-	// 	Println(L"Failed to open configuration file %", StringView(argv[1]));
-	// 	return 2;
-	// }
-	// 
-	// nlohmann::json document;
-	// f >> document;
-	// 
-	// Println(L"", document["type-list"].get<std::string>().c_str());
+	std::ofstream typeIncludeFileStream(projectDirectoryStd + typeIncludeFile);
+	typeIncludeFileStream << "#pragma once" << std::endl;
+
+	CHECK(typeIncludeFileStream.is_open());
 
 	Directory d(nullptr, projectDirectory);
 
@@ -91,15 +98,17 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
 						reader.Next();
 
-						const StringView ClassType = reader.GetCurrentWordOrGroup();
+						const StringView classType = reader.GetCurrentWordOrGroup();
 
-						if (ClassType == L"struct" || ClassType == L"class")
+						if (classType == L"struct" || classType == L"class")
 						{
 							if (reader.Next() && !reader.IsAtGroup())
 							{
-								const StringView ClassName = reader.GetCurrentWordOrGroup();
+								const StringView className = reader.GetCurrentWordOrGroup();
 
-								Println(L"COGTYPE % declared with %", ClassName, ClassType);
+								typeIncludeFileStream << std::string(Format(L"#include \"%\"", file->GetAbsolutePath())) << std::endl;
+								
+								Println(L"COGTYPE % declared with %", className, classType);
 							}
 							else
 							{
@@ -109,7 +118,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 						}
 						else
 						{
-							Println(L"Expected \"struct\" or \"class\"");
+							Println(L"Expected \"struct\" or \"class\", got %", classType);
 							return 3;
 						}
 					}
@@ -118,7 +127,8 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 		}
 	}
 
+	typeIncludeFileStream.flush();
+	typeIncludeFileStream.close();
 
-	std::cin.get();
 	return 0;
 }

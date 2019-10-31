@@ -76,6 +76,20 @@ public:
 		Super::Append(aString);
 	}
 
+	explicit operator std::wstring() const
+	{
+		return std::wstring(GetData(), GetLength());
+	}
+
+	explicit operator std::string() const
+	{
+		std::string string;
+		string.reserve(GetLength());
+		for (const Char character : *this)
+			string.push_back(static_cast<char>(character));
+		return string;
+	}
+
 	DECLARE_ARRAY_SLICE_FUNCTIONS(StringSlice);
 
 };
