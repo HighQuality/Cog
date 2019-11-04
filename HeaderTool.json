@@ -1,0 +1,13 @@
+{
+	"projectName": "ExampleGame",
+	
+	"projects":
+	[
+		"ClientApplication",
+		"ServerApplication",
+		"Game",
+		"WindowsPlatform",
+		"Cog",
+		"Core"
+	]
+}

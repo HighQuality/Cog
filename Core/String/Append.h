@@ -64,7 +64,11 @@ inline void Append(String& aString, const wchar_t(&aValue)[N])
 template <size_t N>
 inline void Append(String& aString, const char(&aValue)[N])
 {
-	aString.Append(String(aValue).View());
+	const i32 appendLength = static_cast<i32>(N);
+	const i32 oldLength = aString.GetLength();
+	aString.Resize(oldLength + appendLength);
+	for (i32 i = 0; i < appendLength; ++i)
+ 		aString[oldLength + i] = aValue[i]; 
 }
 
 template <typename T>

@@ -1,5 +1,6 @@
 #pragma once
 
+class String;
 class StringSlice;
 
 class StringView : public ArrayView<Char>
@@ -49,6 +50,10 @@ public:
 	{
 		return !(*this == aString);
 	}
+
+	String ToLower() const;
+
+	String ToUpper() const;
 
 	bool Contains(const StringView& aString) const
 	{
@@ -103,4 +108,26 @@ FORCEINLINE ::std::wostream & operator<<(::std::wostream & aOut, const StringVie
 FORCEINLINE StringView::StringView(const StringSlice & aStringSlice)
 	: Super(aStringSlice)
 {
+}
+
+#include "CogString.h"
+
+inline String StringView::ToLower() const
+{
+	String str;
+	const i32 length = GetLength();
+	str.Resize(length);
+	for (i32 i = 0; i < length; ++i)
+		str[i] = towlower((*this)[i]);
+	return str;
+}
+
+inline String StringView::ToUpper() const
+{
+	String str;
+	const i32 length = GetLength();
+	str.Resize(length);
+	for (i32 i = 0; i < length; ++i)
+		str[i] = towupper((*this)[i]);
+	return str;
 }

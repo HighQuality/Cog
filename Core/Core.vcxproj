@@ -110,6 +110,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="String\StringTemplate.cpp" />
     <ClCompile Include="String\GroupingWordReader.cpp" />
     <ClCompile Include="Math\Random.cpp" />
     <ClCompile Include="pch.cpp">
@@ -143,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="Containers\TypeMap.h" />
     <ClInclude Include="exported_pch.h" />
+    <ClInclude Include="String\StringTemplate.h" />
     <ClInclude Include="String\GroupingWordReader.h" />
     <ClInclude Include="Math\CogTime.h" />
     <ClInclude Include="Math\Random.h" />

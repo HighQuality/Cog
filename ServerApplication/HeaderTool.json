@@ -1,8 +1,9 @@
 {
-	"type": "library",
+	"type": "executable",
 	"preprocess": true,
 	"references":
 	[
+		"Game",
 		"Cog",
 		"Core"
 	]

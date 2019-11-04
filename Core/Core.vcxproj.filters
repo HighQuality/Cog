@@ -27,6 +27,7 @@
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="String\WordReader.cpp" />
     <ClCompile Include="String\GroupingWordReader.cpp" />
+    <ClCompile Include="String\StringTemplate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -105,6 +106,7 @@
     <ClInclude Include="String\GroupingWordReader.h" />
     <ClInclude Include="Utilities\Defer.h" />
     <ClInclude Include="Utilities\BringIntoScope.h" />
+    <ClInclude Include="String\StringTemplate.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

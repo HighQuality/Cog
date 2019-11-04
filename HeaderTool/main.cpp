@@ -1,9 +1,9 @@
 #include "pch.h"
-#include <External/json.h>
 #include <fstream>
 #include <Filesystem/Directory.h>
 #include <Filesystem/File.h>
 #include <String/GroupingWordReader.h>
+#include <Solution.h>
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
@@ -14,34 +14,17 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 	}
 	
 	String projectDirectory(argv[1]);
+	projectDirectory.Replace(L'\\', L'/');
 
-	for (Char& character : projectDirectory)
-	{
-		if (character == L'\\')
-			character = L'/';
-	}
-
-	if (projectDirectory.ClampedSliceFromEnd(1) != L"/")
-		projectDirectory.Add(L'/');
+	if (projectDirectory.ClampedSliceFromEnd(1) == L"/")
+		projectDirectory.Pop();
 	
-	const std::string projectDirectoryStd(projectDirectory);
-	std::ifstream f(projectDirectoryStd + "HeaderTool.json");
-	if (!f.is_open())
-	{
-		Println(L"Failed to open configuration file %", StringView(argv[1]));
-		return 2;
-	}
-	
-	nlohmann::json document;
-	f >> document;
-	
-	std::string typeList = document["type-list"].get<std::string>();
-	std::string typeIncludeFile = document["type-include-file"].get<std::string>();
+	Solution solution(projectDirectory);
 
-	std::ofstream typeIncludeFileStream(projectDirectoryStd + typeIncludeFile);
-	typeIncludeFileStream << "#pragma once" << std::endl;
-
-	CHECK(typeIncludeFileStream.is_open());
+	// std::ofstream typeIncludeFileStream(Format(L"%/%", projectDirectoryStd, typeIncludeFile);
+	// typeIncludeFileStream << "#pragma once" << std::endl;
+	// 
+	// CHECK(typeIncludeFileStream.is_open());
 
 	Directory d(nullptr, projectDirectory);
 
@@ -106,7 +89,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 							{
 								const StringView className = reader.GetCurrentWordOrGroup();
 
-								typeIncludeFileStream << std::string(Format(L"#include \"%\"", file->GetAbsolutePath())) << std::endl;
+								// typeIncludeFileStream << std::string(Format(L"#include \"%\"", file->GetAbsolutePath())) << std::endl;
 								
 								Println(L"COGTYPE % declared with %", className, classType);
 							}
@@ -126,9 +109,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 			}
 		}
 	}
-
-	typeIncludeFileStream.flush();
-	typeIncludeFileStream.close();
-
+	
 	return 0;
 }

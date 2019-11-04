@@ -22,6 +22,17 @@ public:
 	template <typename TAllocator, bool ZeroOnePastEnd>
 	ArraySlice& operator=(Array<T, TAllocator, ZeroOnePastEnd>&&) = delete;
 
+	void Replace(const T& aElement, const T& aReplacement)
+	{
+		for (i32 i = 0; i < this->GetLength(); ++i)
+		{
+			if ((*this)[i] == aElement)
+			{
+				(*this)[i] = aReplacement;
+			}
+		}
+	}
+
 	FORCEINLINE T& operator[](const i32 aIndex)
 	{
 #if ARRAY_BOUNDSCHECK

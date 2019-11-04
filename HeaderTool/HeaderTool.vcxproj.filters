@@ -3,8 +3,12 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Solution.cpp" />
+    <ClCompile Include="Project.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Project.h" />
+    <ClInclude Include="Solution.h" />
   </ItemGroup>
 </Project>

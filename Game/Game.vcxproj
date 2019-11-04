@@ -92,7 +92,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
-      <Command>..\temp\bin\HeaderTool_$(Configuration)_$(Platform).exe $(ProjectDir)</Command>
+      <Command>..\temp\bin\HeaderTool_$(Configuration)_$(Platform).exe $(SolutionDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -128,7 +128,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
-      <Command>..\temp\bin\HeaderTool_$(Configuration)_$(Platform).exe $(ProjectDir)</Command>
+      <Command>..\temp\bin\HeaderTool_$(Configuration)_$(Platform).exe $(SolutionDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

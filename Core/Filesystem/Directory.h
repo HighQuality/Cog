@@ -31,7 +31,6 @@ public:
 	
 private:
 	static File * CastToFile(FileSystemEntry * aPointer);
-	static String ToLower(StringView aString);
 	FileSystemEntry * GetEntryFromThisDirectory(StringView aEntry);
 	FileSystemEntry* GetEntryDrivePath(StringView aDrivePath);
 

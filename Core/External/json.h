@@ -1754,7 +1754,7 @@ JSON_HEDLEY_DIAGNOSTIC_POP
 #define JSON_INTERNAL_CATCH(exception) catch(exception)
 #else
 #include <cstdlib>
-#define JSON_THROW(exception) std::abort()
+#define JSON_THROW(exception) do { FATAL(L"json error"); } while (false)
 #define JSON_TRY if(true)
 #define JSON_CATCH(exception) if(false)
 #define JSON_INTERNAL_CATCH(exception) if(false)
@@ -22811,6 +22811,8 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 #undef JSON_HEDLEY_VERSION_ENCODE
 #undef JSON_HEDLEY_WARNING
 #undef JSON_HEDLEY_WARN_UNUSED_RESULT
+
+using json = nlohmann::json;
 
 #pragma warning (pop)
 

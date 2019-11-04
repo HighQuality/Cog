@@ -311,16 +311,29 @@ public:
 
 		++myLength;
 		Pair& pair = values.Add(Pair());
-		pair.key = Move(aKey);
+		pair.key = TKey(Move(aKey));
 		pair.value = TValue();
 		return pair.value;
 	}
 
-	FORCEINLINE TValue& Add(FindType aKey, TValue aValue)
+	FORCEINLINE TValue& Add(TKey aKey, TValue aValue)
 	{
-		TValue& value = FindOrAdd(aKey);
-		value = Move(aValue);
-		return value;
+		ConsiderGrow();
+
+		const size_t hash = HashOf<TKey>(aKey);
+		const i32 bucketIndex = hash % myBuckets.GetLength();
+		Array<Pair>& values = myBuckets[bucketIndex];
+		for (i32 i = 0; i < values.GetLength(); ++i)
+		{
+			if (aKey == values[i].key)
+				FATAL(L"Key already present");
+		}
+
+		++myLength;
+		Pair& pair = values.Add(Pair());
+		pair.key = Move(aKey);
+		pair.value = TValue(Move(aValue));
+		return pair.value;
 	}
 
 	FORCEINLINE TValue& operator[](FindType aKey)

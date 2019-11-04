@@ -1,8 +1,10 @@
 {
-	"type": "library",
+	"type": "executable",
 	"preprocess": true,
 	"references":
 	[
+		"WindowsPlatform",
+		"Game",
 		"Cog",
 		"Core"
 	]

@@ -3,7 +3,6 @@
 	"preprocess": true,
 	"references":
 	[
-		"Cog",
 		"Core"
 	]
 }

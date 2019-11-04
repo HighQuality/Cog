@@ -80,6 +80,18 @@ template <typename T>
 constexpr bool IsReference = IsReferenceImpl<T>::Value;
 
 template <typename T>
+struct IsPointerImpl { static constexpr bool Value = false; };
+
+template <typename T>
+struct IsPointerImpl<T*> { static constexpr bool Value = true; };
+
+template <typename T>
+struct IsPointerImpl<const T*> { static constexpr bool Value = true; };
+
+template <typename T>
+constexpr bool IsPointer = IsPointerImpl<T>::Value;
+
+template <typename T>
 struct IsLValueReferenceImpl { static constexpr bool Value = false; };
 template <typename T>
 struct IsLValueReferenceImpl<T&> { static constexpr bool Value = true; };

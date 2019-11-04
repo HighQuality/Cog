@@ -4,7 +4,15 @@
 template <typename T>
 FORCEINLINE size_t HashOf(const T & aValue)
 {
-	return std::hash<T>()(aValue);
+	if constexpr (IsPointer<T>)
+	{
+		static const size_t shift = (size_t)log2(1 + sizeof(*aValue));
+		return (size_t)(aValue) >> shift;
+	}
+	else
+	{
+		return std::hash<T>()(aValue);
+	}
 }
 
 template<>

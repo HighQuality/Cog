@@ -48,8 +48,8 @@
 					u64 lastWriteTime = static_cast<u64>(data.ftLastWriteTime.dwHighDateTime) << 32 | data.ftLastWriteTime.dwLowDateTime;
 					entry = std::make_unique<File>(*this, newPath, fileSize, lastWriteTime);
 				}
-	
-				myFileSystemEntries.Add(ToLower(fileName), entry.release());
+				
+				myFileSystemEntries.Add(fileName.ToLower(), entry.release());
 	
 			} while (FindNextFileW(findHandle, &data));
 			FindClose(findHandle);
@@ -123,15 +123,6 @@
 		return static_cast<File*>(aPointer);
 	}
 	
-	String Directory::ToLower(StringView aString)
-	{
-		String lower;
-		lower.Resize(aString.GetLength());
-		for (i32 i = 0; i < aString.GetLength(); ++i)
-			lower[i] = towlower(aString[i]);
-		return lower;
-	}
-	
 	FileSystemEntry * Directory::GetEntryFromThisDirectory(StringView aEntry)
 	{
 		if (aEntry == L"." || aEntry == L"")
@@ -139,7 +130,7 @@
 		if (aEntry == L"..")
 			return GetParentDirectory();
 	
-		FileSystemEntry ** ptr = myFileSystemEntries.Find(ToLower(aEntry));
+		FileSystemEntry ** ptr = myFileSystemEntries.Find(aEntry.ToLower());
 		if (ptr)
 			return *ptr;
 		return nullptr;
