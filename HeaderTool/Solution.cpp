@@ -129,7 +129,7 @@ void Solution::GenerateSolutionFile(const StringView aSolutionTemplate) const
 	const String outputFile = Format(L"%/%.sln", directory->GetAbsolutePath(), solutionName);
 
 	StringTemplate documentTemplate = StringTemplate(String(aSolutionTemplate));
-	StringTemplate projectTemplate(String(L"Project(\"${ProjectTypeGuid}\") = \"${ProjectName}\", \"${ProjectName}\\${ProjectName}_generated.vcxproj\", \"${ProjectGuid}\""));
+	StringTemplate projectTemplate(String(L"Project(\"${ProjectTypeGuid}\") = \"${ProjectName}\", \"${ProjectName}\\${ProjectName}.vcxproj\", \"${ProjectGuid}\""));
 	StringTemplate configurationTemplate(String(L"\t\t${ProjectGuid}.Debug|x64.ActiveCfg = Debug|x64\n\t\t${ProjectGuid}.Debug|x64.Build.0 = Debug|x64\n\t\t${ProjectGuid}.Release|x64.ActiveCfg = Release|x64\n\t\t${ProjectGuid}.Release|x64.Build.0 = Release|x64"));
 
 	CHECK(vsCppProjectTypeGuid.GetLength() > 0);

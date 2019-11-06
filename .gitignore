@@ -324,5 +324,13 @@ ASALocalRun/
 
 temp/
 lib/
+HeaderTool/bin
+
+*.vcxproj
+*.sln
 
 !extlibs/**
+!bin/HeaderTool.exe
+!HeaderTool/HeaderTool.vcxproj
+!HeaderTool/HeaderTool.vcxproj.user
+!HeaderTool.sln

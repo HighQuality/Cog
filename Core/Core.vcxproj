@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{80D74723-C2F4-4B70-AA6A-940D7FCC6E91}</ProjectGuid>
-    <RootNamespace>Core</RootNamespace>
+    <RootNamespace>$(ProjectName}</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -46,13 +46,13 @@
     <TargetName>$(ProjectName)</TargetName>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
     <OutDir>$(SolutionDir)lib\$(Configuration)_$(Platform)\</OutDir>
-    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>..\extlibs\snappy\include;..\extlibs\libcurl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>$(ProjectName)</TargetName>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
     <OutDir>$(SolutionDir)lib\$(Configuration)_$(Platform)\</OutDir>
-    <IncludePath>..\extlibs\libcurl\include;..\extlibs\snappy\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>..\extlibs\snappy\include;..\extlibs\libcurl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -110,115 +110,118 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="String\StringTemplate.cpp" />
-    <ClCompile Include="String\GroupingWordReader.cpp" />
-    <ClCompile Include="Math\Random.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Program.cpp" />
-    <ClCompile Include="Threading\Fibers\Await.cpp" />
-    <ClCompile Include="Threading\Fibers\Awaitable.cpp" />
-    <ClCompile Include="Threading\ThreadPool\AwaitableWorkItem.cpp" />
-    <ClCompile Include="Images\ByteColor.cpp" />
-    <ClCompile Include="TypeFundamentals\Convert.cpp" />
-    <ClCompile Include="Debug\DebugAsserts.cpp" />
-    <ClCompile Include="Filesystem\Directory.cpp" />
-    <ClCompile Include="External\CityHash\city.cc" />
-    <ClCompile Include="External\lodepng.cpp" />
-    <ClCompile Include="Threading\Fibers\Fiber.cpp" />
-    <ClCompile Include="Filesystem\File.cpp" />
-    <ClCompile Include="Filesystem\FilesystemEntry.cpp" />
-    <ClCompile Include="Web\HttpClient.cpp" />
-    <ClCompile Include="Images\Image.cpp" />
-    <ClCompile Include="Images\LinearColor.cpp" />
-    <ClCompile Include="Threading\Fibers\ReadFileAwaitable.cpp" />
-    <ClCompile Include="Time\Stopwatch.cpp" />
-    <ClCompile Include="Threading\ThreadID.cpp" />
-    <ClCompile Include="Threading\ThreadPool\ThreadPool.cpp" />
     <ClCompile Include="UtilitiesTLS.cpp" />
+    <ClCompile Include="Program.cpp" />
+    <ClCompile Include="Filesystem\FilesystemEntry.cpp" />
+    <ClCompile Include="Filesystem\Directory.cpp" />
+    <ClCompile Include="Filesystem\File.cpp" />
+    <ClCompile Include="Time\Stopwatch.cpp" />
     <ClCompile Include="Math\Vec2.cpp" />
+    <ClCompile Include="Math\Random.cpp" />
+    <ClCompile Include="Images\ByteColor.cpp" />
+    <ClCompile Include="Images\LinearColor.cpp" />
+    <ClCompile Include="Images\Image.cpp" />
+    <ClCompile Include="External\lodepng.cpp" />
+    <ClCompile Include="External\CityHash\city.cc" />
+    <ClCompile Include="Debug\DebugAsserts.cpp" />
+    <ClCompile Include="Threading\ThreadID.cpp" />
+    <ClCompile Include="Threading\Fibers\Fiber.cpp" />
+    <ClCompile Include="Threading\Fibers\Await.cpp" />
+    <ClCompile Include="Threading\Fibers\ReadFileAwaitable.cpp" />
+    <ClCompile Include="Threading\Fibers\Awaitable.cpp" />
+    <ClCompile Include="Threading\ThreadPool\ThreadPool.cpp" />
+    <ClCompile Include="Threading\ThreadPool\AwaitableWorkItem.cpp" />
     <ClCompile Include="String\WordReader.cpp" />
+    <ClCompile Include="String\GroupingWordReader.cpp" />
+    <ClCompile Include="String\StringTemplate.cpp" />
+    <ClCompile Include="TypeFundamentals\Convert.cpp" />
+    <ClCompile Include="Web\HttpClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Containers\TypeMap.h" />
-    <ClInclude Include="exported_pch.h" />
-    <ClInclude Include="String\StringTemplate.h" />
-    <ClInclude Include="String\GroupingWordReader.h" />
-    <ClInclude Include="Math\CogTime.h" />
-    <ClInclude Include="Math\Random.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Math\Angle.h" />
+    <ClInclude Include="exported_pch.h" />
     <ClInclude Include="Program.h" />
-    <ClInclude Include="String\Append.h" />
-    <ClInclude Include="Containers\ArraySlice.h" />
-    <ClInclude Include="Containers\ArrayView.h" />
-    <ClInclude Include="Threading\Fibers\Await.h" />
-    <ClInclude Include="Threading\Fibers\Awaitable.h" />
-    <ClInclude Include="Threading\ThreadPool\AwaitableWorkItem.h" />
-    <ClInclude Include="Threading\Fibers\BackgroundWorkAwaitable.h" />
-    <ClInclude Include="Threading\Barrier.h" />
-    <ClInclude Include="Memory\BaseFactory.h" />
-    <ClInclude Include="Containers\BinaryData.h" />
-    <ClInclude Include="Containers\Bitfield.h" />
-    <ClInclude Include="Containers\Bitset.h" />
-    <ClInclude Include="Containers\BitsetForEachTables.h" />
-    <ClInclude Include="Images\ByteColor.h" />
-    <ClInclude Include="Containers\CogArray.h" />
-    <ClInclude Include="Math\CogMath.h" />
-    <ClInclude Include="Containers\CogStack.h" />
-    <ClInclude Include="String\CogString.h" />
-    <ClInclude Include="String\CogStringSlice.h" />
-    <ClInclude Include="String\CogStringView.h" />
-    <ClInclude Include="Time\CogTime.h" />
-    <ClInclude Include="TypeFundamentals\Convert.h" />
-    <ClInclude Include="Debug\DebugAsserts.h" />
+    <ClInclude Include="UtilitiesTLS.h" />
     <ClInclude Include="Filesystem\Directory.h" />
-    <ClInclude Include="Containers\EventList.h" />
-    <ClInclude Include="External\CityHash\city.h" />
-    <ClInclude Include="External\CityHash\citycrc.h" />
-    <ClInclude Include="External\CityHash\config.h" />
-    <ClInclude Include="External\json.h" />
-    <ClInclude Include="External\lodepng.h" />
-    <ClInclude Include="External\pcg32.h" />
-    <ClInclude Include="External\pcg32_8.h" />
-    <ClInclude Include="Memory\Factory.h" />
-    <ClInclude Include="Memory\FactoryChunk.h" />
-    <ClInclude Include="Threading\Fibers\Fiber.h" />
-    <ClInclude Include="Threading\Fibers\FiberHandle.h" />
-    <ClInclude Include="Threading\Fibers\FiberLocalStorage.h" />
-    <ClInclude Include="Threading\Fibers\FiberResumeData.h" />
-    <ClInclude Include="Filesystem\File.h" />
     <ClInclude Include="Filesystem\FilesystemEntry.h" />
-    <ClInclude Include="String\Format.h" />
+    <ClInclude Include="Filesystem\File.h" />
+    <ClInclude Include="Time\CogTime.h" />
+    <ClInclude Include="Time\Stopwatch.h" />
+    <ClInclude Include="Containers\Hashing.h" />
+    <ClInclude Include="Containers\CogStack.h" />
+    <ClInclude Include="Containers\BinaryData.h" />
+    <ClInclude Include="Containers\CogArray.h" />
+    <ClInclude Include="Containers\ArraySlice.h" />
+    <ClInclude Include="Containers\Bitset.h" />
+    <ClInclude Include="Containers\TypeMap.h" />
+    <ClInclude Include="Containers\Map.h" />
+    <ClInclude Include="Containers\ArrayView.h" />
+    <ClInclude Include="Containers\BitsetForEachTables.h" />
+    <ClInclude Include="Containers\EventList.h" />
+    <ClInclude Include="Containers\Bitfield.h" />
+    <ClInclude Include="Math\Angle.h" />
+    <ClInclude Include="Math\CogTime.h" />
+    <ClInclude Include="Math\Vec4.h" />
+    <ClInclude Include="Math\CogMath.h" />
+    <ClInclude Include="Math\Vec2.h" />
+    <ClInclude Include="Math\Random.h" />
+    <ClInclude Include="Images\LinearColor.h" />
+    <ClInclude Include="Images\ByteColor.h" />
+    <ClInclude Include="Images\Image.h" />
     <ClInclude Include="Function\Function.h" />
     <ClInclude Include="Function\FunctionView.h" />
-    <ClInclude Include="Containers\Hashing.h" />
-    <ClInclude Include="Memory\UniquePtr.h" />
-    <ClInclude Include="Utilities\BringIntoScope.h" />
-    <ClInclude Include="Utilities\Defer.h" />
-    <ClInclude Include="Web\HttpClient.h" />
-    <ClInclude Include="Images\Image.h" />
-    <ClInclude Include="Memory\InlineVirtualObject.h" />
-    <ClInclude Include="Images\LinearColor.h" />
-    <ClInclude Include="Containers\Map.h" />
     <ClInclude Include="Function\MemberFunctionPointer.h" />
     <ClInclude Include="Memory\MemoryBlock.h" />
-    <ClInclude Include="TypeFundamentals\Optional.h" />
-    <ClInclude Include="Threading\Fibers\ReadFileAwaitable.h" />
+    <ClInclude Include="Memory\UniquePtr.h" />
+    <ClInclude Include="Memory\Factory.h" />
+    <ClInclude Include="Memory\BaseFactory.h" />
+    <ClInclude Include="Memory\InlineVirtualObject.h" />
+    <ClInclude Include="Memory\FactoryChunk.h" />
+    <ClInclude Include="External\pcg32.h" />
+    <ClInclude Include="External\json.h" />
+    <ClInclude Include="External\pcg32_8.h" />
+    <ClInclude Include="External\lodepng.h" />
+    <ClInclude Include="External\CityHash\config.h" />
+    <ClInclude Include="External\CityHash\city.h" />
+    <ClInclude Include="External\CityHash\citycrc.h" />
+    <ClInclude Include="Utilities\BringIntoScope.h" />
+    <ClInclude Include="Utilities\Defer.h" />
+    <ClInclude Include="Debug\DebugAsserts.h" />
     <ClInclude Include="Threading\Semaphore.h" />
-    <ClInclude Include="Time\Stopwatch.h" />
-    <ClInclude Include="Threading\ThreadID.h" />
     <ClInclude Include="Threading\ThreadLocalStack.h" />
+    <ClInclude Include="Threading\Barrier.h" />
+    <ClInclude Include="Threading\ThreadID.h" />
+    <ClInclude Include="Threading\Fibers\FiberHandle.h" />
+    <ClInclude Include="Threading\Fibers\BackgroundWorkAwaitable.h" />
+    <ClInclude Include="Threading\Fibers\FiberLocalStorage.h" />
+    <ClInclude Include="Threading\Fibers\FiberResumeData.h" />
+    <ClInclude Include="Threading\Fibers\Await.h" />
+    <ClInclude Include="Threading\Fibers\Awaitable.h" />
+    <ClInclude Include="Threading\Fibers\Fiber.h" />
+    <ClInclude Include="Threading\Fibers\ReadFileAwaitable.h" />
+    <ClInclude Include="Threading\ThreadPool\AwaitableWorkItem.h" />
     <ClInclude Include="Threading\ThreadPool\ThreadPool.h" />
-    <ClInclude Include="TypeFundamentals\TypeID.h" />
+    <ClInclude Include="String\Format.h" />
+    <ClInclude Include="String\WordReader.h" />
+    <ClInclude Include="String\GroupingWordReader.h" />
+    <ClInclude Include="String\CogStringView.h" />
+    <ClInclude Include="String\StringTemplate.h" />
+    <ClInclude Include="String\CogStringSlice.h" />
+    <ClInclude Include="String\CogString.h" />
+    <ClInclude Include="String\Append.h" />
     <ClInclude Include="TypeFundamentals\Types.h" />
     <ClInclude Include="TypeFundamentals\TypeTraits.h" />
-    <ClInclude Include="UtilitiesTLS.h" />
-    <ClInclude Include="Math\Vec2.h" />
-    <ClInclude Include="Math\Vec4.h" />
-    <ClInclude Include="String\WordReader.h" />
+    <ClInclude Include="TypeFundamentals\Optional.h" />
+    <ClInclude Include="TypeFundamentals\TypeID.h" />
+    <ClInclude Include="TypeFundamentals\Convert.h" />
+    <ClInclude Include="Web\HttpClient.h" />
+  </ItemGroup>
+  <ItemGroup>
+
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

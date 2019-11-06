@@ -17,11 +17,11 @@ public:
 	u64 GetLastWriteTime() const;
 
 	// Includes extension but not path (eg "test.dds")
-	FORCEINLINE const StringView & GetFilename() const { return GetName(); }
+	FORCEINLINE StringView GetFilename() const { return GetName(); }
 	// Does not include path (eg "test")
-	FORCEINLINE const StringView & GetFilenameWithoutExtension() const { return myFilenameWithoutExtension; }
+	FORCEINLINE StringView GetFilenameWithoutExtension() const { return myFilenameWithoutExtension; }
 	// Includes dot (eg ".dds")
-	FORCEINLINE const StringView & GetExtension() const { return myExtension; }
+	FORCEINLINE StringView GetExtension() const { return myExtension; }
 
 	Array<u8> ReadFile() const;
 	String ReadString() const;

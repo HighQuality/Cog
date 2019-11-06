@@ -76,7 +76,7 @@ Project::Project(Directory* aProjectDirectory)
 
 				if (aFile.GetExtension() == L".h" || aFile.GetExtension() == L".hpp")
 					headerFiles.Add(aFile.GetRelativePath(*aProjectDirectory));
-				else if (aFile.GetExtension() == L".c" || aFile.GetExtension() == L".cpp")
+				else if (aFile.GetExtension() == L".c" || aFile.GetExtension() == L".cpp" || aFile.GetExtension() == L".cc")
 					sourceFiles.Add(aFile.GetRelativePath(*aProjectDirectory));
 			}, true);
 	}
@@ -93,7 +93,7 @@ void Project::ResolveReferences(const Map<String, Project*>& aProjects)
 		if (Project* referencedProject = aProjects.Find(referenceName.View(), nullptr))
 		{
 			references.Add(referencedProject);
-			extraIncludePaths.Add(Format(L"../%", referencedProject->projectName));
+			extraIncludePaths.Add(Format(L"..\\%", referencedProject->projectName));
 			linkDependencies.Add(Format(L"%.lib", referencedProject->projectName));
 		}
 		else
@@ -124,6 +124,8 @@ void Project::GenerateProjectFile(StringView aProjectTemplate) const
 			includePaths.Add(L';');
 		}
 
+		includePaths.Replace(L'/', L'\\');
+
 		documentTemplate.AddParameter(String(L"ExtraIncludePaths"), Move(includePaths));
 	}
 
@@ -138,6 +140,8 @@ void Project::GenerateProjectFile(StringView aProjectTemplate) const
 			libraryPaths.Add(L';');
 		}
 
+		libraryPaths.Replace(L'/', L'\\');
+
 		documentTemplate.AddParameter(String(L"ExtraLibraryPaths"), Move(libraryPaths));
 	}
 
@@ -151,6 +155,8 @@ void Project::GenerateProjectFile(StringView aProjectTemplate) const
 			extraLinkDependencies.Append(pair.key);
 			extraLinkDependencies.Add(L';');
 		}
+
+		extraLinkDependencies.Replace(L'/', L'\\');
 
 		documentTemplate.AddParameter(String(L"ExtraLinkDependencies"), Move(extraLinkDependencies));
 	}
