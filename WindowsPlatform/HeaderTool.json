@@ -1,9 +1,22 @@
 {
 	"type": "library",
 	"preprocess": true,
+	"projectGuid": "{853C766D-CF9F-4AF3-9605-48833C39D5D8}",
 	"references":
 	[
 		"Cog",
 		"Core"
-	]
+	],
+	"includePaths": [ ],
+	"linkDependencies":
+	[
+		"wldap32.lib",
+		"crypt32.lib",
+		"Ws2_32.lib",
+		"D3D11.lib",
+		"D3DCompiler.lib",
+		"DXGI.lib",
+		"dxguid.lib"
+	],
+	"libraryPaths": []
 }

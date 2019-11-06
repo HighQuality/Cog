@@ -2,12 +2,13 @@
 #include "DebugAsserts.h"
 #include <Windows.h>
 
-void EnsureLog(const char* aCondition)
+void EnsureLog(const StringView aMessage)
 {
-	std::cout << "ensure(" << aCondition << ") failed" << std::endl;
+	OutputDebugStringW(aMessage.GetData());
+	std::wcout << aMessage << std::flush;
 }
 
-void ErrorLog(StringView aMessage)
+void ErrorLog(const StringView aMessage)
 {
 	OutputDebugStringW(aMessage.GetData());
 	std::wcout << aMessage << std::flush;

@@ -1,8 +1,12 @@
 {
 	"type": "library",
 	"preprocess": true,
+	"projectGuid": "{A49DFD8A-DC5B-4B50-89FA-72F3D91E9632}",
 	"references":
 	[
 		"Core"
-	]
+	],
+	"includePaths": [ ],
+	"linkDependencies": [ ],
+	"libraryPaths": []
 }

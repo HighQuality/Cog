@@ -13,12 +13,16 @@ public:
 	Directory * GetParentDirectory() const;
 	Directory * GetRootDirectory();
 
-	std::wstring GetRelativePath(const Directory& aBaseDirectory) const;
+	String GetRelativePath(const Directory& aBaseDirectory) const;
+
+	/* Example outputs: "C:/", "config.json", "My Documents" */
+	FORCEINLINE StringView GetName() const { return myName; }
 
 protected:
 	FileSystemEntry(Directory * aParentDirectory, const StringView & aAbsolutePath);
 
 private:
 	String myAbsolutePath;
+	StringView myName;
 	Directory * myParentDirectory;
 };

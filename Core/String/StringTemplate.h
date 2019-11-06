@@ -6,6 +6,7 @@ public:
 	explicit StringTemplate(String aTemplate);
 	
 	void AddParameter(String aName, String aValue);
+	void ClearParameters();
 
 	String Evaluate() const;
 

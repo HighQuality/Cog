@@ -1,11 +1,15 @@
 {
 	"type": "executable",
 	"preprocess": true,
+	"projectGuid": "{6F97945A-FD05-4BB0-8986-C29A5C605A34}",
 	"references":
 	[
 		"WindowsPlatform",
 		"Game",
 		"Cog",
 		"Core"
-	]
+	],
+	"includePaths": [ ],
+	"linkDependencies": [ ],
+	"libraryPaths": []
 }

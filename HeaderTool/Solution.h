@@ -1,11 +1,17 @@
 #pragma once
 #include <Memory/UniquePtr.h>
+#include <Filesystem/Directory.h>
 #include "Project.h"
 
 struct Solution
 {
 	Solution(StringView aSolutionDirectory);
 
+	void GenerateSolutionFile(StringView aSolutionTemplate) const;
+	
 	Array<UniquePtr<Project>> projects;
-	String projectName;
+	String solutionName;
+	String solutionGuid;
+	String vsCppProjectTypeGuid;
+	UniquePtr<Directory> directory;
 };

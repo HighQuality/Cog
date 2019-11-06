@@ -5,31 +5,18 @@
 File::File(Directory & aParentDirectory, const StringView & aAbsolutePath, const size_t aFileSize, const uint64_t aLastWriteTime)
 	: FileSystemEntry(&aParentDirectory, aAbsolutePath)
 {
-	const StringView & Path = GetAbsolutePath();
-	for (i32 i = Path.GetLength() - 1; i >= 0; --i)
+	const StringView filename = GetName();
+
+	for (i32 i = filename.GetLength() - 1; i >= 0; --i)
 	{
-		if (Path[i] == L'\\' || Path[i] == L'/')
+		if (filename[i] == L'.')
 		{
-			myFilename = Path.ChopFromStart(i + 1);
+			myExtension = filename.ChopFromStart(i);
 			break;
 		}
 	}
 
-	if (myFilename.GetLength() == 0)
-	{
-		myFilename = Path;
-	}
-
-	for (i32 i = myFilename.GetLength() - 1; i >= 0; --i)
-	{
-		if (myFilename[i] == L'.')
-		{
-			myExtension = myFilename.ChopFromStart(i);
-			break;
-		}
-	}
-
-	myFilenameWithoutExtension = myFilename.ChopFromEnd(myExtension.GetLength());
+	myFilenameWithoutExtension = filename.ChopFromEnd(myExtension.GetLength());
 
 	myFileSize = aFileSize;
 	myLastWriteTime = aLastWriteTime;
@@ -37,11 +24,6 @@ File::File(Directory & aParentDirectory, const StringView & aAbsolutePath, const
 
 File::~File()
 {
-}
-
-bool File::IsDirectory() const
-{
-	return false;
 }
 
 size_t File::GetFileSize() const
@@ -57,7 +39,7 @@ uint64_t File::GetLastWriteTime() const
 Array<u8> File::ReadFile() const
 {
 	GetAbsolutePath().CheckEndsWithZero();
-	std::ifstream fileStream(GetAbsolutePath().GetData());
+	std::ifstream fileStream(GetAbsolutePath().GetData(), std::ios::binary);
 
 	if (fileStream.good() == false)
 		FATAL(L"File catalogued by the directory system is not readable");
@@ -74,7 +56,7 @@ Array<u8> File::ReadFile() const
 String File::ReadString() const
 {
 	GetAbsolutePath().CheckEndsWithZero();
-	std::wifstream fileStream(GetAbsolutePath().GetData());
+	std::wifstream fileStream(GetAbsolutePath().GetData(), std::ios::binary);
 
 	if (fileStream.good() == false)
 		FATAL(L"File catalogued by the directory system is not readable");

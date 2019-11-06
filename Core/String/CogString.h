@@ -62,8 +62,8 @@ public:
 			abort();
 	}
 
-	FORCEINLINE String(const String&) = default;
-	FORCEINLINE String& operator=(const String&) = default;
+	FORCEINLINE explicit String(const String&) = default;
+	FORCEINLINE String& operator=(const String&) = delete;
 	FORCEINLINE ~String() = default;
 
 	FORCEINLINE StringView View() const

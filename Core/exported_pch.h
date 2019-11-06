@@ -81,6 +81,8 @@
 #include "Utilities/Defer.h"
 #include "Utilities/BringIntoScope.h"
 
+#define TimeScope Stopwatch _timeScopeWatch; defer { Println(L"%ms", _timeScopeWatch.GetElapsedTime().Milliseconds()); }
+
 #include <TypeFundamentals/Types.h>
 #include <TypeFundamentals/TypeTraits.h>
 

@@ -11,11 +11,13 @@ public:
 	Directory(Directory * aParentDirectory, const StringView & aAbsolutePath);
 	~Directory();
 
+	FORCEINLINE StringView GetDirectoryName() const { return GetName(); }
+
 	FileSystemEntry * GetEntry(StringView aPath);
 	Directory * GetDirectory(StringView aPath);
 	File * GetFile(StringView aPath);
 
-	bool IsDirectory() const override;
+	FORCEINLINE bool IsDirectory() const final { return true; }
 
 	template <typename TCallback>
 	void IterateFiles(const TCallback & aCallback, const bool aIncludeSubDirectories = false);

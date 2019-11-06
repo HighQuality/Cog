@@ -15,10 +15,36 @@ bool TrueOnFirstCallOnly(const T&)
 	return wasFirstCall;
 }
 
-void EnsureLog(const char* aCondition);
+void EnsureLog(StringView aMessage);
 void ErrorLog(StringView aMessage);
 
-#define ENSURE(condition) (!!(condition) || ((IsDebuggerPresent() && ::TrueOnFirstCallOnly([]{})) && (::EnsureLog(#condition), true) && (DebugBreak(), false)))
+#define ENSURE_MSG(condition, format, ...) \
+	( \
+		!!(condition) \
+		|| \
+		( \
+			( \
+				::TrueOnFirstCallOnly([]{}) \
+			) \
+			&& \
+			( \
+				::EnsureLog(Format(L"Ensure condition failed on " __FILE__ L":%:\n" format, __LINE__, __VA_ARGS__).View()) \
+				, true \
+			) \
+			&& \
+			( \
+				IsDebuggerPresent() \
+			) \
+			&& \
+			( \
+				(DebugBreak(), false) \
+			) \
+		) \
+	)
+
+#define ENSURE(condition) ENSURE_MSG(condition, #condition)
+
+#define CHECK_MSG(condition, format, ...) do { if (!(condition)) FATAL(format, __VA_ARGS__); } while (false)
 #define CHECK(condition) do { if (!(condition)) FATAL(L"Condition \"" #condition L"\" failed"); } while (false)
 
 #define PRINT_ERROR(format, ...) do { String message = Format(StringView(L"%:% (%):\n" format L"\n"), __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__); ErrorLog(message); } while (false)

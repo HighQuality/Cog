@@ -205,11 +205,13 @@ public:
 		return ClampedSlice(myLength - aElements, aElements);
 	}
 
+	/** Returns the part at the end, use SliceFromStart to return from the start instead. */
 	FORCEINLINE ArrayView ChopFromStart(const i32 aElements) const
 	{
 		return Slice(aElements, this->myLength - aElements);
 	}
 
+	/** Returns the part at the start, use SliceFromEnd to return from the start instead. */
 	FORCEINLINE ArrayView ChopFromEnd(const i32 aElements) const
 	{
 		return Slice(0, this->myLength - aElements);

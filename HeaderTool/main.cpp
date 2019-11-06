@@ -62,7 +62,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 			{
 				if (reader.GetCurrentWordOrGroup() == L"COGTYPE")
 				{
-					Println(L"", file->GetFilename());
+					Println(L"", file->GetName());
 
 					if (reader.Next())
 					{

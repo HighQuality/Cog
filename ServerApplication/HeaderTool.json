@@ -1,10 +1,14 @@
 {
 	"type": "executable",
 	"preprocess": true,
+	"projectGuid": "{0FA02028-1FB3-46C5-83C8-CDAE7056DE0F}",
 	"references":
 	[
 		"Game",
 		"Cog",
 		"Core"
-	]
+	],
+	"includePaths": [ ],
+	"linkDependencies": [ ],
+	"libraryPaths": []
 }

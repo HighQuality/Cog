@@ -11,6 +11,11 @@ void StringTemplate::AddParameter(String aName, String aValue)
 	myParameters.Add(Move(aName), Move(aValue));
 }
 
+void StringTemplate::ClearParameters()
+{
+	myParameters.Clear();
+}
+
 String StringTemplate::Evaluate() const
 {
 	String result;
@@ -46,7 +51,7 @@ String StringTemplate::Evaluate() const
 				const StringView parameter = myTemplate.Slice(previousIndex, i - previousIndex);
 				const String* parameterValue = myParameters.Find(parameter);
 
-				if (ENSURE(parameterValue))
+				if (ENSURE_MSG(parameterValue, L"Parameter \"%\" on string template not found", parameter))
 				{
 					const StringView value = *parameterValue;
 					result.Append(value);

@@ -11,23 +11,22 @@ public:
 	File & operator=(const File&) = delete;
 	~File();
 
-	bool IsDirectory() const override final;
+	FORCEINLINE bool IsDirectory() const final { return false; }
 
 	u64 GetFileSize() const;
 	u64 GetLastWriteTime() const;
 
 	// Includes extension but not path (eg "test.dds")
-	const StringView & GetFilename() const { return myFilename; }
+	FORCEINLINE const StringView & GetFilename() const { return GetName(); }
 	// Does not include path (eg "test")
-	const StringView & GetFilenameWithoutExtension() const { return myFilenameWithoutExtension; }
+	FORCEINLINE const StringView & GetFilenameWithoutExtension() const { return myFilenameWithoutExtension; }
 	// Includes dot (eg ".dds")
-	const StringView & GetExtension() const { return myExtension; }
+	FORCEINLINE const StringView & GetExtension() const { return myExtension; }
 
 	Array<u8> ReadFile() const;
 	String ReadString() const;
 
 private:
-	StringView myFilename;
 	StringView myFilenameWithoutExtension;
 	StringView myExtension;
 	uint64_t myLastWriteTime;

@@ -1,5 +1,22 @@
 {
 	"type": "library",
 	"preprocess": false,
-	"references": []
+	"projectGuid": "{80D74723-C2F4-4B70-AA6A-940D7FCC6E91}",
+	"references": [],
+	"includePaths":
+	[
+		"../extlibs/libcurl/include",
+		"../extlibs/snappy/include"
+	],
+	"linkDependencies":
+	[
+		"libcurl.lib",
+		"snappy.lib"
+	],
+	"libraryPaths":
+	[
+		"../extlibs/libcurl/lib/$(Configuration)",
+		"../extlibs/snappy/lib/$(Configuration)"
+	]
+
 }
