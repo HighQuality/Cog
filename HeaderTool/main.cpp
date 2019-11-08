@@ -7,54 +7,123 @@
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
-	if (argc < 2)
+	if (argc < 3)
 	{
-		Println(L"Too few inputs!");
+		Println(L"Usage: CogBuild -command directory");
+		Println(L"Valid commands:");
+		Println(L"\t-GenerateProjectFiles");
+		Println(L"\t\tGenerate the visual studio project used by the build system to compile the application(s)");
+		Println(L"\t-Build");
+		Println(L"\t\tCompiles the solution in the directory generates project files if necessary");
+		Println(L"\t-Clean");
+		Println(L"\t\tCleans the project");
+		Println(L"\t-Rebuild");
+		Println(L"\t\tCleans and then builds the project");
+		Println(L"\t-GenerateSolution");
+		Println(L"\t\tGenerate the solution used to invoke the build system");
 		return 1;
 	}
+
+	const String command(argv[1]);
+
+	bool generateProjectFiles = false;
+	bool generateSolutionFile = false;
 	
-	String projectDirectory(argv[1]);
+	bool buildProject = false;
+	String configuration;
+	String platform;
+
+	bool cleanProject = false;
+
+	if (command == L"-GenerateProjectFiles")
+	{
+		generateProjectFiles = true;
+	}
+	else if (command == L"-Build")
+	{
+		generateProjectFiles = true;
+		buildProject = true;
+
+		if (argc < 5)
+		{
+			Println(L"Usage:");
+			Println(L"CogBuild -Build Directory Configuration Platform");
+			return 1;
+		}
+
+		configuration = String(argv[3]);
+		platform = String(argv[4]);
+	}
+	else if (command == L"-GenerateSolution")
+	{
+		generateSolutionFile = true;
+	}
+	else if (command == L"-Clean")
+	{
+		cleanProject = true;
+	}
+	else if (command == L"-Rebuild")
+	{
+		cleanProject = true;
+		generateProjectFiles = true;
+		buildProject = true;
+
+		if (argc < 5)
+		{
+			Println(L"Usage:");
+			Println(L"CogBuild -Rebuild Directory Configuration Platform");
+			return 1;
+		}
+
+		configuration = String(argv[3]);
+		platform = String(argv[4]);
+	}
+
+	String projectDirectory(argv[2]);
 	projectDirectory.Replace(L'\\', L'/');
 
 	if (projectDirectory.ClampedSliceFromEnd(1) == L"/")
 		projectDirectory.Pop();
-	
+
 	Solution solution(projectDirectory);
 
-	// std::ofstream typeIncludeFileStream(Format(L"%/%", projectDirectoryStd, typeIncludeFile);
-	// typeIncludeFileStream << "#pragma once" << std::endl;
-	// 
-	// CHECK(typeIncludeFileStream.is_open());
+	if (cleanProject)
+	{
+		String msBuildCleanCommand = Format(L"msbuild \"%\" -nologo -target:clean -maxcpucount -verbosity:minimal", solution.solutionFile);
 
-	Directory d(nullptr, projectDirectory);
+		const i32 returnCode = system(msBuildCleanCommand.View().ToStdString().c_str());
+
+		Println(L"msbuild clean returned %", returnCode);
+
+	}
+	
+	if (generateProjectFiles)
+	{
+		solution.GenerateSolutionAndProjects();
+	}
+	
+	if (buildProject)
+	{
+		CHECK(configuration.GetLength() > 0);
+		CHECK(platform.GetLength() > 0);
+
+		String buildCommand = Format(L"msbuild \"%\" -nologo -maxcpucount -verbosity:minimal \"/property:Configuration=%;Platform=%\"", solution.solutionFile, configuration, platform);
+
+		const i32 returnCode = system(buildCommand.View().ToStdString().c_str());
+
+		Println(L"msbuild returned %", returnCode);
+
+		if (returnCode != 0)
+			return returnCode;
+	}
 
 	Array<const File*> headerFiles;
-
-	d.IterateFiles([&](const File& aFile)
-		{
-			const StringView extension = aFile.GetExtension();
-
-			StringView filenameWithoutExtension = aFile.GetFilenameWithoutExtension();
-
-			// Skip precompiled headers
-			if (filenameWithoutExtension == L"stdafx" ||
-				filenameWithoutExtension == L"pch" ||
-				filenameWithoutExtension == L"exported_pch")
-			{
-				return;
-			}
-
-			if (extension == L".h" || extension == L".hpp")
-			{
-				headerFiles.Add(&aFile);
-			}
-		}, true);
 
 	for (const File* file : headerFiles)
 	{
 		const String fileContents = file->ReadString();
 
-		GroupingWordReader reader(fileContents); 
+		GroupingWordReader reader(fileContents);
 
 		while (reader.Next())
 		{
@@ -90,7 +159,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 								const StringView className = reader.GetCurrentWordOrGroup();
 
 								// typeIncludeFileStream << std::string(Format(L"#include \"%\"", file->GetAbsolutePath())) << std::endl;
-								
+
 								Println(L"COGTYPE % declared with %", className, classType);
 							}
 							else
@@ -109,6 +178,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 			}
 		}
 	}
-	
+
 	return 0;
 }

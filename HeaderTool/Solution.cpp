@@ -40,6 +40,7 @@ Solution::Solution(const StringView aSolutionDirectory)
 	directory = MakeUnique<Directory>(nullptr, aSolutionDirectory);
 
 	solutionName = String(directory->GetDirectoryName());
+	solutionFile = Format(L"%/temp/Build/%.sln", directory->GetAbsolutePath(), solutionName);
 
 	Println(L"Opening solution %...", solutionName);
 
@@ -62,17 +63,17 @@ Solution::Solution(const StringView aSolutionDirectory)
 		File* solutionTemplateFile = templateDirectory->GetFile(L"SolutionTemplate.txt");
 		if (!solutionTemplateFile)
 			FATAL(L"Can't find SolutionTemplate.txt in template directory");
-		String solutionTemplate = solutionTemplateFile->ReadString();
+		solutionTemplate = solutionTemplateFile->ReadString();
 
 		File* libraryProjectTemplateFile = templateDirectory->GetFile(L"LibraryProjectTemplate.txt");
 		if (!libraryProjectTemplateFile)
 			FATAL(L"Can't find LibraryProjectTemplate.txt in template directory");
-		const String libraryProjectTemplate = libraryProjectTemplateFile->ReadString();
+		libraryProjectTemplate = libraryProjectTemplateFile->ReadString();
 
 		File* executableProjectTemplateFile = templateDirectory->GetFile(L"ExecutableProjectTemplate.txt");
 		if (!executableProjectTemplateFile)
 			FATAL(L"Can't find ExecutableProjectTemplate.txt in template directory");
-		const String executableProjectTemplate = executableProjectTemplateFile->ReadString();
+		executableProjectTemplate = executableProjectTemplateFile->ReadString();
 
 		Map<String, Project*> projectMap;
 
@@ -102,21 +103,6 @@ Solution::Solution(const StringView aSolutionDirectory)
 
 		for (auto& project : projects)
 			project->ResolveReferences(projectMap);
-
-		GenerateSolutionFile(solutionTemplate);
-
-		for (auto& project : projects)
-		{
-			StringView projectTemplate;
-			if (project->projectType == ProjectType::Executable)
-				projectTemplate = executableProjectTemplate;
-			else if (project->projectType == ProjectType::Library)
-				projectTemplate = libraryProjectTemplate;
-			else
-				FATAL(L"Unhandled project template %", static_cast<i32>(project->projectType));
-
-			project->GenerateProjectFile(projectTemplate);
-		}
 	}
 	else
 	{
@@ -124,12 +110,28 @@ Solution::Solution(const StringView aSolutionDirectory)
 	}
 }
 
+void Solution::GenerateSolutionAndProjects() const
+{
+	GenerateSolutionFile(solutionTemplate);
+
+	for (auto& project : projects)
+	{
+		StringView projectTemplate;
+		if (project->projectType == ProjectType::Executable)
+			projectTemplate = executableProjectTemplate;
+		else if (project->projectType == ProjectType::Library)
+			projectTemplate = libraryProjectTemplate;
+		else
+			FATAL(L"Unhandled project template %", static_cast<i32>(project->projectType));
+
+		project->GenerateProjectFile(projectTemplate);
+	}
+}
+
 void Solution::GenerateSolutionFile(const StringView aSolutionTemplate) const
 {
-	const String outputFile = Format(L"%/%.sln", directory->GetAbsolutePath(), solutionName);
-
 	StringTemplate documentTemplate = StringTemplate(String(aSolutionTemplate));
-	StringTemplate projectTemplate(String(L"Project(\"${ProjectTypeGuid}\") = \"${ProjectName}\", \"${ProjectName}\\${ProjectName}.vcxproj\", \"${ProjectGuid}\""));
+	StringTemplate projectTemplate(String(L"Project(\"${ProjectTypeGuid}\") = \"${ProjectName}\", \"..\\..\\${ProjectName}\\${ProjectName}.vcxproj\", \"${ProjectGuid}\""));
 	StringTemplate configurationTemplate(String(L"\t\t${ProjectGuid}.Debug|x64.ActiveCfg = Debug|x64\n\t\t${ProjectGuid}.Debug|x64.Build.0 = Debug|x64\n\t\t${ProjectGuid}.Release|x64.ActiveCfg = Release|x64\n\t\t${ProjectGuid}.Release|x64.Build.0 = Release|x64"));
 
 	CHECK(vsCppProjectTypeGuid.GetLength() > 0);
@@ -173,5 +175,5 @@ void Solution::GenerateSolutionFile(const StringView aSolutionTemplate) const
 
 	const String output = documentTemplate.Evaluate();
 
-	WriteToFileIfChanged(outputFile, output.View());
+	WriteToFileIfChanged(solutionFile, output.View());
 }

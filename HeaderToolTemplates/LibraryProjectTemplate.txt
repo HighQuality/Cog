@@ -44,14 +44,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)</TargetName>
-    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
-    <OutDir>$(SolutionDir)lib\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)..\temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\temp\lib\$(Configuration)_$(Platform)\</OutDir>
     <IncludePath>${ExtraIncludePaths}$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>$(ProjectName)</TargetName>
-    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
-    <OutDir>$(SolutionDir)lib\$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)..\temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\temp\lib\$(Configuration)_$(Platform)\</OutDir>
     <IncludePath>${ExtraIncludePaths}$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

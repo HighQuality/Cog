@@ -43,20 +43,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\</OutDir>
+    <IntDir>$(ProjectDir)..\temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
     <IncludePath>${ExtraIncludePaths}$(ProjectDir);$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_$(Configuration)_$(Platform)</TargetName>
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>${ExtraLibraryPaths}..\lib\$(Configuration)_$(Platform);$(LibraryPath)</LibraryPath>
+    <LibraryPath>${ExtraLibraryPaths}$(ProjectDir)..\temp\lib\$(Configuration)_$(Platform);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\</OutDir>
+    <IntDir>$(ProjectDir)..\temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
     <IncludePath>${ExtraIncludePaths}$(ProjectDir);$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_$(Configuration)_$(Platform)</TargetName>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>${ExtraLibraryPaths}..\lib\$(Configuration)_$(Platform);$(LibraryPath)</LibraryPath>
+    <LibraryPath>${ExtraLibraryPaths}$(ProjectDir)..\temp\lib\$(Configuration)_$(Platform);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

@@ -1,0 +1,1 @@
+bin\HeaderTool.exe -Build %cd% Debug x64 || pause

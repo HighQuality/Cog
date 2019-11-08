@@ -1,0 +1,1 @@
+bin\HeaderTool.exe -GenerateProjectFiles %cd% || pause

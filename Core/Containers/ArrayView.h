@@ -52,7 +52,7 @@ public:
 	FORCEINLINE ArrayView(const T (&aArray)[TLength])
 	{
 		this->myData = const_cast<T*>(aArray);
-		this->myLength = TLength;
+		this->myLength = TLength == 0 ? 0 : TLength - 1;
 	}
 
 	FORCEINLINE ArrayView(const ArrayView& aCopy)

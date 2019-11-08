@@ -56,7 +56,7 @@ void ErrorLog(StringView aMessage);
 // #define FATAL(format, ...) abort()
 // #endif
 
-#define TODO FATAL(L"Function not implemented");
+#define TODO do { FATAL(L"Function not implemented"); } while (false)
 
 #ifdef _MSC_VER
 
