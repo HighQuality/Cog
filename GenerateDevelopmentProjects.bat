@@ -1,1 +1,1 @@
-bin\HeaderTool.exe -GenerateDevelopmentProjects %cd% || pause
+%cd%\bin\HeaderTool.exe -GenerateDevelopmentProjects %cd% || pause
