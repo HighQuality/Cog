@@ -36,6 +36,7 @@ struct Solution
 	String developmentMainProjectGuid;
 	String vsCppProjectTypeGuid;
 	UniquePtr<Directory> directory;
+	Directory* codeDirectory;
 
 	String buildSolutionFile;
 	String developmentSolutionFile;
@@ -45,4 +46,5 @@ struct Solution
 	String executableProjectTemplate;
 
 	String developmentProjectTemplate;
+	String nmakeDebugUserFileTemplate;
 };

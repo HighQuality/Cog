@@ -39,6 +39,9 @@ Solution::Solution(const StringView aSolutionDirectory)
 	Println(L"Indexing files...");
 	directory = MakeUnique<Directory>(nullptr, aSolutionDirectory);
 
+	codeDirectory = directory->GetDirectory(L"Code");
+	CHECK_MSG(codeDirectory, L"Couldn't find directory \"Code\" inside of solution");
+
 	solutionName = String(directory->GetDirectoryName());
 	buildSolutionFile = Format(L"%/Code/Build%.sln", directory->GetAbsolutePath(), solutionName);
 	developmentSolutionFile = Format(L"%/%.sln", directory->GetAbsolutePath(), solutionName);
@@ -83,6 +86,11 @@ Solution::Solution(const StringView aSolutionDirectory)
 		if (!developmentProjectTemplateFile)
 			FATAL(L"Can't find NmakeTemplate.txt in template directory");
 		developmentProjectTemplate = developmentProjectTemplateFile->ReadString();
+
+		File* nmakeDebugUserTemplateFile = templateDirectory->GetFile(L"NmakeDebugUserFileTemplate.txt");
+		if (!nmakeDebugUserTemplateFile)
+			FATAL(L"Can't find NmakeDebugUserFileTemplate.txt in template directory");
+		nmakeDebugUserFileTemplate = nmakeDebugUserTemplateFile->ReadString();
 
 		Map<String, Project*> projectMap;
 
@@ -151,7 +159,7 @@ void Solution::GenerateDevelopmentProjects(const StringView aBuildToolPath) cons
 		{
 			solutionProjects.Add(SolutionDocumentProjectReference(project->projectGuid, project->projectName, project->debugDevelopmentProjectFile));
 
-			project->GenerateDebugDevelopmentProjectFile(developmentMainProjectFile, developmentMainProjectGuid, developmentProjectTemplate);
+			project->GenerateDebugDevelopmentProjectFile(developmentMainProjectFile, developmentMainProjectGuid, developmentProjectTemplate, nmakeDebugUserFileTemplate);
 		}
 	}
 
@@ -192,7 +200,7 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	}
 
 	{
-		Map<String, u8> sourceFiles;
+		Map<const File*, u8> sourceFiles;
 		for (const auto& project : projects)
 			project->GatherSourceFiles(sourceFiles);
 
@@ -202,7 +210,7 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 		{
 			for (const auto& sourceFilePair : sourceFiles)
 			{
-				String sourceFile(sourceFilePair.key);
+				String sourceFile(sourceFilePair.key->GetRelativePath(*codeDirectory));
 				sourceFile.Replace(L'/', L'\\');
 
 				sourceFileList.Append(L"    <ClCompile Include=\"");
@@ -218,7 +226,7 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	}
 
 	{
-		Map<String, u8> headerFiles;
+		Map<const File*, u8> headerFiles;
 		for (const auto& project : projects)
 			project->GatherHeaderFiles(headerFiles);
 
@@ -228,7 +236,7 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 		{
 			for (const auto& headerFilePair : headerFiles)
 			{
-				String headerFile(headerFilePair.key);
+				String headerFile(headerFilePair.key->GetRelativePath(*codeDirectory));
 				headerFile.Replace(L'/', L'\\');
 
 				headerFileList.Append(L"    <ClInclude Include=\"");
