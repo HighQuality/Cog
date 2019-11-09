@@ -34,7 +34,7 @@ public:
 				return;
 			}
 		}
-
+			
 		String resourcePath(aResourcePath);
 
 		myScheduledLoads.Submit([this, resourcePath, aFunctionCallback]()

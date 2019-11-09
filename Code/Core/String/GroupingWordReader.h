@@ -19,6 +19,11 @@ public:
 	Char GetOpeningCharacter() const { CHECK(IsAtGroup()); return myCurrentOpeningCharacter; }
 	Char GetClosingCharacter() const { CHECK(IsAtGroup()); return myCurrentClosingCharacter; }
 
+	/** Current refers to the word that was previously returned by NextWord */
+	i32 CalculateAndGetCurrentLineIndex() { return Base::CalculateAndGetCurrentLineIndex(); }
+	/** Current refers to the word that was previously returned by NextWord */
+	i32 CalculateAndGetCurrentColumnIndex() { return Base::CalculateAndGetCurrentColumnIndex(); }
+
 private:
 	static Char GetCorrespondingEndCharacter(Char aCharacter);
 

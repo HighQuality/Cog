@@ -3,34 +3,7 @@
 #include <External/json.h>
 #include <Filesystem/File.h>
 #include <String/StringTemplate.h>
-
-void WriteToFileIfChanged(const StringView aFilePath, const StringView aNewFileContents)
-{
-	{
-		std::wifstream readStream(aFilePath.ToStdWString(), std::ios::binary);
-
-		if (readStream.is_open())
-		{
-			readStream.seekg(0, std::ios::end);
-			String existingDocument;
-			existingDocument.Resize(static_cast<i32>(readStream.tellg()));
-			readStream.seekg(0, std::ios::beg);
-			readStream.read(existingDocument.GetData(), existingDocument.GetLength());
-
-			if (existingDocument == aNewFileContents)
-				return;
-		}
-	}
-
-	Println(L"Writing to file %...", aFilePath);
-
-	std::wofstream f(aFilePath.ToStdWString(), std::ios::binary);
-
-	if (!f.is_open())
-		FATAL(L"Failed to open file % for writing", aFilePath);
-
-	f.write(aNewFileContents.GetData(), aNewFileContents.GetLength());
-}
+#include "CogBuildUtilities.h"
 
 Solution::Solution(const StringView aSolutionDirectory)
 {
@@ -254,6 +227,21 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	const String output = documentTemplate.Evaluate();
 
 	WriteToFileIfChanged(developmentMainProjectFile, output.View());
+}
+
+void Solution::GenerateCode()
+{
+	CreateDirectoryW(Format(L"%/temp", directory->GetAbsolutePath()).GetData(), nullptr);
+
+	for (const auto& project : projects)
+	{
+		if (!project->preprocess)
+			continue;
+
+		const String projectGeneratedCodeDirectory = Format(L"%/temp/%", directory->GetAbsolutePath(), project->projectName);
+		CreateDirectoryW(projectGeneratedCodeDirectory.GetData(), nullptr);
+		project->GenerateCode(projectGeneratedCodeDirectory.View());
+	}
 }
 
 void Solution::GenerateSolutionFile(StringView aSolutionFilePath, ArrayView<SolutionDocumentProjectReference> aProjects) const

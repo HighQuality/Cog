@@ -21,6 +21,11 @@ public:
 	void Rewind(i32 aOffset);
 	void Forward(i32 aOffset);
 
+	/** Current refers to the word that was previously returned by NextWord */
+	i32 CalculateAndGetCurrentLineIndex() { RefreshLineAndColumnIndex(); return myCurrentLineIndex; }
+	/** Current refers to the word that was previously returned by NextWord */
+	i32 CalculateAndGetCurrentColumnIndex() { RefreshLineAndColumnIndex(); return myCurrentColumnIndex; }
+
 private:
 	static bool IsWhitespace(Char aCharacter);
 	static bool IsLetterOrDigit(Char aCharacter);
@@ -28,6 +33,14 @@ private:
 	static bool IsControlCharacter(Char aCharacter);
 	static bool IsSpecialCharacter(Char aCharacter);
 
+	void RefreshLineAndColumnIndex();
+	i32 CalculateColumnIndexAt(i32 aIndex) const;
+
 	StringView myString;
 	i32 myCurrentIndex = 0;
+
+	i32 myPreviouslyReturnedWordIndex = -1;
+	i32 myCachedLineAndColumnIndex = 0;
+	i32 myCurrentLineIndex = 0;
+	i32 myCurrentColumnIndex = 0;
 };

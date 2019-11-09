@@ -27,6 +27,8 @@ struct Solution
 	void GenerateDevelopmentProjects(StringView aBuildToolPath) const;
 	void GenerateDevelopmentMainProjectFile(StringView aBuildToolPath) const;
 	
+	void GenerateCode();
+
 	Array<UniquePtr<Project>> projects;
 	String solutionName;
 	// Shared between build and development solution

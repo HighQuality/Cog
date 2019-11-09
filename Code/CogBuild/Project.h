@@ -16,6 +16,8 @@ struct Project
 	void ResolveReferences(const Map<String, Project*>& aProjects);
 	void GenerateBuildProjectFile(StringView aProjectTemplate) const;
 	void GenerateDebugDevelopmentProjectFile(StringView aMainProjectFilePath, StringView aMainProjectGuid, StringView aProjectTemplate, const StringView nmakeDebugUserFileTemplate) const;
+	
+	void GenerateCode(StringView aGeneratedCodeDirectory);
 
 	/** These gather functions gather all the properties from this and all referenced projects */
 	void GatherLibraryPaths(Map<StringView, u8>& aLibraryPaths) const;

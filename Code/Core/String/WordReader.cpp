@@ -12,14 +12,20 @@ StringView WordReader::NextWord()
 	const i32 contentLength = myString.GetLength();
 
 	if (index >= contentLength)
+	{
+		myPreviouslyReturnedWordIndex = index;
 		return StringView();
+	}
 
 	while (IsWhitespace(myString[index]))
 	{
 		++index;
 
 		if (index >= contentLength)
+		{
+			myPreviouslyReturnedWordIndex = index;
 			return StringView();
+		}
 	}
 
 	const auto continueWhile = [this, &_index = index, contentLength](bool(*const aPredicate)(Char)) -> StringView
@@ -38,6 +44,8 @@ StringView WordReader::NextWord()
 
 		return myString.Slice(startIndex, index - startIndex);
 	};
+
+	myPreviouslyReturnedWordIndex = index;
 
 	const StringView alphanumericWord = continueWhile([](const Char aCharacter) { return IsLetterOrDigit(aCharacter); });
 	
@@ -89,6 +97,61 @@ void WordReader::Forward(const i32 aOffset)
 
 	if (myCurrentIndex > myString.GetLength())
 		myCurrentIndex = myString.GetLength();
+}
+
+void WordReader::RefreshLineAndColumnIndex()
+{
+	const i32 targetIndex = myPreviouslyReturnedWordIndex;
+	bring_into_scope(cachedIndex, myCachedLineAndColumnIndex);
+	bring_into_scope(columnIndex, myCurrentColumnIndex);
+	bring_into_scope(lineIndex, myCurrentLineIndex);
+
+	if (cachedIndex < targetIndex)
+	{
+		while (cachedIndex < targetIndex)
+		{
+			const Char previousCharacter = myString.TryGet(cachedIndex, L'\0');
+			++cachedIndex;
+			++columnIndex;
+
+			if (previousCharacter == L'\n')
+			{
+				columnIndex = 0;
+				++lineIndex;
+			}
+		}
+	}
+	else if (cachedIndex > targetIndex)
+	{
+		while (cachedIndex > targetIndex)
+		{
+			--cachedIndex;
+			--columnIndex;
+
+			if (myString[cachedIndex] == L'\n')
+			{
+				columnIndex = CalculateColumnIndexAt(cachedIndex);
+				--lineIndex;
+			}
+		}
+	}
+}
+
+i32 WordReader::CalculateColumnIndexAt(const i32 aIndex) const
+{
+	i32 column = 0;
+	i32 current = aIndex - 1;
+
+	while (current >= 0)
+	{
+		if (myString[current] == L'\n')
+			break;
+
+		--current;
+		++column;
+	}
+
+	return column;
 }
 
 bool WordReader::IsWhitespace(const Char aCharacter)

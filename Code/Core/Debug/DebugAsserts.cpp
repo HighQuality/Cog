@@ -5,11 +5,11 @@
 void EnsureLog(const StringView aMessage)
 {
 	OutputDebugStringW(aMessage.GetData());
-	std::wcout << aMessage << std::flush;
+	std::wcout << aMessage << std::endl << std::flush;
 }
 
 void ErrorLog(const StringView aMessage)
 {
 	OutputDebugStringW(aMessage.GetData());
-	std::wcout << aMessage << std::flush;
+	std::wcout << aMessage << std::endl << std::flush;
 }

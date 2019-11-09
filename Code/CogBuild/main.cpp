@@ -1,9 +1,6 @@
 #include "CogBuildPch.h"
-#include <fstream>
-#include <Filesystem/Directory.h>
-#include <Filesystem/File.h>
-#include <String/GroupingWordReader.h>
 #include <Solution.h>
+#include <Time\Stopwatch.h>
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
@@ -113,6 +110,15 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
 	}
 	
+	// Generate code before generating the build project files so the generated code can be included
+	if (buildProject)
+	{
+		Println(L"Generating code...");
+		Stopwatch w;
+		solution.GenerateCode();
+		Println(L"Done in %ms", w.GetElapsedTime().Milliseconds());
+	}
+
 	if (generateBuildProjects)
 	{
 		solution.GenerateBuildProjects();
@@ -137,68 +143,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
 		if (returnCode != 0)
 			return returnCode;
-	}
-
-	Array<const File*> headerFiles;
-
-	for (const File* file : headerFiles)
-	{
-		const String fileContents = file->ReadString();
-
-		GroupingWordReader reader(fileContents);
-
-		while (reader.Next())
-		{
-			if (!reader.IsAtGroup())
-			{
-				if (reader.GetCurrentWordOrGroup() == L"COGTYPE")
-				{
-					Println(L"", file->GetName());
-
-					if (reader.Next())
-					{
-						if (!reader.IsAtGroup() || reader.GetOpeningCharacter() != L'(')
-						{
-							Println(L"Expected group");
-							return 5;
-						}
-
-						GroupingWordReader parameterReader(reader.GetCurrentGroup());
-
-						while (parameterReader.Next())
-						{
-							Println(L"\t", parameterReader.GetCurrentWordOrGroup());
-						}
-
-						reader.Next();
-
-						const StringView classType = reader.GetCurrentWordOrGroup();
-
-						if (classType == L"struct" || classType == L"class")
-						{
-							if (reader.Next() && !reader.IsAtGroup())
-							{
-								const StringView className = reader.GetCurrentWordOrGroup();
-
-								// typeIncludeFileStream << std::string(Format(L"#include \"%\"", file->GetAbsolutePath())) << std::endl;
-
-								Println(L"COGTYPE % declared with %", className, classType);
-							}
-							else
-							{
-								Println(L"Expected class name");
-								return 4;
-							}
-						}
-						else
-						{
-							Println(L"Expected \"struct\" or \"class\", got %", classType);
-							return 3;
-						}
-					}
-				}
-			}
-		}
 	}
 
 	return 0;

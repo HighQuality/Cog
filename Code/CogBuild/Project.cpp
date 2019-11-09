@@ -3,7 +3,9 @@
 #include <External\json.h>
 #include <Filesystem/Directory.h>
 #include <Filesystem/File.h>
-#include <String\StringTemplate.h>
+#include <String/StringTemplate.h>
+#include "CogBuildUtilities.h"
+#include <String/GroupingWordReader.h>
 
 Project::Project(Directory* aProjectDirectory)
 {
@@ -269,6 +271,78 @@ void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectF
 	WriteToFileIfChanged(debugDevelopmentProjectFile, output.View());
 
 	WriteToFileIfChanged(debugDevelopmentUserProjectFile, nmakeDebugUserFileTemplate);
+}
+
+void Project::GenerateCode(const StringView aGeneratedCodeDirectory)
+{
+	const String pchFileName = Format(L"%Pch.h", projectName);
+
+	for (const File* file : headerFiles)
+	{
+		if (file->GetName() == pchFileName.View())
+			continue;
+
+		const String fileContents = file->ReadString();
+
+		GroupingWordReader reader(fileContents);
+
+		while (reader.Next())
+		{
+			if (!reader.IsAtGroup())
+			{
+				if (reader.GetCurrentWordOrGroup() == L"COGTYPE")
+				{
+					Println(L"", file->GetName());
+
+					if (reader.Next())
+					{
+						if (!reader.IsAtGroup() || reader.GetOpeningCharacter() != L'(')
+						{
+							ReportErrorInFile(L"Expected group", file->GetAbsolutePath(), reader.CalculateAndGetCurrentLineIndex(), reader.CalculateAndGetCurrentColumnIndex());
+							return;
+						}
+
+						GroupingWordReader parameterReader(reader.GetCurrentGroup());
+
+						while (parameterReader.Next())
+						{
+							Println(L"\t", parameterReader.GetCurrentWordOrGroup());
+						}
+
+						reader.Next();
+
+						const StringView classType = reader.GetCurrentWordOrGroup();
+
+						if (classType == L"struct" || classType == L"class")
+						{
+							if (reader.Next() && !reader.IsAtGroup())
+							{
+								const StringView className = reader.GetCurrentWordOrGroup();
+
+								// typeIncludeFileStream << std::string(Format(L"#include \"%\"", file->GetAbsolutePath())) << std::endl;
+
+								Println(L"COGTYPE % declared with %", className, classType);
+							}
+							else
+							{
+								ReportErrorInFile(L"Expected class name", file->GetAbsolutePath(), reader.CalculateAndGetCurrentLineIndex(), reader.CalculateAndGetCurrentColumnIndex());
+								return;
+							}
+						}
+						else
+						{
+							ReportErrorInFile(Format(L"Expected \"struct\" or \"class\", got %", classType).View(), file->GetAbsolutePath(), reader.CalculateAndGetCurrentLineIndex(), reader.CalculateAndGetCurrentColumnIndex());
+							return;
+						}
+					}
+				}
+				else if (reader.GetCurrentWordOrGroup() == L"§")
+				{
+					ReportErrorInFile(L"Detected §", file->GetAbsolutePath(), reader.CalculateAndGetCurrentLineIndex(), reader.CalculateAndGetCurrentColumnIndex());
+				}
+			}
+		}
+	}
 }
 
 void Project::GatherLibraryPaths(Map<StringView, u8>& aLibraryPaths) const
