@@ -43,7 +43,7 @@ Solution::Solution(const StringView aSolutionDirectory)
 	buildSolutionFile = Format(L"%/Code/Build%.sln", directory->GetAbsolutePath(), solutionName);
 	developmentSolutionFile = Format(L"%/%.sln", directory->GetAbsolutePath(), solutionName);
 	developmentMainProjectName = Format(L"Develop%", solutionName);
-	developmentMainProjectFile = Format(L"Code/%.vcxproj", directory->GetAbsolutePath(), developmentMainProjectName);
+	developmentMainProjectFile = Format(L"%/Code/%.vcxproj", directory->GetAbsolutePath(), developmentMainProjectName);
 
 	Println(L"Opening solution %...", solutionName);
 
