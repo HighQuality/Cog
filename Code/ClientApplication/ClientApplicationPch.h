@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Game/exported_pch.h"
+#include "GamePch.h"
 
 #include <d3d11_1.h>
 #include <d3d11.h>

@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "ClientApplicationPch.h"
 #include "RenderTarget.h"
 
 void RenderTarget::SetRenderTexture(const std::shared_ptr<RenderTexture>& aNewRenderTexture)

@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "CorePch.h"
 #include "Directory.h"
 #include "File.h"
 #include <Shlwapi.h>

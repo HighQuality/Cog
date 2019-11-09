@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+﻿#include "CorePch.h"
 #include "ByteColor.h"
 #include "LinearColor.h"
 

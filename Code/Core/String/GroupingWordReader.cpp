@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "CorePch.h"
 #include "GroupingWordReader.h"
 
 GroupingWordReader::GroupingWordReader(const StringView aContent)

@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+﻿#include "CorePch.h"
 #include "ThreadID.h"
 
 std::array<ThreadID*, MaxThreadID> ThreadID::ourThreadIDs;

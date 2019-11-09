@@ -28,7 +28,7 @@
 // compromising on hash quality.
 
 
-#include "pch.h"
+#include "CorePch.h"
 #include "config.h"
 #pragma warning ( disable : 4456 )
 #pragma warning ( disable : 4267 )

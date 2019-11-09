@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "CorePch.h"
 #include "StringTemplate.h"
 
 StringTemplate::StringTemplate(String aTemplate)

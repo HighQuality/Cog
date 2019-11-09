@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "GamePch.h"
 #include "GameTypeList.h"
 
 void GameTypeList::RegisterTypes()

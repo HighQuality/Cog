@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "CorePch.h"
 #include "Image.h"
 #include "LinearColor.h"
 #include <External/lodepng.h>

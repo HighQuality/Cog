@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Cog/exported_pch.h"
+#include "CogPch.h"
 
 #define COGTYPE(...)
 

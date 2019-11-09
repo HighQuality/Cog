@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "GamePch.h"
 #include "ResourceManager.h"
 #include <Cog\CogGame.h>
 

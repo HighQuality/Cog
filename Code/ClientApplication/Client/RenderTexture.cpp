@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "ClientApplicationPch.h"
 #include "RenderTexture.h"
 
 RenderTexture::RenderTexture(ID3D11Texture2D* aTexture, ID3D11RenderTargetView* aRenderTargetView,
