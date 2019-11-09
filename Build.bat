@@ -1,1 +1,1 @@
-%cd%\bin\HeaderTool.exe -Build %cd% Debug x64 || pause
+%cd%\bin\CogBuild.exe -Build %cd% Debug x64 || pause

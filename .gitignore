@@ -331,7 +331,7 @@ HeaderTool/bin
 *.sln
 
 !extlibs/**
-!bin/HeaderTool.exe
-!HeaderTool/HeaderTool.vcxproj
-!HeaderTool/HeaderTool.vcxproj.user
-!HeaderTool.sln
+!bin/CogBuild.exe
+!CogBuild/CogBuild.vcxproj
+!CogBuild/CogBuild.vcxproj.user
+!CogBuild.sln

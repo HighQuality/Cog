@@ -68,7 +68,7 @@ FileSystemEntry* Directory::GetEntry(StringView aPath)
 	{
 		if (aPath[i] == L'\\' || aPath[i] == L'/')
 		{
-			FileSystemEntry * ourEntry = GetEntryFromThisDirectory(aPath.ChopFromStart(i));
+			FileSystemEntry* ourEntry = GetEntryFromThisDirectory(aPath.SliceFromStart(i));
 	
 			if (ourEntry != nullptr)
 			{

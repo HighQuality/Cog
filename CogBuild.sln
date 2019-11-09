@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{80D74723-C2F4-4B70-AA6A-940D7FCC6E91}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeaderTool", "HeaderTool\HeaderTool.vcxproj", "{DB5323BE-3B8E-432C-9E86-1E4F373A0B61}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CogBuild", "CogBuild\CogBuild.vcxproj", "{DB5323BE-3B8E-432C-9E86-1E4F373A0B61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

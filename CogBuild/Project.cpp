@@ -16,7 +16,7 @@ Project::Project(Directory* aProjectDirectory)
 
 	Println(L"Opening project %...", projectName);
 
-	if (const File* configFile = directory->GetFile(L"HeaderTool.json"))
+	if (const File* configFile = directory->GetFile(Format(L"%.json", projectName).View()))
 	{
 		const std::string fileContents = configFile->ReadString().View().ToStdString();
 
@@ -87,7 +87,7 @@ Project::Project(Directory* aProjectDirectory)
 	}
 	else
 	{
-		FATAL(L"Project % does not contain a HeaderTool.json file", projectName);
+		FATAL(L"Project % does not contain a %.json file", projectName, projectName);
 	}
 }
 

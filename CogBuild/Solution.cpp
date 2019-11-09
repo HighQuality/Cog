@@ -47,7 +47,7 @@ Solution::Solution(const StringView aSolutionDirectory)
 
 	Println(L"Opening solution %...", solutionName);
 
-	if (const File* configFile = directory->GetFile(L"HeaderTool.json"))
+	if (const File* configFile = directory->GetFile(L"CogBuildConfig.json"))
 	{
 		const std::string fileContents = configFile->ReadString().View().ToStdString();
 
@@ -115,7 +115,7 @@ Solution::Solution(const StringView aSolutionDirectory)
 	}
 	else
 	{
-		FATAL(L"Solution % does not contain a HeaderTool.json file", solutionName);
+		FATAL(L"Solution % does not contain a CogBuildConfig.json file", solutionName);
 	}
 }
 

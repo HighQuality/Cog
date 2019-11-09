@@ -1,1 +1,1 @@
-%cd%\bin\HeaderTool.exe -GenerateDevelopmentProjects %cd% || pause
+%cd%\bin\CogBuild.exe -GenerateDevelopmentProjects %cd% || pause

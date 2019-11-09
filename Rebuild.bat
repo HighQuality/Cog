@@ -1,1 +1,1 @@
-bin\HeaderTool.exe -Rebuild %cd% Debug x64 || pause
+%cd%\bin\CogBuild.exe -Rebuild %cd% Debug x64 || pause
