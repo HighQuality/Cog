@@ -8,15 +8,6 @@
 		"Core"
 	],
 	"includePaths": [ ],
-	"linkDependencies":
-	[
-		"wldap32.lib",
-		"crypt32.lib",
-		"Ws2_32.lib",
-		"D3D11.lib",
-		"D3DCompiler.lib",
-		"DXGI.lib",
-		"dxguid.lib"
-	],
-	"libraryPaths": []
+	"linkDependencies": [ ],
+	"libraryPaths": [ ]
 }

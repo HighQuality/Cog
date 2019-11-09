@@ -1,5 +1,5 @@
 #pragma once
 
-#include "../Core/exported_pch.h"
+#include "CorePch.h"
 
 void WriteToFileIfChanged(StringView aFilePath, StringView aNewFileContents);

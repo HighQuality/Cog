@@ -1,6 +1,7 @@
 #include "CorePch.h"
 #include "FileSystemEntry.h"
 #include "Directory.h"
+#include <Shlwapi.h>
 
 FileSystemEntry::FileSystemEntry(Directory * aParentDirectory, const StringView & aAbsolutePath)
 {
@@ -50,6 +51,17 @@ Directory* FileSystemEntry::GetRootDirectory()
 	}
 	
 	return nullptr;
+}
+
+String FileSystemEntry::EvaluatePath(const String aPath)
+{
+	std::unique_ptr<wchar_t[]> buffer(new wchar_t[MAX_PATH]);
+
+	BOOL success = PathCanonicalizeW(buffer.get(), aPath.GetData());
+	if (!success)
+		FATAL("PathCanonicalizeW failed");
+
+	return String(buffer.get());
 }
 	
 String FileSystemEntry::GetRelativePath(const Directory& aBaseDirectory) const

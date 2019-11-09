@@ -34,7 +34,6 @@ public:
 private:
 	static File * CastToFile(FileSystemEntry * aPointer);
 	FileSystemEntry * GetEntryFromThisDirectory(StringView aEntry);
-	FileSystemEntry* GetEntryDrivePath(StringView aDrivePath);
 
 	Map<String, FileSystemEntry*> myFileSystemEntries;
 };

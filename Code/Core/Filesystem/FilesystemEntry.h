@@ -13,6 +13,9 @@ public:
 	Directory * GetParentDirectory() const;
 	Directory * GetRootDirectory();
 
+	// Simplifies path by removing entries such as . and ..
+	static String EvaluatePath(String aPath);
+
 	String GetRelativePath(const Directory& aBaseDirectory) const;
 
 	/* Example outputs: "C:/", "config.json", "My Documents" */

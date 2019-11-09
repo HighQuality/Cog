@@ -8,11 +8,14 @@
 		"../../extlibs/libcurl/include",
 		"../../extlibs/snappy/include"
 	],
-	"linkDependencies":
-	[
-		"libcurl.lib",
-		"snappy.lib"
-	],
+  "linkDependencies": [
+    "libcurl.lib",
+    "snappy.lib",
+    "Shlwapi.lib",
+    "wldap32.lib",
+    "crypt32.lib",
+    "Ws2_32.lib"
+  ],
 	"libraryPaths":
 	[
 		"../../extlibs/libcurl/lib/$(Configuration)",

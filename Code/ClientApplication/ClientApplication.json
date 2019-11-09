@@ -10,6 +10,14 @@
 		"Core"
 	],
 	"includePaths": [ ],
-	"linkDependencies": [ ],
-	"libraryPaths": []
+	
+	"linkDependencies":
+	[
+		"D3D11.lib",
+		"D3DCompiler.lib",
+		"DXGI.lib",
+		"dxguid.lib"
+	],
+	
+	"libraryPaths": [ ]
 }

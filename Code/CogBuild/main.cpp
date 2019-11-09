@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "CogBuildPch.h"
 #include <fstream>
 #include <Filesystem/Directory.h>
 #include <Filesystem/File.h>
@@ -91,6 +91,10 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 	}
 
 	String projectDirectory(argv[2]);
+	projectDirectory.Replace(L'/', L'\\');
+
+	projectDirectory = FileSystemEntry::EvaluatePath(Move(projectDirectory));
+
 	projectDirectory.Replace(L'\\', L'/');
 
 	if (projectDirectory.ClampedSliceFromEnd(1) == L"/")

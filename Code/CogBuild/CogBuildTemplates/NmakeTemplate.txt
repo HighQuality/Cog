@@ -46,8 +46,8 @@
     <NMakeCleanCommandLine>${CleanCommandLine}</NMakeCleanCommandLine>
     <NMakeIncludeSearchPath>${ExtraIncludePaths}</NMakeIncludeSearchPath>
     <IncludePath>${ExtraIncludePaths}$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
-    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)..\temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)..\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeBuildCommandLine>${BuildCommandLine}</NMakeBuildCommandLine>
@@ -57,8 +57,8 @@
     <NMakeCleanCommandLine>${CleanCommandLine}</NMakeCleanCommandLine>
     <NMakeIncludeSearchPath>${ExtraIncludePaths}</NMakeIncludeSearchPath>
     <IncludePath>${ExtraIncludePaths}$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
-    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)..\temp\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)..\bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>

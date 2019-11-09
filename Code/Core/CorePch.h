@@ -136,6 +136,9 @@ void Println(const TArgs& ...aArgs)
 	String output = Format(aArgs...);
 	output.Add(L'\n');
 	std::wcout << output;
+
+	if (IsDebuggerPresent())
+		OutputDebugStringW(output.GetData());
 }
 
 template <typename TTo, typename TFrom>

@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "CogBuildPch.h"
 #include "Project.h"
 #include <External\json.h>
 #include <Filesystem/Directory.h>
@@ -12,6 +12,8 @@ Project::Project(Directory* aProjectDirectory)
 	directory = aProjectDirectory;
 	projectName = aProjectDirectory->GetName();
 	
+	extraIncludePaths.Add(Format(L"$(SolutionDir)%\\", projectName));
+
 	buildProjectFile = Format(L"%/%.vcxproj", aProjectDirectory->GetAbsolutePath(), projectName);
 
 	Println(L"Opening project %...", projectName);
@@ -95,7 +97,7 @@ void Project::ResolveReferences(const Map<String, Project*>& aProjects)
 		if (Project* referencedProject = aProjects.Find(referenceName.View(), nullptr))
 		{
 			references.Add(referencedProject);
-			extraIncludePaths.Add(Format(L"$(ProjectDir)..\\%\\", referencedProject->projectName));
+			extraIncludePaths.Add(Format(L"$(SolutionDir)%\\", referencedProject->projectName));
 			linkDependencies.Add(Format(L"%.lib", referencedProject->projectName));
 		}
 		else
@@ -185,9 +187,11 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 	{
 		String sourceFileList;
 
+		const String pchFileName = Format(L"%Pch.cpp", projectName);
+
 		for (const File* sourceFile : sourceFiles)
 		{
-			if (sourceFile->GetFilename() == L"pch.cpp")
+			if (sourceFile->GetFilename() == pchFileName.View())
 				continue;
 
 			String sourceFilePath(sourceFile->GetRelativePath(*directory));
@@ -208,9 +212,11 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 	{
 		String headerFileList;
 
+		const String pchFileName = Format(L"%Pch.h", projectName);
+
 		for (const File* headerFile : headerFiles)
 		{
-			if (headerFile->GetFilename() == L"pch.h")
+			if (headerFile->GetFilename() == pchFileName.View())
 				continue;
 
 			String headerFilePath(headerFile->GetRelativePath(*directory));
@@ -249,7 +255,7 @@ void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectF
 	documentTemplate.AddParameter(String(L"BuildCommandLine"), String());
 	documentTemplate.AddParameter(String(L"RebuildCommandLine"), String());
 	documentTemplate.AddParameter(String(L"CleanCommandLine"), String());
-	documentTemplate.AddParameter(String(L"OutputFile"), Format(L"$(ProjectDir)..\\..\\bin\\%_$(Configuration)_$(Platform).exe", projectName));
+	documentTemplate.AddParameter(String(L"OutputFile"), Format(L"$(SolutionDir)..\\bin\\%_$(Configuration)_$(Platform).exe", projectName));
 
 	documentTemplate.AddParameter(String(L"ProjectReferences"), Format(L"\
   <ItemGroup>\n\

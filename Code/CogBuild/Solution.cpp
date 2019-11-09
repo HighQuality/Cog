@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "CogBuildPch.h"
 #include "Solution.h"
 #include <External/json.h>
 #include <Filesystem/File.h>
@@ -44,7 +44,7 @@ Solution::Solution(const StringView aSolutionDirectory)
 
 	solutionName = String(directory->GetDirectoryName());
 	buildSolutionFile = Format(L"%/Code/Build%.sln", directory->GetAbsolutePath(), solutionName);
-	developmentSolutionFile = Format(L"%/%.sln", directory->GetAbsolutePath(), solutionName);
+	developmentSolutionFile = Format(L"%/Code/%.sln", directory->GetAbsolutePath(), solutionName);
 	developmentMainProjectName = Format(L"Develop%", solutionName);
 	developmentMainProjectFile = Format(L"%/Code/%.vcxproj", directory->GetAbsolutePath(), developmentMainProjectName);
 
@@ -177,9 +177,9 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	documentTemplate.AddParameter(String(L"ProjectReferences"), String());
 	documentTemplate.AddParameter(String(L"OutputFile"), String());
 
-	documentTemplate.AddParameter(String(L"BuildCommandLine"), Format(L"\"%\" -Build $(SolutionDir) $(Configuration) $(Platform)", aBuildToolPath));
-	documentTemplate.AddParameter(String(L"RebuildCommandLine"), Format(L"\"%\" -Rebuild $(SolutionDir) $(Configuration) $(Platform)", aBuildToolPath));
-	documentTemplate.AddParameter(String(L"CleanCommandLine"), Format(L"\"%\" -Clean", aBuildToolPath));
+	documentTemplate.AddParameter(String(L"BuildCommandLine"), Format(L"\"%\" -Build % $(Configuration) $(Platform)", aBuildToolPath, directory->GetAbsolutePath()));
+	documentTemplate.AddParameter(String(L"RebuildCommandLine"), Format(L"\"%\" -Rebuild % $(Configuration) $(Platform)", aBuildToolPath, directory->GetAbsolutePath()));
+	documentTemplate.AddParameter(String(L"CleanCommandLine"), Format(L"\"%\" -Clean %", aBuildToolPath, directory->GetAbsolutePath()));
 
 	{
 		Map<StringView, u8> includePathsMap;

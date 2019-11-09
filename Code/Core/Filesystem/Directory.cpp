@@ -1,10 +1,8 @@
 #include "CorePch.h"
 #include "Directory.h"
 #include "File.h"
-#include <Shlwapi.h>
 #include <memory>
 #include <string>
-#pragma comment ( lib, "Shlwapi.lib" )
 
 Directory::Directory(Directory * aParentDirectory, const StringView & aAbsolutePath)
 	: FileSystemEntry(aParentDirectory, aAbsolutePath)
@@ -81,7 +79,7 @@ FileSystemEntry* Directory::GetEntry(StringView aPath)
 		// Handle drive paths seperately
 		if (aPath[i] == L':')
 		{
-			return GetEntryDrivePath(aPath);
+			TODO;
 		}
 	}
 	
@@ -128,41 +126,4 @@ FileSystemEntry * Directory::GetEntryFromThisDirectory(StringView aEntry)
 	if (ptr)
 		return *ptr;
 	return nullptr;
-}
-	
-FileSystemEntry* Directory::GetEntryDrivePath(StringView aDrivePath)
-{
-	abort();
-	// Directory * rootDirectory = GetRootDirectory();
-	// 
-	// if (rootDirectory == this || rootDirectory == nullptr)
-	// {
-	// 	std::wstring s = aDrivePath;
-	// 	for (size_t i = 0; i < aDrivePath.size(); i++)
-	// 	{
-	// 		s[i] = towlower(s[i] == L'/' ? L'\\' : s[i]);
-	// 	}
-	// 	std::unique_ptr<wchar_t[]> buffer(new wchar_t[MAX_PATH]);
-	// 	BOOL success = PathCanonicalizeW(buffer.get(), s.c_str());
-	// 	if (success == false)
-	// 	{
-	// 		// Error("PathCanonicalizeW failed");
-	// 		abort();
-	// 	}
-	// 	std::wstring str = buffer.get();
-	// 	std::wstring ourPath = GetAbsolutePath();
-	// 	for (size_t i = 0; i < ourPath.size(); ++i)
-	// 	{
-	// 		ourPath[i] = towlower(ourPath[i]);
-	// 	}
-	// 
-	// 	if (str.compare(0, ourPath.length(), ourPath) == 0)
-	// 	{
-	// 		return GetEntry(str.substr(ourPath.length()));
-	// 	}
-	// 
-	// 	return nullptr;
-	// }
-	// 
-	// return rootDirectory->GetEntryDrivePath(aDrivePath);
 }
