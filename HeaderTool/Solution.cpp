@@ -121,6 +121,9 @@ Solution::Solution(const StringView aSolutionDirectory)
 
 void Solution::GenerateBuildProjects() const
 {
+	CreateDirectoryW(Format(L"%/temp", directory->GetAbsolutePath()).GetData(), 0);
+	CreateDirectoryW(Format(L"%/temp/Build", directory->GetAbsolutePath()).GetData(), 0);
+
 	Array<SolutionDocumentProjectReference> solutionProjects;
 
 	for (auto& project : projects)
@@ -143,6 +146,9 @@ void Solution::GenerateBuildProjects() const
 
 void Solution::GenerateDevelopmentProjects(const StringView aBuildToolPath) const
 {
+	CreateDirectoryW(Format(L"%/temp", directory->GetAbsolutePath()).GetData(), 0);
+	CreateDirectoryW(Format(L"%/temp/Build", directory->GetAbsolutePath()).GetData(), 0);
+
 	Array<SolutionDocumentProjectReference> solutionProjects;
 
 	for (auto& project : projects)
