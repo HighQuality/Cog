@@ -53,6 +53,11 @@ public:
 		myObject = nullptr;
 	}
 
+	T* Get() const
+	{
+		return myObject;
+	}
+
 	FORCEINLINE explicit operator bool() const { return myObject != nullptr; }
 	FORCEINLINE bool IsValid() const { return *this; }
 

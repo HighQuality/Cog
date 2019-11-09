@@ -8,6 +8,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.filters
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -332,6 +333,6 @@ HeaderTool/bin
 
 !extlibs/**
 !bin/CogBuild.exe
-!CogBuild/CogBuild.vcxproj
-!CogBuild/CogBuild.vcxproj.user
+!Code/CogBuild.vcxproj
+!Code/CogBuild.vcxproj.user
 !CogBuild.sln

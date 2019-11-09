@@ -5,8 +5,8 @@
 	"references": [],
 	"includePaths":
 	[
-		"../extlibs/libcurl/include",
-		"../extlibs/snappy/include"
+		"../../extlibs/libcurl/include",
+		"../../extlibs/snappy/include"
 	],
 	"linkDependencies":
 	[
@@ -15,8 +15,7 @@
 	],
 	"libraryPaths":
 	[
-		"../extlibs/libcurl/lib/$(Configuration)",
-		"../extlibs/snappy/lib/$(Configuration)"
+		"../../extlibs/libcurl/lib/$(Configuration)",
+		"../../extlibs/snappy/lib/$(Configuration)"
 	]
-
 }

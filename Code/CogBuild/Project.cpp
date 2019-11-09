@@ -12,7 +12,7 @@ Project::Project(Directory* aProjectDirectory)
 	directory = aProjectDirectory;
 	projectName = aProjectDirectory->GetName();
 	
-	buildProjectFile = Format(L"%/%.vcxproj", directory->GetAbsolutePath(), projectName);
+	buildProjectFile = Format(L"%/%.vcxproj", aProjectDirectory->GetAbsolutePath(), projectName);
 
 	Println(L"Opening project %...", projectName);
 
@@ -66,7 +66,7 @@ Project::Project(Directory* aProjectDirectory)
 		if (typeName == "executable")
 		{
 			projectType = ProjectType::Executable;
-			debugDevelopmentProjectFile = Format(L"%/../temp/Debug%.vcxproj", directory->GetAbsolutePath(), projectName);
+			debugDevelopmentProjectFile = Format(L"%/Debug%.vcxproj", aProjectDirectory->GetAbsolutePath(), projectName);
 		}
 		else if (typeName == "library")
 			projectType = ProjectType::Library;
@@ -80,9 +80,9 @@ Project::Project(Directory* aProjectDirectory)
 					return;
 
 				if (aFile.GetExtension() == L".h" || aFile.GetExtension() == L".hpp")
-					headerFiles.Add(aFile.GetAbsolutePath());
+					headerFiles.Add(aFile.GetRelativePath(*aProjectDirectory));
 				else if (aFile.GetExtension() == L".c" || aFile.GetExtension() == L".cpp" || aFile.GetExtension() == L".cc")
-					sourceFiles.Add(aFile.GetAbsolutePath());
+					sourceFiles.Add(aFile.GetRelativePath(*aProjectDirectory));
 			}, true);
 	}
 	else
@@ -98,7 +98,7 @@ void Project::ResolveReferences(const Map<String, Project*>& aProjects)
 		if (Project* referencedProject = aProjects.Find(referenceName.View(), nullptr))
 		{
 			references.Add(referencedProject);
-			extraIncludePaths.Add(Format(L"..\\%", referencedProject->projectName));
+			extraIncludePaths.Add(Format(L"$(ProjectDir)%\\", referencedProject->projectName));
 			linkDependencies.Add(Format(L"%.lib", referencedProject->projectName));
 		}
 		else
@@ -176,7 +176,7 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 		{
 			for (const auto& pair : projectReferencesMap)
 			{
-				projectReferences.Append(Format(L"    <ProjectReference Include=\"..\\%\\%.vcxproj\">\n", pair.key->projectName, pair.key->projectName).View());
+				projectReferences.Append(Format(L"    <ProjectReference Include=\"%.vcxproj\">\n", pair.key->projectName).View());
 				projectReferences.Append(Format(L"      <Project>%</Project>\n", pair.key->projectGuid).View());
 				projectReferences.Append(L"    </ProjectReference>\n");
 			}
@@ -252,7 +252,7 @@ void Project::GenerateDebugDevelopmentProjectFile(StringView aMainProjectFilePat
 	documentTemplate.AddParameter(String(L"BuildCommandLine"), String());
 	documentTemplate.AddParameter(String(L"RebuildCommandLine"), String());
 	documentTemplate.AddParameter(String(L"CleanCommandLine"), String());
-	documentTemplate.AddParameter(String(L"OutputFile"), Format(L"$(SolutionDir)bin/%_$(Configuration)_$(Platform).exe", projectName));
+	documentTemplate.AddParameter(String(L"OutputFile"), Format(L"$(ProjectDir)..\\bin\\%_$(Configuration)_$(Platform).exe", projectName));
 
 	documentTemplate.AddParameter(String(L"ProjectReferences"), Format(L"\
   <ItemGroup>\n\

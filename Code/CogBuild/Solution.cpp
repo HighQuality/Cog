@@ -40,10 +40,10 @@ Solution::Solution(const StringView aSolutionDirectory)
 	directory = MakeUnique<Directory>(nullptr, aSolutionDirectory);
 
 	solutionName = String(directory->GetDirectoryName());
-	buildSolutionFile = Format(L"%/temp/Build/%.sln", directory->GetAbsolutePath(), solutionName);
+	buildSolutionFile = Format(L"%/Code/Build%.sln", directory->GetAbsolutePath(), solutionName);
 	developmentSolutionFile = Format(L"%/%.sln", directory->GetAbsolutePath(), solutionName);
-	developmentMainProjectName = Format(L"%_Development", solutionName);
-	developmentMainProjectFile = Format(L"%/temp/%.vcxproj", directory->GetAbsolutePath(), developmentMainProjectName);
+	developmentMainProjectName = Format(L"Develop%", solutionName);
+	developmentMainProjectFile = Format(L"Code/%.vcxproj", directory->GetAbsolutePath(), developmentMainProjectName);
 
 	Println(L"Opening solution %...", solutionName);
 
@@ -89,7 +89,7 @@ Solution::Solution(const StringView aSolutionDirectory)
 		for (const auto& projectDirectoryNameProperty : document["projects"].get<json::array_t>())
 		{
 			const std::string projectDirectoryStdName = projectDirectoryNameProperty.get<std::string>();
-			const String projectDirectoryName(projectDirectoryStdName.c_str());
+			const String projectDirectoryName = Format(L"Code/%", projectDirectoryStdName.c_str());
 
 			if (Directory* projectDirectory = directory->GetDirectory(projectDirectoryName))
 			{
@@ -121,9 +121,6 @@ Solution::Solution(const StringView aSolutionDirectory)
 
 void Solution::GenerateBuildProjects() const
 {
-	CreateDirectoryW(Format(L"%/temp", directory->GetAbsolutePath()).GetData(), 0);
-	CreateDirectoryW(Format(L"%/temp/Build", directory->GetAbsolutePath()).GetData(), 0);
-
 	Array<SolutionDocumentProjectReference> solutionProjects;
 
 	for (auto& project : projects)
@@ -146,9 +143,6 @@ void Solution::GenerateBuildProjects() const
 
 void Solution::GenerateDevelopmentProjects(const StringView aBuildToolPath) const
 {
-	CreateDirectoryW(Format(L"%/temp", directory->GetAbsolutePath()).GetData(), 0);
-	CreateDirectoryW(Format(L"%/temp/Build", directory->GetAbsolutePath()).GetData(), 0);
-
 	Array<SolutionDocumentProjectReference> solutionProjects;
 
 	for (auto& project : projects)
