@@ -11,6 +11,8 @@ Project::Project(Directory* aProjectDirectory)
 
 	directory = aProjectDirectory;
 	projectName = aProjectDirectory->GetName();
+	
+	buildProjectFile = Format(L"%/%.vcxproj", directory->GetAbsolutePath(), projectName);
 
 	Println(L"Opening project %...", projectName);
 
@@ -62,7 +64,10 @@ Project::Project(Directory* aProjectDirectory)
 		const std::string typeName = document["type"].get<std::string>();
 
 		if (typeName == "executable")
+		{
 			projectType = ProjectType::Executable;
+			debugDevelopmentProjectFile = Format(L"%/../temp/Debug%.vcxproj", directory->GetAbsolutePath(), projectName);
+		}
 		else if (typeName == "library")
 			projectType = ProjectType::Library;
 		else
@@ -75,9 +80,9 @@ Project::Project(Directory* aProjectDirectory)
 					return;
 
 				if (aFile.GetExtension() == L".h" || aFile.GetExtension() == L".hpp")
-					headerFiles.Add(aFile.GetRelativePath(*aProjectDirectory));
+					headerFiles.Add(aFile.GetAbsolutePath());
 				else if (aFile.GetExtension() == L".c" || aFile.GetExtension() == L".cpp" || aFile.GetExtension() == L".cc")
-					sourceFiles.Add(aFile.GetRelativePath(*aProjectDirectory));
+					sourceFiles.Add(aFile.GetAbsolutePath());
 			}, true);
 	}
 	else
@@ -103,9 +108,9 @@ void Project::ResolveReferences(const Map<String, Project*>& aProjects)
 	}
 }
 
-void Project::GenerateProjectFile(StringView aProjectTemplate) const
+void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 {
-	const String outputFile = Format(L"%/%.vcxproj", directory->GetAbsolutePath(), projectName);
+	CHECK(buildProjectFile.GetLength() > 0);
 
 	StringTemplate documentTemplate = StringTemplate(String(aProjectTemplate));
 	CHECK(projectGuid.GetLength() > 0);
@@ -228,7 +233,37 @@ void Project::GenerateProjectFile(StringView aProjectTemplate) const
 
 	const String output = documentTemplate.Evaluate();
 
-	WriteToFileIfChanged(outputFile, output.View());
+	WriteToFileIfChanged(buildProjectFile, output.View());
+}
+
+void Project::GenerateDebugDevelopmentProjectFile(StringView aMainProjectFilePath, StringView aMainProjectGuid, StringView aProjectTemplate) const
+{
+	CHECK(projectType == ProjectType::Executable);
+	CHECK(debugDevelopmentProjectFile.GetLength() > 0);
+
+	StringTemplate documentTemplate = StringTemplate(String(aProjectTemplate));
+	CHECK(projectGuid.GetLength() > 0);
+	documentTemplate.AddParameter(String(L"ProjectGuid"), String(projectGuid));
+
+	documentTemplate.AddParameter(String(L"ExtraIncludePaths"), String());
+
+	documentTemplate.AddParameter(String(L"SourceFiles"), String());
+	documentTemplate.AddParameter(String(L"HeaderFiles"), String());
+	documentTemplate.AddParameter(String(L"BuildCommandLine"), String());
+	documentTemplate.AddParameter(String(L"RebuildCommandLine"), String());
+	documentTemplate.AddParameter(String(L"CleanCommandLine"), String());
+	documentTemplate.AddParameter(String(L"OutputFile"), Format(L"$(SolutionDir)bin/%_$(Configuration)_$(Platform).exe", projectName));
+
+	documentTemplate.AddParameter(String(L"ProjectReferences"), Format(L"\
+  <ItemGroup>\n\
+    <ProjectReference Include=\"%\">\n\
+      <Project>%</Project>\n\
+    </ProjectReference>\n\
+  </ItemGroup>\n", aMainProjectFilePath, aMainProjectGuid));
+
+	const String output = documentTemplate.Evaluate();
+
+	WriteToFileIfChanged(debugDevelopmentProjectFile, output.View());
 }
 
 void Project::GatherLibraryPaths(Map<StringView, u8>& aLibraryPaths) const
@@ -265,4 +300,22 @@ void Project::GatherProjectReferences(Map<Project*, u8>& aProjectReferences) con
 
 	for (Project* reference : references)
 		reference->GatherProjectReferences(aProjectReferences);
+}
+
+void Project::GatherHeaderFiles(Map<String, u8>& aHeaderFiles) const
+{
+	for (const String& headerFile : headerFiles)
+		aHeaderFiles.FindOrAdd(headerFile.View()) = 0;
+
+	for (Project* reference : references)
+		reference->GatherHeaderFiles(aHeaderFiles);
+}
+
+void Project::GatherSourceFiles(Map<String, u8>& aSourceFiles) const
+{
+	for (const String& sourceFile : sourceFiles)
+		aSourceFiles.FindOrAdd(sourceFile.View()) = 0;
+
+	for (Project* reference : references)
+		reference->GatherSourceFiles(aSourceFiles);
 }

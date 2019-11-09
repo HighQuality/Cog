@@ -40,7 +40,10 @@ Solution::Solution(const StringView aSolutionDirectory)
 	directory = MakeUnique<Directory>(nullptr, aSolutionDirectory);
 
 	solutionName = String(directory->GetDirectoryName());
-	solutionFile = Format(L"%/temp/Build/%.sln", directory->GetAbsolutePath(), solutionName);
+	buildSolutionFile = Format(L"%/temp/Build/%.sln", directory->GetAbsolutePath(), solutionName);
+	developmentSolutionFile = Format(L"%/%.sln", directory->GetAbsolutePath(), solutionName);
+	developmentMainProjectName = Format(L"%_Development", solutionName);
+	developmentMainProjectFile = Format(L"%/temp/%.vcxproj", directory->GetAbsolutePath(), developmentMainProjectName);
 
 	Println(L"Opening solution %...", solutionName);
 
@@ -54,6 +57,7 @@ Solution::Solution(const StringView aSolutionDirectory)
 
 		vsCppProjectTypeGuid = String(document["vsCppProjectTypeGuid"].get<std::string>().c_str());
 		solutionGuid = String(document["solutionGuid"].get<std::string>().c_str());
+		developmentMainProjectGuid = String(document["developmentProjectGuid"].get<std::string>().c_str());
 
 		Directory* templateDirectory = directory->GetDirectory(templateDirectoryName);
 
@@ -74,6 +78,11 @@ Solution::Solution(const StringView aSolutionDirectory)
 		if (!executableProjectTemplateFile)
 			FATAL(L"Can't find ExecutableProjectTemplate.txt in template directory");
 		executableProjectTemplate = executableProjectTemplateFile->ReadString();
+
+		File* developmentProjectTemplateFile = templateDirectory->GetFile(L"NmakeTemplate.txt");
+		if (!developmentProjectTemplateFile)
+			FATAL(L"Can't find NmakeTemplate.txt in template directory");
+		developmentProjectTemplate = developmentProjectTemplateFile->ReadString();
 
 		Map<String, Project*> projectMap;
 
@@ -110,9 +119,9 @@ Solution::Solution(const StringView aSolutionDirectory)
 	}
 }
 
-void Solution::GenerateSolutionAndProjects() const
+void Solution::GenerateBuildProjects() const
 {
-	GenerateSolutionFile(solutionTemplate);
+	Array<SolutionDocumentProjectReference> solutionProjects;
 
 	for (auto& project : projects)
 	{
@@ -124,14 +133,127 @@ void Solution::GenerateSolutionAndProjects() const
 		else
 			FATAL(L"Unhandled project template %", static_cast<i32>(project->projectType));
 
-		project->GenerateProjectFile(projectTemplate);
+		solutionProjects.Add(SolutionDocumentProjectReference(project->projectGuid, project->projectName, project->buildProjectFile));
+
+		project->GenerateBuildProjectFile(projectTemplate);
 	}
+	
+	GenerateSolutionFile(buildSolutionFile, solutionProjects);
 }
 
-void Solution::GenerateSolutionFile(const StringView aSolutionTemplate) const
+void Solution::GenerateDevelopmentProjects(const StringView aBuildToolPath) const
 {
-	StringTemplate documentTemplate = StringTemplate(String(aSolutionTemplate));
-	StringTemplate projectTemplate(String(L"Project(\"${ProjectTypeGuid}\") = \"${ProjectName}\", \"..\\..\\${ProjectName}\\${ProjectName}.vcxproj\", \"${ProjectGuid}\""));
+	Array<SolutionDocumentProjectReference> solutionProjects;
+
+	for (auto& project : projects)
+	{
+		if (project->projectType == ProjectType::Executable)
+		{
+			solutionProjects.Add(SolutionDocumentProjectReference(project->projectGuid, project->projectName, project->debugDevelopmentProjectFile));
+
+			project->GenerateDebugDevelopmentProjectFile(developmentMainProjectFile, developmentMainProjectGuid, developmentProjectTemplate);
+		}
+	}
+
+	GenerateDevelopmentMainProjectFile(aBuildToolPath);
+	solutionProjects.Add(SolutionDocumentProjectReference(developmentMainProjectGuid, developmentMainProjectName, developmentMainProjectFile));
+
+	GenerateSolutionFile(developmentSolutionFile, solutionProjects);
+}
+
+void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPath) const
+{
+	StringTemplate documentTemplate = StringTemplate(String(developmentProjectTemplate));
+
+	documentTemplate.AddParameter(String(L"ProjectGuid"), String(developmentMainProjectGuid));
+	documentTemplate.AddParameter(String(L"ProjectReferences"), String());
+	documentTemplate.AddParameter(String(L"OutputFile"), String());
+
+	documentTemplate.AddParameter(String(L"BuildCommandLine"), Format(L"\"%\" -Build $(SolutionDir) $(Configuration) $(Platform)", aBuildToolPath));
+	documentTemplate.AddParameter(String(L"RebuildCommandLine"), Format(L"\"%\" -Rebuild $(SolutionDir) $(Configuration) $(Platform)", aBuildToolPath));
+	documentTemplate.AddParameter(String(L"CleanCommandLine"), Format(L"\"%\" -Clean", aBuildToolPath));
+
+	{
+		Map<StringView, u8> includePathsMap;
+		for (const auto& project : projects)
+			project->GatherIncludePaths(includePathsMap);
+
+		String includePaths;
+		
+		for (const auto& pair : includePathsMap)
+		{
+			includePaths.Append(pair.key);
+			includePaths.Add(L';');
+		}
+
+		includePaths.Replace(L'/', L'\\');
+
+		documentTemplate.AddParameter(String(L"ExtraIncludePaths"), Move(includePaths));
+	}
+
+	{
+		Map<String, u8> sourceFiles;
+		for (const auto& project : projects)
+			project->GatherSourceFiles(sourceFiles);
+
+		String sourceFileList;
+
+		if (sourceFiles.GetLength() > 0)
+		{
+			for (const auto& sourceFilePair : sourceFiles)
+			{
+				String sourceFile(sourceFilePair.key);
+				sourceFile.Replace(L'/', L'\\');
+
+				sourceFileList.Append(L"    <ClCompile Include=\"");
+				sourceFileList.Append(sourceFile);
+				sourceFileList.Append(L"\" />\n");
+			}
+
+			// Pop last \n
+			sourceFileList.Pop();
+		}
+
+		documentTemplate.AddParameter(String(L"SourceFiles"), Move(sourceFileList));
+	}
+
+	{
+		Map<String, u8> headerFiles;
+		for (const auto& project : projects)
+			project->GatherHeaderFiles(headerFiles);
+
+		String headerFileList;
+
+		if (headerFiles.GetLength() > 0)
+		{
+			for (const auto& headerFilePair : headerFiles)
+			{
+				String headerFile(headerFilePair.key);
+				headerFile.Replace(L'/', L'\\');
+
+				headerFileList.Append(L"    <ClInclude Include=\"");
+				headerFileList.Append(headerFile);
+				headerFileList.Append(L"\" />\n");
+			}
+
+			// Pop last \n
+			headerFileList.Pop();
+		}
+
+		documentTemplate.AddParameter(String(L"HeaderFiles"), Move(headerFileList));
+	}
+
+	const String output = documentTemplate.Evaluate();
+
+	WriteToFileIfChanged(developmentMainProjectFile, output.View());
+}
+
+void Solution::GenerateSolutionFile(StringView aSolutionFilePath, ArrayView<SolutionDocumentProjectReference> aProjects) const
+{
+	CHECK(solutionTemplate.GetLength() > 0);
+
+	StringTemplate documentTemplate = StringTemplate(String(solutionTemplate));
+	StringTemplate projectTemplate(String(L"Project(\"${ProjectTypeGuid}\") = \"${ProjectName}\", \"${ProjectFilePath}\", \"${ProjectGuid}\""));
 	StringTemplate configurationTemplate(String(L"\t\t${ProjectGuid}.Debug|x64.ActiveCfg = Debug|x64\n\t\t${ProjectGuid}.Debug|x64.Build.0 = Debug|x64\n\t\t${ProjectGuid}.Release|x64.ActiveCfg = Release|x64\n\t\t${ProjectGuid}.Release|x64.Build.0 = Release|x64"));
 
 	CHECK(vsCppProjectTypeGuid.GetLength() > 0);
@@ -140,21 +262,23 @@ void Solution::GenerateSolutionFile(const StringView aSolutionTemplate) const
 		String projectSection;
 		String configurationSection;
 
-		for (const UniquePtr<Project>& project : projects)
+		for (const SolutionDocumentProjectReference& project : aProjects)
 		{
-			CHECK(project->projectName.GetLength() > 0);
-			CHECK(project->projectGuid.GetLength() > 0);
+			CHECK(project.projectName.GetLength() > 0);
+			CHECK(project.guid.GetLength() > 0);
+			CHECK(project.projectFilePath.GetLength() > 0);
 
 			projectTemplate.AddParameter(String(L"ProjectTypeGuid"), String(vsCppProjectTypeGuid));
-			projectTemplate.AddParameter(String(L"ProjectName"), String(project->projectName));
-			projectTemplate.AddParameter(String(L"ProjectGuid"), String(project->projectGuid));
+			projectTemplate.AddParameter(String(L"ProjectName"), String(project.projectName));
+			projectTemplate.AddParameter(String(L"ProjectGuid"), String(project.guid));
+			projectTemplate.AddParameter(String(L"ProjectFilePath"), String(project.projectFilePath));
 
 			projectSection.Append(projectTemplate.Evaluate().View());
 			projectSection.Append(L"\nEndProject\n");
 
 			projectTemplate.ClearParameters();
 
-			configurationTemplate.AddParameter(String(L"ProjectGuid"), String(project->projectGuid));
+			configurationTemplate.AddParameter(String(L"ProjectGuid"), String(project.guid));
 			configurationSection.Append(configurationTemplate.Evaluate().View());
 			configurationSection.Add(L'\n');
 		
@@ -175,5 +299,6 @@ void Solution::GenerateSolutionFile(const StringView aSolutionTemplate) const
 
 	const String output = documentTemplate.Evaluate();
 
-	WriteToFileIfChanged(solutionFile, output.View());
+	WriteToFileIfChanged(aSolutionFilePath, output.View());
 }
+

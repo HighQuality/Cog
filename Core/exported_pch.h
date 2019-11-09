@@ -134,9 +134,8 @@ template <typename ...TArgs>
 void Println(const TArgs& ...aArgs)
 {
 	String output = Format(aArgs...);
-	output.Append(L"\r\n");
+	output.Add(L'\n');
 	std::wcout << output;
-	OutputDebugStringW(output.GetData());
 }
 
 template <typename TTo, typename TFrom>

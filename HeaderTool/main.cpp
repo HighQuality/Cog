@@ -7,6 +7,12 @@
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
+	// Println(L"% args", argc);
+	// for (i32 i = 0; i < argc; ++i)
+	// {
+	// 	Println(L"\t", StringView(argv[i]));
+	// }
+
 	if (argc < 3)
 	{
 		Println(L"Usage: CogBuild -command directory");
@@ -26,8 +32,8 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
 	const String command(argv[1]);
 
-	bool generateProjectFiles = false;
-	bool generateSolutionFile = false;
+	bool generateBuildProjects = false;
+	bool generateDevelopmentProjects = false;
 	
 	bool buildProject = false;
 	String configuration;
@@ -35,13 +41,13 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
 	bool cleanProject = false;
 
-	if (command == L"-GenerateProjectFiles")
+	if (command == L"-GenerateBuildProjects")
 	{
-		generateProjectFiles = true;
+		generateBuildProjects = true;
 	}
 	else if (command == L"-Build")
 	{
-		generateProjectFiles = true;
+		generateBuildProjects = true;
 		buildProject = true;
 
 		if (argc < 5)
@@ -54,9 +60,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 		configuration = String(argv[3]);
 		platform = String(argv[4]);
 	}
-	else if (command == L"-GenerateSolution")
+	else if (command == L"-GenerateDevelopmentProjects")
 	{
-		generateSolutionFile = true;
+		generateDevelopmentProjects = true;
 	}
 	else if (command == L"-Clean")
 	{
@@ -65,7 +71,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 	else if (command == L"-Rebuild")
 	{
 		cleanProject = true;
-		generateProjectFiles = true;
+		generateBuildProjects = true;
 		buildProject = true;
 
 		if (argc < 5)
@@ -78,6 +84,11 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 		configuration = String(argv[3]);
 		platform = String(argv[4]);
 	}
+	else
+	{
+		Println(L"Unknown command \"%\"", command);
+		return 1;
+	}
 
 	String projectDirectory(argv[2]);
 	projectDirectory.Replace(L'\\', L'/');
@@ -89,26 +100,33 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
 	if (cleanProject)
 	{
-		String msBuildCleanCommand = Format(L"msbuild \"%\" -nologo -target:clean -maxcpucount -verbosity:minimal", solution.solutionFile);
+		String msBuildCleanCommand = Format(L"msbuild \"%\" -nologo -target:clean -maxcpucount -verbosity:minimal", solution.buildSolutionFile);
 
+		std::wcout.flush();
 		const i32 returnCode = system(msBuildCleanCommand.View().ToStdString().c_str());
 
 		Println(L"msbuild clean returned %", returnCode);
 
 	}
 	
-	if (generateProjectFiles)
+	if (generateBuildProjects)
 	{
-		solution.GenerateSolutionAndProjects();
+		solution.GenerateBuildProjects();
 	}
-	
+
+	if (generateDevelopmentProjects)
+	{
+		solution.GenerateDevelopmentProjects(argv[0]);
+	}
+
 	if (buildProject)
 	{
 		CHECK(configuration.GetLength() > 0);
 		CHECK(platform.GetLength() > 0);
 
-		String buildCommand = Format(L"msbuild \"%\" -nologo -maxcpucount -verbosity:minimal \"/property:Configuration=%;Platform=%\"", solution.solutionFile, configuration, platform);
+		String buildCommand = Format(L"msbuild \"%\" -nologo -maxcpucount -verbosity:minimal \"/property:Configuration=%;Platform=%\"", solution.buildSolutionFile, configuration, platform);
 
+		std::wcout.flush();
 		const i32 returnCode = system(buildCommand.View().ToStdString().c_str());
 
 		Println(L"msbuild returned %", returnCode);

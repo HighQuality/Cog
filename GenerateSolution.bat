@@ -1,1 +1,0 @@
-bin\HeaderTool.exe -GenerateSolution %cd% || pause

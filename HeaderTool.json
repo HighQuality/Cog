@@ -2,6 +2,7 @@
 	"templateDirectory": "HeaderToolTemplates",
 	"vsCppProjectTypeGuid": "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}",
 	"solutionGuid": "{62E476D4-63CC-41F9-B7C0-6D7B3A5BF835}",
+	"developmentProjectGuid": "{A417AA4E-E8EE-4708-8073-0ECE47DA2CFD}",
 	
 	"projects":
 	[
