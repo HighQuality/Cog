@@ -6,23 +6,29 @@ class GroupingWordReader : private WordReader
 public:
 	using Base = WordReader;
 
+	GroupingWordReader() = default;
 	explicit GroupingWordReader(StringView aContent);
 
 	bool Next();
 	
-	StringView GetCurrentWordOrGroup() { return myCurrentContent; }
-	StringView GetCurrentWord() { CHECK(!IsAtGroup()); return myCurrentContent; }
-	StringView GetCurrentGroup() { CHECK(IsAtGroup()); return myCurrentContent; }
+	StringView GetCurrentWordOrGroup() const { return myCurrentContent; }
+	StringView GetCurrentWord() const { CHECK(!IsAtGroup()); return myCurrentContent; }
+	StringView GetCurrentGroup() const { CHECK(IsAtGroup()); return myCurrentContent; }
 
 	bool IsAtGroup() const { return myIsAtGroup; }
+	bool IsAtWord() const { return !myIsAtGroup; }
 
 	Char GetOpeningCharacter() const { CHECK(IsAtGroup()); return myCurrentOpeningCharacter; }
 	Char GetClosingCharacter() const { CHECK(IsAtGroup()); return myCurrentClosingCharacter; }
 
 	/** Current refers to the word that was previously returned by NextWord */
-	i32 CalculateAndGetCurrentLineIndex() { return Base::CalculateAndGetCurrentLineIndex(); }
+	i32 CalculateAndGetCurrentLineIndex() { return Base::CalculateAndGetCurrentLineIndex() + myLineOffset; }
 	/** Current refers to the word that was previously returned by NextWord */
 	i32 CalculateAndGetCurrentColumnIndex() { return Base::CalculateAndGetCurrentColumnIndex(); }
+
+	i32 GetCurrentGroupFirstContentLineIndex() const { CHECK(IsAtGroup()); return myCurrentGroupFirstContentLineIndex; }
+
+	void SetLineOffset(const i32 aLineOffset) { myLineOffset = aLineOffset; }
 
 private:
 	static Char GetCorrespondingEndCharacter(Char aCharacter);
@@ -30,6 +36,8 @@ private:
 	StringView myCurrentContent;
 	Char myCurrentOpeningCharacter;
 	Char myCurrentClosingCharacter;
+	i32 myLineOffset = 0;
+	i32 myCurrentGroupFirstContentLineIndex = 0;
 	bool myIsAtGroup = false;
 };
 

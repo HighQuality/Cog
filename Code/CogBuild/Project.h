@@ -1,4 +1,5 @@
 #pragma once
+#include "HeaderParser.h"
 
 class Directory;
 class File;
@@ -17,7 +18,7 @@ struct Project
 	void GenerateBuildProjectFile(StringView aProjectTemplate) const;
 	void GenerateDebugDevelopmentProjectFile(StringView aMainProjectFilePath, StringView aMainProjectGuid, StringView aProjectTemplate, const StringView nmakeDebugUserFileTemplate) const;
 	
-	void GenerateCode(StringView aGeneratedCodeDirectory);
+	bool ParseHeaders();
 
 	/** These gather functions gather all the properties from this and all referenced projects */
 	void GatherLibraryPaths(Map<StringView, u8>& aLibraryPaths) const;
@@ -34,6 +35,8 @@ struct Project
 	String buildProjectFile;
 	String debugDevelopmentProjectFile;
 	String debugDevelopmentUserProjectFile;
+
+	Array<UniquePtr<HeaderParser>> myHeaderParsers;
 
 	Array<String> namesOfReferences;
 	Array<Project*> references;

@@ -3,6 +3,7 @@
 #include "CogPch.h"
 
 #define COGTYPE(...)
+#define GENERATED_BODY
 
 using ChunkIndex = u8;
 

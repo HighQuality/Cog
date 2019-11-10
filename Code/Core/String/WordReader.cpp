@@ -47,7 +47,7 @@ StringView WordReader::NextWord()
 
 	myPreviouslyReturnedWordIndex = index;
 
-	const StringView alphanumericWord = continueWhile([](const Char aCharacter) { return IsLetterOrDigit(aCharacter); });
+	const StringView alphanumericWord = continueWhile([](const Char aCharacter) { return IsLetterDigitOrUnderscore(aCharacter); });
 	
 	if (alphanumericWord.GetLength() > 0)
 		return alphanumericWord;
@@ -159,9 +159,9 @@ bool WordReader::IsWhitespace(const Char aCharacter)
 	return iswspace(aCharacter) || aCharacter == L'\0';
 }
 
-bool WordReader::IsLetterOrDigit(const Char aCharacter)
+bool WordReader::IsLetterDigitOrUnderscore(const Char aCharacter)
 {
-	return iswalnum(aCharacter);
+	return iswalnum(aCharacter) || aCharacter == L'_';
 }
 
 bool WordReader::IsNewline(const Char aCharacter)
@@ -184,7 +184,7 @@ bool WordReader::IsControlCharacter(const Char aCharacter)
 
 bool WordReader::IsSpecialCharacter(const Char aCharacter)
 {
-	if (IsLetterOrDigit(aCharacter))
+	if (IsLetterDigitOrUnderscore(aCharacter))
 		return false;
 
 	if (IsWhitespace(aCharacter))

@@ -115,7 +115,13 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 	{
 		Println(L"Generating code...");
 		Stopwatch w;
-		solution.GenerateCode();
+		
+		if (!solution.GenerateCode())
+		{
+			Println(L"Code generation failed");
+			return 1;
+		}
+
 		Println(L"Done in %ms", w.GetElapsedTime().Milliseconds());
 	}
 

@@ -13,19 +13,19 @@ public:
 	StringView(class String&&) = delete;
 	StringView& operator=(class String&&) = delete;
 
-	StringView(const StringSlice & aStringSlice);
+	StringView(const StringSlice& aStringSlice);
 
-	FORCEINLINE StringView(const ArrayView & aStringView)
+	FORCEINLINE StringView(const ArrayView& aStringView)
 		: Super(aStringView)
 	{
 	}
 
-	FORCEINLINE StringView(const Char * aString)
+	FORCEINLINE StringView(const Char* aString)
 		: Super(aString, static_cast<i32>(wcslen(aString)))
 	{
 	}
 
-	FORCEINLINE bool operator==(const wchar_t * aString) const
+	FORCEINLINE bool operator==(const wchar_t* aString) const
 	{
 		const size_t length = wcslen(aString);
 		if (length != GetLength())
@@ -36,17 +36,17 @@ public:
 		return true;
 	}
 
-	FORCEINLINE bool operator!=(const wchar_t * aString) const
+	FORCEINLINE bool operator!=(const wchar_t* aString) const
 	{
 		return !(*this == aString);
 	}
 
-	FORCEINLINE bool operator==(const StringView & aString) const
+	FORCEINLINE bool operator==(const StringView& aString) const
 	{
 		return Super::operator==(aString);
 	}
 
-	FORCEINLINE bool operator!=(const StringView & aString) const
+	FORCEINLINE bool operator!=(const StringView& aString) const
 	{
 		return !(*this == aString);
 	}
@@ -64,7 +64,7 @@ public:
 
 		const i32 substringLength = aString.GetLength();
 		i32 n = this->GetLength() - aString.GetLength();
-		for (i32 i=0; i<n; ++i)
+		for (i32 i = 0; i < n; ++i)
 		{
 			if (memcmp(&this->myData[i], aString.GetData(), substringLength * sizeof Char) == 0)
 				return true;
@@ -87,17 +87,76 @@ public:
 		return std::wstring(GetData(), GetLength());
 	}
 
+	void TrimLeft()
+	{
+		if (GetLength() == 0)
+			return;
+
+		const i32 length = GetLength();
+
+		for (i32 i = 0; i < length; ++i)
+		{
+			if (!iswspace((*this)[i]))
+			{
+				*this = ChopFromStart(i);
+				break;
+			}
+		}
+	}
+
+	void TrimRight()
+	{
+		if (GetLength() == 0)
+			return;
+
+		for (i32 i = GetLength() - 1; i >= 0; --i)
+		{
+			if (!iswspace((*this)[i]))
+			{
+				*this = SliceFromStart(i + 1);
+				break;
+			}
+		}
+	}
+
+	void Trim()
+	{
+		TrimLeft();
+		TrimRight();
+	}
+
+	StringView GetTrimmedLeft() const
+	{
+		StringView copy = *this;
+		copy.TrimLeft();
+		return copy;
+	}
+
+	StringView GetTrimmedRight() const
+	{
+		StringView copy = *this;
+		copy.TrimRight();
+		return copy;
+	}
+
+	StringView GetTrimmed() const
+	{
+		StringView copy = *this;
+		copy.Trim();
+		return copy;
+	}
+
 	FORCEINLINE explicit operator bool() const { return GetLength() > 0; }
 
 	DECLARE_ARRAY_SLICE_FUNCTIONS(StringView);
 
 
-	FORCEINLINE explicit StringView(StringView && aBase, UpcastType&&)
+	FORCEINLINE explicit StringView(StringView&& aBase, UpcastType&&)
 		: Super(Move(aBase))
 	{ }
 };
 
-FORCEINLINE ::std::wostream & operator<<(::std::wostream & aOut, const StringView& aString)
+FORCEINLINE::std::wostream& operator<<(::std::wostream& aOut, const StringView& aString)
 {
 	aOut.write(aString.GetData(), aString.GetLength());
 	return aOut;
@@ -105,7 +164,7 @@ FORCEINLINE ::std::wostream & operator<<(::std::wostream & aOut, const StringVie
 
 #include "CogStringSlice.h"
 
-FORCEINLINE StringView::StringView(const StringSlice & aStringSlice)
+FORCEINLINE StringView::StringView(const StringSlice& aStringSlice)
 	: Super(aStringSlice)
 {
 }

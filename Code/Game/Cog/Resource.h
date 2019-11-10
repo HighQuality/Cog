@@ -2,12 +2,14 @@
 #include <Containers/BinaryData.h>
 #include "Object.h"
 #include "ObjectFunctionView.h"
+#include "Resource.generated.h"
 
 using ResourceLoaderFunction = ObjectFunctionView<void(const ArrayView<u8>&, BinaryData&)>;
 
 COGTYPE(SuperFast, ReallyCool, Abc)
-class Resource : public InheritType<Object>
+class Resource : public Object
 {
+	GENERATED_BODY;
 public:
 
 protected:
@@ -22,6 +24,14 @@ protected:
 
 	//GENCELFIXED
 	void RegisterCallback(const Function<void(Resource&)>& aFunctionCallback);
+
+	void Test()
+	{
+		if (Hello == World)
+		{
+			Print();
+		}
+	}
 
 private:
 	bool myIsLoaded = false;

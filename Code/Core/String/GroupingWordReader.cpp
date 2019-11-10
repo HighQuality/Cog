@@ -29,6 +29,12 @@ bool GroupingWordReader::Next()
 	myCurrentOpeningCharacter = current[0];
 	myCurrentClosingCharacter = closingCharacter;
 	Rewind(current.GetLength() - 1);
+	const i32 previousIndex = GetReadIndex();
+	NextWord();
+
+	myCurrentGroupFirstContentLineIndex = CalculateAndGetCurrentLineIndex();
+
+	SetReadIndex(previousIndex);
 
 	const StringView string = GetString();
 
@@ -41,6 +47,7 @@ bool GroupingWordReader::Next()
 	SetReadIndex(index + 1);
 
 	myCurrentContent = string.Slice(startIndex, index - startIndex);
+	myCurrentContent.Trim();
 	return true;
 }
 

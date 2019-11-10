@@ -229,19 +229,32 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	WriteToFileIfChanged(developmentMainProjectFile, output.View());
 }
 
-void Solution::GenerateCode()
+bool Solution::GenerateCode()
 {
 	CreateDirectoryW(Format(L"%/temp", directory->GetAbsolutePath()).GetData(), nullptr);
+
+	Array<Project*> preprocessProjects;
 
 	for (const auto& project : projects)
 	{
 		if (!project->preprocess)
 			continue;
 
+		preprocessProjects.Add(project);
+	}
+
+	for (Project* project : preprocessProjects)
+	{
+		/*
 		const String projectGeneratedCodeDirectory = Format(L"%/temp/%", directory->GetAbsolutePath(), project->projectName);
 		CreateDirectoryW(projectGeneratedCodeDirectory.GetData(), nullptr);
-		project->GenerateCode(projectGeneratedCodeDirectory.View());
+		*/
+
+		if (!project->ParseHeaders())
+			return false;
 	}
+
+	return true;
 }
 
 void Solution::GenerateSolutionFile(StringView aSolutionFilePath, ArrayView<SolutionDocumentProjectReference> aProjects) const
