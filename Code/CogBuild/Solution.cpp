@@ -29,41 +29,18 @@ Solution::Solution(const StringView aSolutionDirectory)
 
 		json document = json::parse(fileContents);
 		
-		const String templateDirectoryName(document["templateDirectory"].get<std::string>().c_str());
-
 		vsCppProjectTypeGuid = String(document["vsCppProjectTypeGuid"].get<std::string>().c_str());
 		solutionGuid = String(document["solutionGuid"].get<std::string>().c_str());
 		developmentMainProjectGuid = String(document["developmentProjectGuid"].get<std::string>().c_str());
 
-		Directory* templateDirectory = directory->GetDirectory(templateDirectoryName);
+		const String templateDirectoryPath(document["templateDirectory"].get<std::string>().c_str());
+		
+		Directory* templateDirectory = directory->GetDirectory(templateDirectoryPath);
 
 		if (!templateDirectory)
-			FATAL(L"Could not open template directory %", templateDirectoryName);
+			FATAL(L"Could not open template directory %", templateDirectoryPath);
 
-		File* solutionTemplateFile = templateDirectory->GetFile(L"SolutionTemplate.txt");
-		if (!solutionTemplateFile)
-			FATAL(L"Can't find SolutionTemplate.txt in template directory");
-		solutionTemplate = solutionTemplateFile->ReadString();
-
-		File* libraryProjectTemplateFile = templateDirectory->GetFile(L"LibraryProjectTemplate.txt");
-		if (!libraryProjectTemplateFile)
-			FATAL(L"Can't find LibraryProjectTemplate.txt in template directory");
-		libraryProjectTemplate = libraryProjectTemplateFile->ReadString();
-
-		File* executableProjectTemplateFile = templateDirectory->GetFile(L"ExecutableProjectTemplate.txt");
-		if (!executableProjectTemplateFile)
-			FATAL(L"Can't find ExecutableProjectTemplate.txt in template directory");
-		executableProjectTemplate = executableProjectTemplateFile->ReadString();
-
-		File* developmentProjectTemplateFile = templateDirectory->GetFile(L"NmakeTemplate.txt");
-		if (!developmentProjectTemplateFile)
-			FATAL(L"Can't find NmakeTemplate.txt in template directory");
-		developmentProjectTemplate = developmentProjectTemplateFile->ReadString();
-
-		File* nmakeDebugUserTemplateFile = templateDirectory->GetFile(L"NmakeDebugUserFileTemplate.txt");
-		if (!nmakeDebugUserTemplateFile)
-			FATAL(L"Can't find NmakeDebugUserFileTemplate.txt in template directory");
-		nmakeDebugUserFileTemplate = nmakeDebugUserTemplateFile->ReadString();
+		templates.ReadFromDirectory(*templateDirectory);
 
 		Map<String, Project*> projectMap;
 
@@ -100,6 +77,11 @@ Solution::Solution(const StringView aSolutionDirectory)
 	}
 }
 
+void Solution::ReadTemplates(const StringView aTemplateDirectory)
+{
+
+}
+
 void Solution::GenerateBuildProjects() const
 {
 	Array<SolutionDocumentProjectReference> solutionProjects;
@@ -108,9 +90,9 @@ void Solution::GenerateBuildProjects() const
 	{
 		StringView projectTemplate;
 		if (project->projectType == ProjectType::Executable)
-			projectTemplate = executableProjectTemplate;
+			projectTemplate = templates.executableProjectTemplate;
 		else if (project->projectType == ProjectType::Library)
-			projectTemplate = libraryProjectTemplate;
+			projectTemplate = templates.libraryProjectTemplate;
 		else
 			FATAL(L"Unhandled project template %", static_cast<i32>(project->projectType));
 
@@ -132,7 +114,7 @@ void Solution::GenerateDevelopmentProjects(const StringView aBuildToolPath) cons
 		{
 			solutionProjects.Add(SolutionDocumentProjectReference(project->projectGuid, project->projectName, project->debugDevelopmentProjectFile));
 
-			project->GenerateDebugDevelopmentProjectFile(developmentMainProjectFile, developmentMainProjectGuid, developmentProjectTemplate, nmakeDebugUserFileTemplate);
+			project->GenerateDebugDevelopmentProjectFile(developmentMainProjectFile, developmentMainProjectGuid, templates);
 		}
 	}
 
@@ -144,7 +126,7 @@ void Solution::GenerateDevelopmentProjects(const StringView aBuildToolPath) cons
 
 void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPath) const
 {
-	StringTemplate documentTemplate = StringTemplate(String(developmentProjectTemplate));
+	StringTemplate documentTemplate = StringTemplate(String(templates.developmentProjectTemplate));
 
 	documentTemplate.AddParameter(String(L"ProjectGuid"), String(developmentMainProjectGuid));
 	documentTemplate.AddParameter(String(L"ProjectReferences"), String());
@@ -259,9 +241,9 @@ bool Solution::GenerateCode()
 
 void Solution::GenerateSolutionFile(StringView aSolutionFilePath, ArrayView<SolutionDocumentProjectReference> aProjects) const
 {
-	CHECK(solutionTemplate.GetLength() > 0);
+	templates.CheckIsLoaded();
 
-	StringTemplate documentTemplate = StringTemplate(String(solutionTemplate));
+	StringTemplate documentTemplate = StringTemplate(String(templates.solutionTemplate));
 	StringTemplate projectTemplate(String(L"Project(\"${ProjectTypeGuid}\") = \"${ProjectName}\", \"${ProjectFilePath}\", \"${ProjectGuid}\""));
 	StringTemplate configurationTemplate(String(L"\t\t${ProjectGuid}.Debug|x64.ActiveCfg = Debug|x64\n\t\t${ProjectGuid}.Debug|x64.Build.0 = Debug|x64\n\t\t${ProjectGuid}.Release|x64.ActiveCfg = Release|x64\n\t\t${ProjectGuid}.Release|x64.Build.0 = Release|x64"));
 

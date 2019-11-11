@@ -6,6 +6,7 @@
 #include <String/GroupingWordReader.h>
 #include <String/StringTemplate.h>
 #include "CogBuildUtilities.h"
+#include "DocumentTemplates.h"
 
 Project::Project(Directory* aProjectDirectory)
 {
@@ -243,12 +244,12 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 	WriteToFileIfChanged(buildProjectFile, output.View());
 }
 
-void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectFilePath, const StringView aMainProjectGuid, const StringView aProjectTemplate, const StringView nmakeDebugUserFileTemplate) const
+void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectFilePath, const StringView aMainProjectGuid, const DocumentTemplates& aTemplates) const
 {
 	CHECK(projectType == ProjectType::Executable);
 	CHECK(debugDevelopmentProjectFile.GetLength() > 0);
 
-	StringTemplate documentTemplate = StringTemplate(String(aProjectTemplate));
+	StringTemplate documentTemplate = StringTemplate(String(aTemplates.developmentProjectTemplate));
 	CHECK(projectGuid.GetLength() > 0);
 	documentTemplate.AddParameter(String(L"ProjectGuid"), String(projectGuid));
 
@@ -272,7 +273,7 @@ void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectF
 
 	WriteToFileIfChanged(debugDevelopmentProjectFile, output.View());
 
-	WriteToFileIfChanged(debugDevelopmentUserProjectFile, nmakeDebugUserFileTemplate);
+	WriteToFileIfChanged(debugDevelopmentUserProjectFile, aTemplates.nmakeDebugUserFileTemplate);
 }
 
 bool Project::ParseHeaders()

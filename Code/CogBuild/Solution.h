@@ -2,6 +2,7 @@
 #include <Memory/UniquePtr.h>
 #include <Filesystem/Directory.h>
 #include "Project.h"
+#include "DocumentTemplates.h"
 
 struct SolutionDocumentProjectReference
 {
@@ -20,6 +21,8 @@ struct Solution
 {
 	Solution(StringView aSolutionDirectory);
 
+	void ReadTemplates(StringView aTemplateDirectory);
+
 	void GenerateBuildProjects() const;
 
 	void GenerateSolutionFile(StringView aSolutionFilePath, ArrayView<SolutionDocumentProjectReference> aProjects) const;
@@ -28,7 +31,7 @@ struct Solution
 	void GenerateDevelopmentMainProjectFile(StringView aBuildToolPath) const;
 	
 	bool GenerateCode();
-
+	
 	Array<UniquePtr<Project>> projects;
 	String solutionName;
 	// Shared between build and development solution
@@ -43,10 +46,5 @@ struct Solution
 	String buildSolutionFile;
 	String developmentSolutionFile;
 
-	String solutionTemplate;
-	String libraryProjectTemplate;
-	String executableProjectTemplate;
-
-	String developmentProjectTemplate;
-	String nmakeDebugUserFileTemplate;
+	DocumentTemplates templates;
 };

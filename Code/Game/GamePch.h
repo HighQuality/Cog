@@ -2,8 +2,19 @@
 
 #include "CogPch.h"
 
-#define COGTYPE(...)
-#define GENERATED_BODY
+/**
+	Should be used in attribute specifier sequence, e.g:
+	[[COGTYPE()]] class X : public Object { ... };
+	[[COGFUNC()]] void Function();
+
+	https://en.cppreference.com/w/cpp/language/attributes
+	"All attributes unknown to an implementation are ignored without causing an error. (since C++17)"
+*/
+#define COGTYPE(...) cog_type_attribute
+#define COGFUNC(...) cog_func_attribute
+
+// Should be placed very first on all class or struct COGTYPEs followed by a semicolon.
+#define GENERATED_BODY JOIN(JOIN(GENERATED_BODY, COG_CURRENT_GENERATED_HEADER_FILE), __LINE__)
 
 using ChunkIndex = u8;
 

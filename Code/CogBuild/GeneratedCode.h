@@ -1,17 +1,9 @@
 #pragma once
+#include "CogType.h"
+#include "GeneratedFunction.h"
 
-struct GeneratedFunctionParameter
-{
-	String Type;
-	String Name;
-};
-
-struct GeneratedFunction
-{
-	String functionName;
-	Array<GeneratedFunctionParameter> parameterDeclarations;
-	bool isInlined = false;
-};
+class GroupingWordReader;
+class CogClass;
 
 class GeneratedCode
 {
@@ -20,8 +12,11 @@ public:
 
 	void WriteFiles(const StringView aOutputDirectory);
 
+	CogClass& AddCogClass(StringView aTypeName, i32 aGeneratedBodyLineIndex);
+
 private:
 	Map<String, u8> mySourceFileIncludes;
 	Array<GeneratedFunction> myGlobalFunctions;
+	Array<UniquePtr<CogType>> myDeclaredCogTypes;
 	String myFileName;
 };

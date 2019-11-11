@@ -1,0 +1,9 @@
+#pragma once
+
+#undef COG_CURRENT_GENERATED_HEADER_FILE
+#define COG_CURRENT_GENERATED_HEADER_FILE ${GENERATED_HEADER_IDENTIFIER}
+
+#define GENERATED_BODY${GENERATED_HEADER_IDENTIFIER}${GENERATED_BODY_LINE} \
+	using Base = ${BaseClassName}; \
+	void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const override \
+	{ aFunction(TypeID<Object>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }

@@ -13,27 +13,27 @@ public:
 
 	FORCEINLINE StringView GetDirectoryName() const { return GetName(); }
 
-	FileSystemEntry * GetEntry(StringView aPath);
-	Directory * GetDirectory(StringView aPath);
-	File * GetFile(StringView aPath);
+	FileSystemEntry* GetEntry(StringView aPath);
+	Directory* GetDirectory(StringView aPath);
+	File* GetFile(StringView aPath);
 
 	FORCEINLINE bool IsDirectory() const final { return true; }
 
 	template <typename TCallback>
-	void IterateFiles(const TCallback & aCallback, const bool aIncludeSubDirectories = false);
+	void IterateFiles(const TCallback& aCallback, const bool aIncludeSubDirectories = false);
 
 	template <typename TCallback>
-	void IterateDirectories(const TCallback & aCallback, const bool aIncludeSubDirectories = false);
+	void IterateDirectories(const TCallback& aCallback, const bool aIncludeSubDirectories = false);
 
 	template <typename TPredicate>
-	File * SelectFirstFile(const TPredicate & aPredicate, const bool aIncludeSubDirectories = false);
+	File* SelectFirstFile(const TPredicate& aPredicate, const bool aIncludeSubDirectories = false);
 
 	template <typename TPredicate>
-	Directory * SelectFirstDirectory(const TPredicate & aPredicate, const bool aIncludeSubDirectories = false);
+	Directory* SelectFirstDirectory(const TPredicate& aPredicate, const bool aIncludeSubDirectories = false);
 	
 private:
-	static File * CastToFile(FileSystemEntry * aPointer);
-	FileSystemEntry * GetEntryFromThisDirectory(StringView aEntry);
+	static File* CastToFile(FileSystemEntry* aPointer);
+	FileSystemEntry* GetEntryFromThisDirectory(StringView aEntry);
 
 	Map<String, FileSystemEntry*> myFileSystemEntries;
 };
@@ -121,7 +121,7 @@ File* Directory::SelectFirstFile(const TPredicate& aPredicate, const bool aInclu
 }
 
 template <typename TPredicate>
-Directory * Directory::SelectFirstDirectory(const TPredicate& aPredicate, const bool aIncludeSubDirectories)
+Directory* Directory::SelectFirstDirectory(const TPredicate& aPredicate, const bool aIncludeSubDirectories)
 {
 	for (auto && it : myFileSystemEntries)
 	{

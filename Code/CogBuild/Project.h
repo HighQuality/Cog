@@ -3,6 +3,7 @@
 
 class Directory;
 class File;
+struct DocumentTemplates;
 
 enum class ProjectType : uint8
 {
@@ -16,7 +17,7 @@ struct Project
 
 	void ResolveReferences(const Map<String, Project*>& aProjects);
 	void GenerateBuildProjectFile(StringView aProjectTemplate) const;
-	void GenerateDebugDevelopmentProjectFile(StringView aMainProjectFilePath, StringView aMainProjectGuid, StringView aProjectTemplate, const StringView nmakeDebugUserFileTemplate) const;
+	void GenerateDebugDevelopmentProjectFile(StringView aMainProjectFilePath, StringView aMainProjectGuid, const DocumentTemplates& aTemplates) const;
 	
 	bool ParseHeaders();
 

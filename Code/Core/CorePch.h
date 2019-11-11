@@ -1,5 +1,8 @@
 #pragma once
 
+#define JOIN_INNER(a, b) a ## b
+#define JOIN(a, b) JOIN_INNER(a, b)
+
 // These are wrapped in ifndef so they can be overridden via compiler settings
 #ifndef PRODUCTION
 #define PRODUCTION 0

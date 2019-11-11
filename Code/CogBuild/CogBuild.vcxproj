@@ -116,6 +116,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CogBuildUtilities.cpp" />
+    <ClCompile Include="CogClass.cpp" />
+    <ClCompile Include="CogType.cpp" />
+    <ClCompile Include="DocumentTemplates.cpp" />
     <ClCompile Include="GeneratedCode.cpp" />
     <ClCompile Include="HeaderParser.cpp" />
     <ClCompile Include="main.cpp" />
@@ -129,7 +132,11 @@
   <ItemGroup>
     <ClInclude Include="CogBuildPch.h" />
     <ClInclude Include="CogBuildUtilities.h" />
+    <ClInclude Include="CogClass.h" />
+    <ClInclude Include="CogType.h" />
+    <ClInclude Include="DocumentTemplates.h" />
     <ClInclude Include="GeneratedCode.h" />
+    <ClInclude Include="GeneratedFunction.h" />
     <ClInclude Include="HeaderParser.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="Solution.h" />

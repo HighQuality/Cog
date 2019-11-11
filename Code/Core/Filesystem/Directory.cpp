@@ -109,20 +109,20 @@ File* Directory::GetFile(StringView aPath)
 	
 	return nullptr;
 }
-	
+
 File* Directory::CastToFile(FileSystemEntry* aPointer)
 {
 	return static_cast<File*>(aPointer);
 }
-	
-FileSystemEntry * Directory::GetEntryFromThisDirectory(StringView aEntry)
+
+FileSystemEntry* Directory::GetEntryFromThisDirectory(StringView aEntry)
 {
 	if (aEntry == L"." || aEntry == L"")
 		return this;
 	if (aEntry == L"..")
 		return GetParentDirectory();
 	
-	FileSystemEntry ** ptr = myFileSystemEntries.Find(aEntry.ToLower());
+	FileSystemEntry * const * ptr = myFileSystemEntries.Find(aEntry.ToLower());
 	if (ptr)
 		return *ptr;
 	return nullptr;
