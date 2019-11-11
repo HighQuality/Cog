@@ -333,6 +333,6 @@ HeaderTool/bin
 
 !extlibs/**
 !bin/CogBuild.exe
-!Code/CogBuild.vcxproj
-!Code/CogBuild.vcxproj.user
+!Code/CogBuild/CogBuild.vcxproj
+!Code/CogBuild/CogBuild.vcxproj.user
 !Code/CogBuild.sln

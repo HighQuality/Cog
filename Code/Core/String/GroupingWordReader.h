@@ -34,10 +34,10 @@ private:
 	static Char GetCorrespondingEndCharacter(Char aCharacter);
 
 	StringView myCurrentContent;
-	Char myCurrentOpeningCharacter;
-	Char myCurrentClosingCharacter;
 	i32 myLineOffset = 0;
 	i32 myCurrentGroupFirstContentLineIndex = 0;
+	Char myCurrentOpeningCharacter = L'\0';
+	Char myCurrentClosingCharacter = L'\0';
+	Char myStopAtCharacter = L'\0';
 	bool myIsAtGroup = false;
 };
-

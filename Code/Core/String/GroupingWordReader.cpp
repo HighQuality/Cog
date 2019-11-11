@@ -16,6 +16,13 @@ bool GroupingWordReader::Next()
 		return false;
 	}
 
+	if (current.Find(myStopAtCharacter) >= 0)
+	{
+		Rewind(current.GetLength() - 1);
+		myIsAtGroup = false;
+		return false;
+	}
+
 	const Char closingCharacter = GetCorrespondingEndCharacter(current[0]);
 
 	if (closingCharacter == L'\0')
@@ -41,12 +48,15 @@ bool GroupingWordReader::Next()
 	i32 index = GetReadIndex();
 	const i32 startIndex = index;
 
-	while (index < string.GetLength() && string[index] != closingCharacter)
-		++index;
+	// Include nested groups inside this group, also fixes cases where end character inside of our own group ends the group prematurely
+	GroupingWordReader subWordReader(GetString().ChopFromStart(index));
+	subWordReader.myStopAtCharacter = closingCharacter;
+	while (subWordReader.Next());
+	
+	index = startIndex + subWordReader.GetReadIndex();
+	SetReadIndex(index);
 
-	SetReadIndex(index + 1);
-
-	myCurrentContent = string.Slice(startIndex, index - startIndex);
+	myCurrentContent = string.Slice(startIndex, index - startIndex - 1);
 	myCurrentContent.Trim();
 	return true;
 }

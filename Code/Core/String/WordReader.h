@@ -14,7 +14,7 @@ public:
 	explicit WordReader(StringView aContent);
 
 	StringView NextWord();
-	const StringView& GetString() const { return myString; }
+	StringView GetString() const { return myString; }
 
 	void SetReadIndex(i32 aNewIndex);
 	i32 GetReadIndex() const { return myCurrentIndex; }

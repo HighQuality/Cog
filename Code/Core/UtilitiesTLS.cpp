@@ -3,6 +3,13 @@
 #include <Threading/ThreadID.h>
 #include <Threading/Fibers/FiberResumeData.h>
 #include <External/pcg32.h>
+#include <chrono>
+
+static u64 GetRandomSeed()
+{
+	std::chrono::high_resolution_clock clock;
+	return clock.now().time_since_epoch().count();
+}
 
 static thread_local Fiber* ourThisThreadsStartingFiber = nullptr;
 static thread_local ThreadID* ourThreadID = nullptr;
@@ -10,7 +17,7 @@ static thread_local String ourThreadName;
 static thread_local FiberResumeData ourFiberResumeData;
 static thread_local bool ourProhibitAwaits = true;
 
-static thread_local pcg32 ourRandomEngine(time(nullptr));
+static thread_local pcg32 ourRandomEngine(GetRandomSeed());
 
 struct TlsDestruct
 {
