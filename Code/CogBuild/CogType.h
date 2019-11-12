@@ -3,7 +3,11 @@
 class CogType
 {
 public:
-	CogType() = default;
+	CogType(String aTypeName);
 	virtual ~CogType() = default;
-};
 
+	StringView GetTypeName() const { return myTypeName.View(); }
+
+private:
+	String myTypeName;
+};

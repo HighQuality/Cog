@@ -4,6 +4,7 @@
 #include <CogBuildUtilities.h>
 
 HeaderParser::HeaderParser(const File* aMainFile)
+	: myGeneratedCode(aMainFile->GetFilenameWithoutExtension())
 {
 	myFile = aMainFile;
 	myFileContents = myFile->ReadString();
@@ -11,7 +12,7 @@ HeaderParser::HeaderParser(const File* aMainFile)
 	myWordReader = GroupingWordReader(myFileContents.View());
 }
 
-void HeaderParser::Parse()
+GeneratedCode& HeaderParser::Parse()
 {
 	bool hasGeneratedHeaderInclude = false;
 
@@ -26,7 +27,7 @@ void HeaderParser::Parse()
 				if (!hasGeneratedHeaderInclude)
 				{
 					ReportError(L"Missing #include \"%\"", myGeneratedHeaderFileName.View());
-					return;
+					return myGeneratedCode;
 				}
 
 				ParseCogType();
@@ -34,7 +35,7 @@ void HeaderParser::Parse()
 			else if (currentWord == L"#")
 			{
 				if (!MoveNextExpectWord())
-					return;
+					return myGeneratedCode;
 
 				currentWord = myWordReader.GetCurrentWordOrGroup();
 
@@ -43,7 +44,7 @@ void HeaderParser::Parse()
 					if (hasGeneratedHeaderInclude)
 					{
 						ReportError(L"The last include must be the generated header file: #include \"%\"", myGeneratedHeaderFileName.View());
-						return;
+						return myGeneratedCode;
 					}
 
 					const bool isOpenedByAngleBracket = IsAtGroup(L'<');
@@ -56,19 +57,16 @@ void HeaderParser::Parse()
 						if (isOpenedByQuotationMarks && includePath == myGeneratedHeaderFileName.View())
 						{
 							hasGeneratedHeaderInclude = true;
+
+							myGeneratedCode.SetShouldGenerateCode(true);
 						}
 					}
 				}
 			}
 		}
 	}
-}
 
-GeneratedCode HeaderParser::GenerateCode()
-{
-	GeneratedCode generatedCode(myFile->GetFilenameWithoutExtension());
-
-	return generatedCode;
+	return myGeneratedCode;
 }
 
 void HeaderParser::ParseCogType()
@@ -159,6 +157,11 @@ void HeaderParser::ParseCogTypeClass()
 		ReportErrorWithInnerReader(bodyReader, L"COGTYPE classes must begin with \"GENERATED_BODY;\", got \"%\"", bodyReader.GetCurrentWordOrGroup());
 		return;
 	}
+
+	CogClass& cogClass = myGeneratedCode.AddCogClass(String(className), generatedBodyLineIndex);
+
+	// TODO: Remove
+	cogClass;
 
 	while (bodyReader.Next())
 	{

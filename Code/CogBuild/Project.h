@@ -33,6 +33,8 @@ struct Project
 	String projectName;
 	String projectGuid;
 
+	String generatedCodeDirectory;
+
 	String buildProjectFile;
 	String debugDevelopmentProjectFile;
 	String debugDevelopmentUserProjectFile;

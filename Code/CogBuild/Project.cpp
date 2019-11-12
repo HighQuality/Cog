@@ -14,9 +14,10 @@ Project::Project(Directory* aProjectDirectory)
 
 	directory = aProjectDirectory;
 	projectName = aProjectDirectory->GetName();
+	generatedCodeDirectory = Format(L"%\\temp\\%\\generated\\", aProjectDirectory->GetParentDirectory()->GetParentDirectory()->GetAbsolutePath(), projectName);
 	
 	extraIncludePaths.Add(Format(L"$(SolutionDir)%\\", projectName));
-	extraIncludePaths.Add(Format(L"$(SolutionDir)..\\temp\\%\\generated\\", projectName));
+	extraIncludePaths.Add(generatedCodeDirectory);
 
 	buildProjectFile = Format(L"%/%.vcxproj", aProjectDirectory->GetAbsolutePath(), projectName);
 
@@ -102,7 +103,7 @@ void Project::ResolveReferences(const Map<String, Project*>& aProjects)
 		{
 			references.Add(referencedProject);
 			extraIncludePaths.Add(Format(L"$(SolutionDir)%\\", referencedProject->projectName));
-			extraIncludePaths.Add(Format(L"$(SolutionDir)..\\temp\\%\\generated\\", referencedProject->projectName));
+			extraIncludePaths.Add(referencedProject->generatedCodeDirectory);
 			linkDependencies.Add(Format(L"%.lib", referencedProject->projectName));
 		}
 		else
@@ -287,7 +288,7 @@ bool Project::ParseHeaders()
 
 		HeaderParser& parser = *myHeaderParsers.Add(MakeUnique<HeaderParser>(file));
 		
-		parser.Parse();
+		GeneratedCode& generatedCode = parser.Parse();
 
 		if (parser.HasErrors())
 		{
@@ -296,6 +297,9 @@ bool Project::ParseHeaders()
 
 			return false;
 		}
+
+		if (generatedCode.ShouldGenerateCode())
+			generatedCode.WriteFiles(generatedCodeDirectory);
 	}
 
 	return true;

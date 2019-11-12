@@ -9,8 +9,7 @@ class HeaderParser
 public:
 	HeaderParser(const File* aMainFile);
 
-	void Parse();
-	GeneratedCode GenerateCode();
+	GeneratedCode& Parse();
 
 	bool HasErrors() const { return myErrors.GetLength() > 0; }
 	ArrayView<String> GetErrors() { return myErrors; }
@@ -48,6 +47,7 @@ private:
 	String myFileContents;
 	String myGeneratedHeaderFileName;
 	GroupingWordReader myWordReader;
+	GeneratedCode myGeneratedCode;
 	bool myFileHasCogTypes = false;
 };
 

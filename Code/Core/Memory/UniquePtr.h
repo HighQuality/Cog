@@ -22,6 +22,11 @@ public:
 		*this = Move(aMove);
 	}
 
+	explicit UniquePtr(T* aPtr)
+	{
+		myObject = aPtr;
+	}
+
 	UniquePtr& operator=(UniquePtr&& aMove)
 	{
 		if (*this == aMove)
@@ -89,11 +94,6 @@ public:
 private:
 	template <typename T2, typename ...TArgs>
 	friend UniquePtr<T2> MakeUnique(TArgs ...aArgs);
-
-	UniquePtr(T* aPtr)
-	{
-		myObject = aPtr;
-	}
 
 	T* myObject = nullptr;
 };

@@ -5,11 +5,14 @@
 class CogClass : public CogType
 {
 public:
-	CogClass();
+	using Base = CogType;
+
+	CogClass(String aClassName, i32 aGeneratedBodyLineIndex);
 
 	Array<String> GenerateGeneratedBodyContents() const;
 
 private:
 	Array<GeneratedFunction> myGeneratedFunctions;
+	i32 myGeneratedBodyLineIndex = -1;
 };
 

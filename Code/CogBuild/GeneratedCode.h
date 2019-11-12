@@ -12,11 +12,16 @@ public:
 
 	void WriteFiles(const StringView aOutputDirectory);
 
-	CogClass& AddCogClass(StringView aTypeName, i32 aGeneratedBodyLineIndex);
+	CogClass& AddCogClass(String aTypeName, i32 aGeneratedBodyLineIndex);
+
+	void SetShouldGenerateCode(const bool aShouldGenerateCode) { myShouldGenerateCode = true; }
+	bool ShouldGenerateCode() const { return myShouldGenerateCode; }
 
 private:
 	Map<String, u8> mySourceFileIncludes;
 	Array<GeneratedFunction> myGlobalFunctions;
 	Array<UniquePtr<CogType>> myDeclaredCogTypes;
-	String myFileName;
+	String myGeneratedHeaderFileName;
+	String myGeneratedSourceFileName;
+	bool myShouldGenerateCode = false;
 };
