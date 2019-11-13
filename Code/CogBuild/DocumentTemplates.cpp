@@ -19,11 +19,12 @@ void DocumentTemplates::ReadFromDirectory(Directory& aDirectory)
 	developmentProjectTemplate = ReadStringFromFileInDirectory(L"NmakeTemplate.txt", aDirectory);
 	nmakeDebugUserFileTemplate = ReadStringFromFileInDirectory(L"NmakeDebugUserFileTemplate.txt", aDirectory);
 	generatedHeaderTemplate = ReadStringFromFileInDirectory(L"GeneratedHeaderTemplate.txt", aDirectory);
+	generatedSourceTemplate = ReadStringFromFileInDirectory(L"GeneratedSourceTemplate.txt", aDirectory);
 
-	bIsLoaded = true;
+	isLoaded = true;
 }
 
 void DocumentTemplates::CheckIsLoaded() const
 {
-	CHECK(bIsLoaded);
+	CHECK(isLoaded);
 }

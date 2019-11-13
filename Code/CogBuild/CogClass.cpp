@@ -1,29 +1,29 @@
 #include "CogBuildPch.h"
 #include "CogClass.h"
 
-CogClass::CogClass(String aClassName, i32 aGeneratedBodyLineIndex)
-	: Base(Move(aClassName))
+CogClass::CogClass(String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex)
+	: Base(Move(aClassName), Move(aBaseClassName))
 {
 	myGeneratedBodyLineIndex = aGeneratedBodyLineIndex;
 }
 
-Array<String> CogClass::GenerateGeneratedBodyContents() const
+Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGeneratedHeaderIdentifier) const
 {
 	Array<String> generatedLines;
 
-	generatedLines.Add(Format(L"#define GENERATED_BODY", GENERATED_HEADER_IDENTIFIER, GENERATED_BODY_LINE));
-	generatedLines.Add(Format(L"using Base = %;", myBaseClassName));
+	generatedLines.Add(Format(L"#define GENERATED_BODY", aGeneratedHeaderIdentifier, myGeneratedBodyLineIndex + 1));
+	generatedLines.Add(Format(L"using Base = %;", GetBaseTypeName()));
 	generatedLines.Add(String(L"void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const override"));
 	generatedLines.Add(String(L"{ aFunction(TypeID<Object>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }"));
 
 	return generatedLines;
 }
 
-String CogClass::GenerateHeaderFileContents() const
+String CogClass::GenerateHeaderFileContents(const DocumentTemplates& aTemplates, const StringView aGeneratedHeaderIdentifier) const
 {
-	String headerOutput = Base::GenerateHeaderFileContents();
+	String headerOutput = Base::GenerateHeaderFileContents(aTemplates, aGeneratedHeaderIdentifier);
 	
-	Array<String> generatedBodyContents = GenerateGeneratedBodyContents();
+	Array<String> generatedBodyContents = GenerateGeneratedBodyContents(aGeneratedHeaderIdentifier);
 
 	for (i32 i = 0; i < generatedBodyContents.GetLength(); ++i)
 	{
@@ -36,9 +36,9 @@ String CogClass::GenerateHeaderFileContents() const
 	return headerOutput;
 }
 
-String CogClass::GenerateSourceFileContents() const
+String CogClass::GenerateSourceFileContents(const DocumentTemplates& aTemplates) const
 {
-	String sourceOutput = Base::GenerateHeaderFileContents();
+	String sourceOutput = Base::GenerateSourceFileContents(aTemplates);
 
 	return sourceOutput;
 }

@@ -15,7 +15,8 @@ struct DocumentTemplates
 	String developmentProjectTemplate;
 	String nmakeDebugUserFileTemplate;
 	String generatedHeaderTemplate;
+	String generatedSourceTemplate;
 
-	bool bIsLoaded = false;
+	bool isLoaded = false;
 };
 

@@ -7,12 +7,12 @@ class CogClass : public CogType
 public:
 	using Base = CogType;
 
-	CogClass(String aClassName, i32 aGeneratedBodyLineIndex);
+	CogClass(String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex);
 
-	Array<String> GenerateGeneratedBodyContents() const;
+	Array<String> GenerateGeneratedBodyContents(StringView aGeneratedHeaderIdentifier) const;
 
-	String GenerateHeaderFileContents() const override;
-	String GenerateSourceFileContents() const override;
+	String GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const override;
+	String GenerateSourceFileContents(const DocumentTemplates& aTemplates) const override;
 
 private:
 	Array<GeneratedFunction> myGeneratedFunctions;

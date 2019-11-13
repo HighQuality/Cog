@@ -52,6 +52,9 @@ struct Project
 	Array<const File*> headerFiles;
 	Array<const File*> sourceFiles;
 
+	Array<String> generatedHeaderFiles;
+	Array<String> generatedSourceFiles;
+
 	Directory* directory;
 
 	ProjectType projectType;

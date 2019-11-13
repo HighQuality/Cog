@@ -2,14 +2,18 @@
 #include "GeneratedCode.h"
 #include "CogClass.h"
 #include "CogBuildUtilities.h"
+#include "DocumentTemplates.h"
+#include <String/StringTemplate.h>
 
 GeneratedCode::GeneratedCode(const StringView aMainFileName)
 {
-	myGeneratedHeaderFileName = Format(L"%_generated.h", aMainFileName);
-	myGeneratedSourceFileName = Format(L"%_generated.cpp", aMainFileName);
+	myGeneratedHeaderFileName = Format(L"%.generated.h", aMainFileName);
+	myGeneratedSourceFileName = Format(L"%.generated.cpp", aMainFileName);
+
+	myGeneratedHeaderIdentifier = Format(L"_%_H_", aMainFileName.ToUpper());
 }
 
-void GeneratedCode::WriteFiles(const DocumentTemplates& aTemplates, const StringView aOutputDirectory)
+void GeneratedCode::WriteFiles(const DocumentTemplates& aTemplates, const StringView aProjectName, const StringView aOutputDirectory)
 {
 	CreateDirectoryW(aOutputDirectory.GetData(), nullptr);
 
@@ -21,12 +25,12 @@ void GeneratedCode::WriteFiles(const DocumentTemplates& aTemplates, const String
 	String sourceFilePath(aOutputDirectory);
 	sourceFilePath.Append(myGeneratedSourceFileName);
 	
-	GenerateSourceFile(aTemplates, sourceFilePath);
+	GenerateSourceFile(aTemplates, aProjectName, sourceFilePath);
 }
 
-CogClass& GeneratedCode::AddCogClass(String aTypeName, const i32 aGeneratedBodyLineIndex)
+CogClass& GeneratedCode::AddCogClass(String aTypeName, String aBaseTypeName, const i32 aGeneratedBodyLineIndex)
 {
-	CogClass& type = *new CogClass(Move(aTypeName), aGeneratedBodyLineIndex);
+	CogClass& type = *new CogClass(Move(aTypeName), Move(aBaseTypeName), aGeneratedBodyLineIndex);
 	// UniquePtr takes ownership of CogClass allocation
 	myDeclaredCogTypes.Add(UniquePtr<CogType>(&type));
 	return type;
@@ -34,38 +38,59 @@ CogClass& GeneratedCode::AddCogClass(String aTypeName, const i32 aGeneratedBodyL
 
 void GeneratedCode::GenerateHeaderFile(const DocumentTemplates& aTemplates, StringView aHeaderFilePath)
 {
-	String headerFileContents;
-	
-	for (const auto& cogType : myDeclaredCogTypes)
+	StringTemplate document(String(aTemplates.generatedHeaderTemplate));
+
+	document.AddParameter(String(L"GENERATED_HEADER_IDENTIFIER"), String(myGeneratedHeaderIdentifier));
+
 	{
-		String generatedHeaderCode = cogType->GenerateHeaderFileContents();
-		
-		if (generatedHeaderCode.GetLength() > 0)
+		String extraContents;
+
+		for (const auto& cogType : myDeclaredCogTypes)
 		{
-			headerFileContents.Append(Format(L"// Generated code for type %\n", cogType->GetTypeName()).View());
-			headerFileContents.Append(generatedHeaderCode.View());
-			headerFileContents.Append(Format(L"\n// End generated code for type %\n", cogType->GetTypeName()).View());
+			String generatedHeaderCode = cogType->GenerateHeaderFileContents(aTemplates, myGeneratedHeaderIdentifier);
+
+			if (generatedHeaderCode.GetLength() > 0)
+			{
+				extraContents.Append(Format(L"// Generated code for type %\n", cogType->GetTypeName()).View());
+				extraContents.Append(generatedHeaderCode.View());
+				extraContents.Append(Format(L"\n// End generated code for type %\n", cogType->GetTypeName()).View());
+			}
 		}
+
+		document.AddParameter(String(L"ExtraHeaderContent"), Move(extraContents));
 	}
+
+	const String headerFileContents = document.Evaluate();
 
 	WriteToFileIfChanged(aHeaderFilePath, headerFileContents.View());
 }
 
-void GeneratedCode::GenerateSourceFile(const DocumentTemplates& aTemplates, StringView aSourceFilePath)
+void GeneratedCode::GenerateSourceFile(const DocumentTemplates& aTemplates, const StringView aProjectName, const StringView aSourceFilePath)
 {
-	String sourceFileContents;
-	
-	for (const auto& cogType : myDeclaredCogTypes)
-	{
-		String generatedSourceCode = cogType->GenerateSourceFileContents();
+	StringTemplate document(String(aTemplates.generatedSourceTemplate));
 
-		if (generatedSourceCode.GetLength() > 0)
+	document.AddParameter(String(L"HeaderFile"), String(myGeneratedHeaderFileName));
+	document.AddParameter(String(L"PchFileName"), Format(L"%Pch.h", aProjectName));
+
+	{
+		String extraContents;
+
+		for (const auto& cogType : myDeclaredCogTypes)
 		{
-			sourceFileContents.Append(Format(L"// Generated code for type %\n", cogType->GetTypeName()).View());
-			sourceFileContents.Append(generatedSourceCode.View());
-			sourceFileContents.Append(Format(L"\n// End generated code for type %\n", cogType->GetTypeName()).View());
+			String generatedHeaderCode = cogType->GenerateSourceFileContents(aTemplates);
+
+			if (generatedHeaderCode.GetLength() > 0)
+			{
+				extraContents.Append(Format(L"// Generated code for type %\n", cogType->GetTypeName()).View());
+				extraContents.Append(generatedHeaderCode.View());
+				extraContents.Append(Format(L"\n// End generated code for type %\n", cogType->GetTypeName()).View());
+			}
 		}
+
+		document.AddParameter(String(L"ExtraSourceContent"), Move(extraContents));
 	}
+
+	const String sourceFileContents = document.Evaluate();
 
 	WriteToFileIfChanged(aSourceFilePath, sourceFileContents.View());
 }

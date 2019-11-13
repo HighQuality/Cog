@@ -158,7 +158,7 @@ void HeaderParser::ParseCogTypeClass()
 		return;
 	}
 
-	CogClass& cogClass = myGeneratedCode.AddCogClass(String(className), generatedBodyLineIndex);
+	CogClass& cogClass = myGeneratedCode.AddCogClass(String(className), String(baseClass), generatedBodyLineIndex);
 
 	// TODO: Remove
 	cogClass;

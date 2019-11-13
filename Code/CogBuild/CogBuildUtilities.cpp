@@ -16,10 +16,10 @@ void WriteToFileIfChanged(const StringView aFilePath, const StringView aNewFileC
 
 			if (existingDocument == aNewFileContents)
 				return;
+
+			Println(L"Writing to file %...", aFilePath);
 		}
 	}
-
-	Println(L"Writing to file %...", aFilePath);
 
 	std::wofstream f(aFilePath.ToStdWString(), std::ios::binary);
 

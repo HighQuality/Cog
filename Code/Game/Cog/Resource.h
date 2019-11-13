@@ -25,15 +25,6 @@ protected:
 	//GENCELFIXED
 	void RegisterCallback(const Function<void(Resource&)>& aFunctionCallback);
 
-	void Test()
-	{
-		if (Hello == World)
-		{
-			Print();
-		}
-	}
-
 private:
 	bool myIsLoaded = false;
 };
-

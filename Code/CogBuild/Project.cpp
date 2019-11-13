@@ -208,6 +208,16 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 			sourceFileList.Append(L"\" />\n");
 		}
 
+		for (const String& sourceFile : generatedSourceFiles)
+		{
+			String sourceFilePath(sourceFile);
+			sourceFilePath.Replace(L'/', L'\\');
+
+			sourceFileList.Append(L"    <ClCompile Include=\"");
+			sourceFileList.Append(sourceFilePath);
+			sourceFileList.Append(L"\" />\n");
+		}
+
 		// Pop last \n
 		if (sourceFileList.GetLength() > 0)
 			sourceFileList.Pop();
@@ -226,6 +236,16 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 				continue;
 
 			String headerFilePath(headerFile->GetRelativePath(*directory));
+			headerFilePath.Replace(L'/', L'\\');
+
+			headerFileList.Append(L"    <ClInclude Include=\"");
+			headerFileList.Append(headerFilePath);
+			headerFileList.Append(L"\" />\n");
+		}
+
+		for (const String& generatedHeader : generatedHeaderFiles)
+		{
+			String headerFilePath(generatedHeader);
 			headerFilePath.Replace(L'/', L'\\');
 
 			headerFileList.Append(L"    <ClInclude Include=\"");
@@ -299,7 +319,12 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 		}
 
 		if (generatedCode.ShouldGenerateCode())
-			generatedCode.WriteFiles(aTemplates, generatedCodeDirectory);
+		{
+			generatedCode.WriteFiles(aTemplates, projectName, generatedCodeDirectory);
+
+			generatedHeaderFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetHeaderFileName()));
+			generatedSourceFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetSourceFileName()));
+		}
 	}
 
 	return true;
