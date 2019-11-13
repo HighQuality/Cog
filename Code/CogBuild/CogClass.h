@@ -11,6 +11,9 @@ public:
 
 	Array<String> GenerateGeneratedBodyContents() const;
 
+	String GenerateHeaderFileContents() const override;
+	String GenerateSourceFileContents() const override;
+
 private:
 	Array<GeneratedFunction> myGeneratedFunctions;
 	i32 myGeneratedBodyLineIndex = -1;

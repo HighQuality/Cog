@@ -19,7 +19,7 @@ struct Project
 	void GenerateBuildProjectFile(StringView aProjectTemplate) const;
 	void GenerateDebugDevelopmentProjectFile(StringView aMainProjectFilePath, StringView aMainProjectGuid, const DocumentTemplates& aTemplates) const;
 	
-	bool ParseHeaders();
+	bool ParseHeaders(const DocumentTemplates& aTemplates);
 
 	/** These gather functions gather all the properties from this and all referenced projects */
 	void GatherLibraryPaths(Map<StringView, u8>& aLibraryPaths) const;

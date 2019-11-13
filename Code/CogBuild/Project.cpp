@@ -277,7 +277,7 @@ void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectF
 	WriteToFileIfChanged(debugDevelopmentUserProjectFile, aTemplates.nmakeDebugUserFileTemplate);
 }
 
-bool Project::ParseHeaders()
+bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 {
 	const String pchFileName = Format(L"%Pch.h", projectName);
 
@@ -299,7 +299,7 @@ bool Project::ParseHeaders()
 		}
 
 		if (generatedCode.ShouldGenerateCode())
-			generatedCode.WriteFiles(generatedCodeDirectory);
+			generatedCode.WriteFiles(aTemplates, generatedCodeDirectory);
 	}
 
 	return true;

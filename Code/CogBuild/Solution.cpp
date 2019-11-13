@@ -227,12 +227,7 @@ bool Solution::GenerateCode()
 
 	for (Project* project : preprocessProjects)
 	{
-		/*
-		const String projectGeneratedCodeDirectory = Format(L"%/temp/%", directory->GetAbsolutePath(), project->projectName);
-		CreateDirectoryW(projectGeneratedCodeDirectory.GetData(), nullptr);
-		*/
-
-		if (!project->ParseHeaders())
+		if (!project->ParseHeaders(templates))
 			return false;
 	}
 

@@ -8,6 +8,9 @@ public:
 
 	StringView GetTypeName() const { return myTypeName.View(); }
 
+	virtual String GenerateHeaderFileContents() const;
+	virtual String GenerateSourceFileContents() const;
+
 private:
 	String myTypeName;
 };
