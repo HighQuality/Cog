@@ -22,8 +22,6 @@ bool IsInGameThread();
 
 #define CHECK_COMPONENT_INCLUDED(Type) do { static_assert(IsComplete<Type>, "Component header must be included"); } while (false)
 
-#include <Cog/InheritType.h>
-
 #include <Cog/Casts.h>
 #include <Cog/Class.h>
 #include <Cog/Pointer.h>

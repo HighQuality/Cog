@@ -1,9 +1,13 @@
 #pragma once
 #include "RenderTexture.h"
 #include "DrawCall.h"
+#include "RenderTarget.generated.h"
 
-class RenderTarget : public InheritType<Object>
+COGTYPE()
+class RenderTarget : public Object
 {
+	GENERATED_BODY;
+
 public:
 	void SetRenderTexture(const std::shared_ptr<RenderTexture>& aNewRenderTexture);
 

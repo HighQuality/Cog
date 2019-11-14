@@ -1,8 +1,12 @@
 #pragma once
 #include <Game/Game.h>
+#include "ServerGame.generated.h"
 
-class ServerGame final : public InheritType<Game>
+COGTYPE()
+class ServerGame final : public Game
 {
+	GENERATED_BODY;
+
 public:
 	bool ShouldKeepRunning() const override;
 

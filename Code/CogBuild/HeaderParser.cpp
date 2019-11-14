@@ -108,9 +108,11 @@ void HeaderParser::ParseCogTypeClass()
 		return;
 
 	const StringView className = myWordReader.GetCurrentWordOrGroup();
-
+	
 	myWordReader.Next();
 
+	TryConsume(L"final");
+	
 	if (!Expect(L":"))
 		return;
 
@@ -125,8 +127,6 @@ void HeaderParser::ParseCogTypeClass()
 
 	const StringView baseClass = myWordReader.GetCurrentWordOrGroup();
 
-	Println(L"COGTYPE % derives from ", className, baseClass);
-
 	if (!MoveNextExpectBracesGroup())
 		return;
 
@@ -138,7 +138,6 @@ void HeaderParser::ParseCogTypeClass()
 	if (bodyReader.Next() && bodyReader.IsAtWord() && bodyReader.GetCurrentWordOrGroup() == L"GENERATED_BODY")
 	{
 		generatedBodyLineIndex = bodyReader.CalculateAndGetCurrentLineIndex();
-		Println(L"GENERATED_BODY is at line % on file %", generatedBodyLineIndex, myFile->GetFilename());
 
 		if (!bodyReader.Next())
 		{

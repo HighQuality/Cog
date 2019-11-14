@@ -12,9 +12,13 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 	Array<String> generatedLines;
 
 	generatedLines.Add(Format(L"#define GENERATED_BODY", aGeneratedHeaderIdentifier, myGeneratedBodyLineIndex + 1));
+	generatedLines.Add(String(L"public:"));
 	generatedLines.Add(Format(L"using Base = %;", GetBaseTypeName()));
 	generatedLines.Add(String(L"void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const override"));
 	generatedLines.Add(String(L"{ aFunction(TypeID<Object>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }"));
+
+	// Reset the default visibility of class
+	generatedLines.Add(String(L"private:"));
 
 	return generatedLines;
 }

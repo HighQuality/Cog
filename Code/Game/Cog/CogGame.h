@@ -3,6 +3,7 @@
 #include <Threading/ThreadID.h>
 #include "ObjectFunctionView.h"
 #include "ResourceManager.h"
+#include "CogGame.generated.h"
 
 template <typename TSignature>
 class FunctionView;
@@ -17,8 +18,11 @@ class Object;
 class TypeList;
 struct FrameData;
 
-class CogGame : public InheritType<Object>
+COGTYPE()
+class CogGame : public Object
 {
+	GENERATED_BODY;
+
 public:
 	CogGame();
 	virtual ~CogGame();

@@ -1,12 +1,16 @@
 #pragma once
 #include <Game/Game.h>
+#include "ClientGame.generated.h"
 
 class Window;
 class RenderEngine;
 class BaseObjectFactory;
 
-class ClientGame : public InheritType<Game>
+COGTYPE()
+class ClientGame : public Game
 {
+	GENERATED_BODY;
+
 public:
 	ClientGame();
 	~ClientGame();

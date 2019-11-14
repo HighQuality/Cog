@@ -4,13 +4,17 @@
 #include <Threading/ThreadPool/ThreadPool.h>
 #include <Containers/EventList.h>
 #include "Resource.h"
+#include "ResourceManager.generated.h"
 
 class Resource;
 class ThreadPool;
 class CogGame;
 
-class ResourceManager : public InheritType<Object>
+COGTYPE()
+class ResourceManager : public Object
 {
+	GENERATED_BODY;
+
 public:
 	ResourceManager();
 	~ResourceManager();
