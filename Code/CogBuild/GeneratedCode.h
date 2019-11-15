@@ -21,13 +21,18 @@ public:
 	StringView GetHeaderFileName() const { return myGeneratedHeaderFileName; }
 	StringView GetSourceFileName() const { return myGeneratedSourceFileName; }
 
+	ArrayView<CogClass*> GetCogClasses() const { return myCogClasses; }
+
 private:
 	void GenerateHeaderFile(const DocumentTemplates& aTemplates, StringView aHeaderFilePath);
 	void GenerateSourceFile(const DocumentTemplates& aTemplates, StringView aProjectName, StringView aSourceFilePath);
 	
 	Map<String, u8> mySourceFileIncludes;
 	Array<GeneratedFunction> myGlobalFunctions;
+	
 	Array<UniquePtr<CogType>> myDeclaredCogTypes;
+	Array<CogClass*> myCogClasses;
+
 	String myGeneratedHeaderFileName;
 	String myGeneratedSourceFileName;
 	String myGeneratedHeaderIdentifier;

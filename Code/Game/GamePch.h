@@ -29,13 +29,7 @@ bool IsInGameThread();
 
 class TypeList;
 
-void InnerRunGame(UniquePtr<TypeList>(*aTypeListCreator)());
-
-template <typename TTypeList>
-void RunGame()
-{
-	InnerRunGame([]() -> UniquePtr<TypeList> { return MakeUnique<TTypeList>(); });
-}
+void RunGame();
 
 Object& NewObjectByType(const TypeID<Object>& aTypeID);
 

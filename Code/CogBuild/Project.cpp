@@ -7,6 +7,7 @@
 #include <String/StringTemplate.h>
 #include "CogBuildUtilities.h"
 #include "DocumentTemplates.h"
+#include "CogClass.h"
 
 Project::Project(Directory* aProjectDirectory)
 {
@@ -14,10 +15,10 @@ Project::Project(Directory* aProjectDirectory)
 
 	directory = aProjectDirectory;
 	projectName = aProjectDirectory->GetName();
-	generatedCodeDirectory = Format(L"%\\temp\\%\\generated\\", aProjectDirectory->GetParentDirectory()->GetParentDirectory()->GetAbsolutePath(), projectName);
+	generatedCodeDirectory = Format(L"%\\temp\\%\\generated", aProjectDirectory->GetParentDirectory()->GetParentDirectory()->GetAbsolutePath(), projectName);
 	
 	extraIncludePaths.Add(Format(L"$(SolutionDir)%\\", projectName));
-	extraIncludePaths.Add(generatedCodeDirectory);
+	extraIncludePaths.Add(Format(L"%\\", generatedCodeDirectory));
 
 	buildProjectFile = Format(L"%/%.vcxproj", aProjectDirectory->GetAbsolutePath(), projectName);
 
@@ -103,7 +104,7 @@ void Project::ResolveReferences(const Map<String, Project*>& aProjects)
 		{
 			references.Add(referencedProject);
 			extraIncludePaths.Add(Format(L"$(SolutionDir)%\\", referencedProject->projectName));
-			extraIncludePaths.Add(referencedProject->generatedCodeDirectory);
+			extraIncludePaths.Add(Format(L"%\\", referencedProject->generatedCodeDirectory));
 			linkDependencies.Add(Format(L"%.lib", referencedProject->projectName));
 		}
 		else
@@ -299,7 +300,12 @@ void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectF
 
 bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 {
+	CreateDirectoryW(generatedCodeDirectory.GetData(), nullptr);
+
 	const String pchFileName = Format(L"%Pch.h", projectName);
+
+	Array<String> cogClassNames;
+	Array<String> cogClassHeaderFiles;
 
 	for (const File* file : headerFiles)
 	{
@@ -324,7 +330,50 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 
 			generatedHeaderFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetHeaderFileName()));
 			generatedSourceFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetSourceFileName()));
+
+			String headerIncludePath = file->GetRelativePath(*directory);
+			headerIncludePath.Replace(L'\\', L'/');
+			cogClassHeaderFiles.Add(Move(headerIncludePath));
+
+			for (const CogClass* cogClass : generatedCode.GetCogClasses())
+				cogClassNames.Add(String(cogClass->GetTypeName()));
 		}
+	}
+
+	{
+		StringTemplate typeList(String(aTemplates.generatedTypeListSource));
+
+		typeList.AddParameter(String(L"PchFileName"), String(pchFileName));
+		typeList.AddParameter(String(L"ProjectName"), String(projectName));
+
+		{
+			String includes;
+			
+			for (StringView header : cogClassHeaderFiles)
+			{
+				includes.Append(Format(L"#include \"%\"\n", header).View());
+			}
+
+			typeList.AddParameter(String(L"Includes"), Move(includes));
+		}
+
+		{
+			String typeListRegistrations;
+
+			for (StringView className : cogClassNames)
+			{
+				typeListRegistrations.Append(Format(L"\tREGISTER_TYPE(aTypeList, %);\n", className).View());
+			}
+
+
+			typeList.AddParameter(String(L"TypeListRegistrations"), Move(typeListRegistrations));
+		}
+		
+		const String typeListContent = typeList.Evaluate();
+
+		String generatedTypeListSourceFile = Format(L"%/%TypeListRegistrator.h", generatedCodeDirectory, projectName);
+		WriteToFileIfChanged(generatedTypeListSourceFile.View(), typeListContent);
+		generatedSourceFiles.Add(generatedTypeListSourceFile);
 	}
 
 	return true;

@@ -15,11 +15,11 @@ bool IsInGameThread()
 	return GetGame().IsInGameThread();
 }
 
-void RegisterTypeList(UniquePtr<TypeList>(*aTypeListCreator)());
+void RegisterTypeList();
 
-void InnerRunGame(UniquePtr<TypeList>(*aTypeListCreator)())
+void RunGame()
 {
-	RegisterTypeList(aTypeListCreator);
+	RegisterTypeList();
 
 	Program::Create();
 

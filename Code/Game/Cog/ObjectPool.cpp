@@ -6,9 +6,9 @@
 static ObjectPool gObjectPool;
 static UniquePtr<const TypeList> gTypeList;
 
-void RegisterTypeList(UniquePtr<TypeList>(*aTypeListCreator)())
+void RegisterTypeList()
 {
-	UniquePtr<TypeList> typeList = aTypeListCreator();
+	UniquePtr<TypeList> typeList = MakeUnique<TypeList>();
 	typeList->BuildList();
 	gTypeList = Move(typeList);
 }

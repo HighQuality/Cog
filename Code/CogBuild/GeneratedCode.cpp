@@ -18,11 +18,13 @@ void GeneratedCode::WriteFiles(const DocumentTemplates& aTemplates, const String
 	CreateDirectoryW(aOutputDirectory.GetData(), nullptr);
 
 	String headerFilePath(aOutputDirectory);
+	headerFilePath.Add(L'\\');
 	headerFilePath.Append(myGeneratedHeaderFileName);
 
 	GenerateHeaderFile(aTemplates, headerFilePath);
 
 	String sourceFilePath(aOutputDirectory);
+	sourceFilePath.Add(L'\\');
 	sourceFilePath.Append(myGeneratedSourceFileName);
 	
 	GenerateSourceFile(aTemplates, aProjectName, sourceFilePath);
@@ -33,6 +35,7 @@ CogClass& GeneratedCode::AddCogClass(String aTypeName, String aBaseTypeName, con
 	CogClass& type = *new CogClass(Move(aTypeName), Move(aBaseTypeName), aGeneratedBodyLineIndex);
 	// UniquePtr takes ownership of CogClass allocation
 	myDeclaredCogTypes.Add(UniquePtr<CogType>(&type));
+	myCogClasses.Add(&type);
 	return type;
 }
 

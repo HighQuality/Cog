@@ -1,14 +1,13 @@
 #include "GamePch.h"
 #include "TypeList.h"
 
-void TypeList::RegisterTypes()
-{
-	Internal_AddType(TypeID<Object>::Resolve<Object>().GetUnderlyingInteger(), L"Object", &CreateObjectFactory<Object>, nullptr);
-}
+void RegisterExecutableTypes_Generated();
 
 void TypeList::BuildList()
 {
-	RegisterTypes();
+	Internal_AddType(TypeID<Object>::Resolve<Object>().GetUnderlyingInteger(), L"Object", &CreateObjectFactory<Object>, nullptr);
+	
+	RegisterExecutableTypes_Generated();
 
 	for (auto& pair : myIDToData)
 	{

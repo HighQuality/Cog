@@ -22,17 +22,17 @@ UniquePtr<BaseFactory> CreateObjectFactory()
 	static_assert(IsDerivedFrom<TType, TType::Base>, #TType "::Base is not in inheritance chain."); \
 	} while (false)
 
-#define REGISTER_TYPE(TType) \
+#define REGISTER_TYPE(TypeListObject, TType) \
 	do { \
 	CHECK_BASE_DECLARED(TType); \
-	Internal_AddType(TypeID<Object>::Resolve<TType>().GetUnderlyingInteger(), L"" #TType, &CreateObjectFactory<TType>, nullptr); \
+	TypeListObject->Internal_AddType(TypeID<Object>::Resolve<TType>().GetUnderlyingInteger(), L"" #TType, &CreateObjectFactory<TType>, nullptr); \
 	} while (false)
 
-#define REGISTER_TYPE_SPECIALIZATION(BaseType, Specialization) \
+#define REGISTER_TYPE_SPECIALIZATION(TypeListObject, BaseType, Specialization) \
 	do { \
 	CHECK_BASE_DECLARED(Specialization); \
 	static_assert(IsDerivedFrom<Specialization, BaseType>, #Specialization " does not derive from " #BaseType); \
-	Internal_AddSpecialization(L"" #BaseType, TypeID<Object>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateObjectFactory<Specialization>, nullptr); \
+	TypeListObject->Internal_AddSpecialization(L"" #BaseType, TypeID<Object>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateObjectFactory<Specialization>, nullptr); \
 	} while (false)
 
 class TypeList
@@ -67,12 +67,9 @@ public:
 		return aOutermost ? data->GetOutermostSpecialization() : *data;
 	}
 
-protected:
 	// Use macros "REGISTER_TYPE" and "REGISTER_TYPE_SPECIALIZATION" instead
 	TypeData& Internal_AddType(u16 aTypeID, const StringView& aTypeName, UniquePtr<BaseFactory>(*aFactoryAllocator)(), nullptr_t);
 	void Internal_AddSpecialization(const StringView& aBaseName, u16 aTypeID, const StringView& aSpecializationName, UniquePtr<BaseFactory>(*aFactoryAllocator)(), nullptr_t);
-
-	virtual void RegisterTypes();
 
 private:
 	// Name -> ID
