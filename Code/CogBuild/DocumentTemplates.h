@@ -17,7 +17,8 @@ struct DocumentTemplates
 	String generatedHeaderTemplate;
 	String generatedSourceTemplate;
 
-	String generatedTypeListSource;
+	String typeListTemplate;
+	String typeListInvocatorTemplate;
 
 	bool isLoaded = false;
 };

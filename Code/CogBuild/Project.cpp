@@ -341,7 +341,7 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 	}
 
 	{
-		StringTemplate typeList(String(aTemplates.generatedTypeListSource));
+		StringTemplate typeList(String(aTemplates.typeListTemplate));
 
 		typeList.AddParameter(String(L"PchFileName"), String(pchFileName));
 		typeList.AddParameter(String(L"ProjectName"), String(projectName));
@@ -371,9 +371,42 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 		
 		const String typeListContent = typeList.Evaluate();
 
-		String generatedTypeListSourceFile = Format(L"%/%TypeListRegistrator.h", generatedCodeDirectory, projectName);
+		String generatedTypeListSourceFile = Format(L"%/%TypeListRegistrator.cpp", generatedCodeDirectory, projectName);
 		WriteToFileIfChanged(generatedTypeListSourceFile.View(), typeListContent);
 		generatedSourceFiles.Add(generatedTypeListSourceFile);
+	}
+
+	if (projectType == ProjectType::Executable)
+	{
+		StringTemplate typeListInvocator(String(aTemplates.typeListInvocatorTemplate));
+
+		typeListInvocator.AddParameter(String(L"PchFileName"), String(pchFileName));
+
+		{
+			String declarations;
+			String invocations;
+
+			Map<Project*, u8> referencedProjects;
+			GatherProjectReferences(referencedProjects);
+			referencedProjects.Add(this, 0);
+
+			for (const auto& projectPair : referencedProjects)
+			{
+				const Project* project = projectPair.key;
+
+				declarations.Append(Format(L"void RegisterCogTypesForProject_%(TypeList* aTypeList);\n", project->projectName).View());
+				invocations.Append(Format(L"\tRegisterCogTypesForProject_%(aTypeList);\n", project->projectName).View());
+			}
+
+			typeListInvocator.AddParameter(String(L"Declarations"), Move(declarations));
+			typeListInvocator.AddParameter(String(L"Invocations"), Move(invocations));
+		}
+
+		const String typeListInvocatorContent = typeListInvocator.Evaluate();
+
+		String typeListInvocatorFile = Format(L"%/%TypeListInvocator.cpp", generatedCodeDirectory, projectName);
+		WriteToFileIfChanged(typeListInvocatorFile.View(), typeListInvocatorContent);
+		generatedSourceFiles.Add(typeListInvocatorFile);
 	}
 
 	return true;

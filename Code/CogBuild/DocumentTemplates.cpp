@@ -21,7 +21,8 @@ void DocumentTemplates::ReadFromDirectory(Directory& aDirectory)
 	generatedHeaderTemplate = ReadStringFromFileInDirectory(L"GeneratedHeaderTemplate.txt", aDirectory);
 	generatedSourceTemplate = ReadStringFromFileInDirectory(L"GeneratedSourceTemplate.txt", aDirectory);
 
-	generatedTypeListSource = ReadStringFromFileInDirectory(L"GeneratedTypeListSourceFile.txt", aDirectory);
+	typeListTemplate = ReadStringFromFileInDirectory(L"TypeListTemplate.txt", aDirectory);
+	typeListInvocatorTemplate = ReadStringFromFileInDirectory(L"TypeListInvocatorTemplate.txt", aDirectory);
 
 	isLoaded = true;
 }
