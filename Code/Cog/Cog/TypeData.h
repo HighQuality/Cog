@@ -47,6 +47,7 @@ private:
 		}
 
 		myOutermostSpecialization = &mySpecialization->AssignOutermostSpecialization();
+		CHECK(myOutermostSpecialization);
 		return *myOutermostSpecialization;
 	}
 

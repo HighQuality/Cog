@@ -6,8 +6,8 @@ class Window;
 class RenderEngine;
 class BaseObjectFactory;
 
-COGTYPE()
-class ClientGame : public Game
+COGTYPE(Specialization)
+class ClientGame final : public Game
 {
 	GENERATED_BODY;
 

@@ -2,7 +2,7 @@
 #include <Game/Game.h>
 #include "ServerGame.generated.h"
 
-COGTYPE()
+COGTYPE(Specialization)
 class ServerGame final : public Game
 {
 	GENERATED_BODY;

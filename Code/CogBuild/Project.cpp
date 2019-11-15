@@ -125,70 +125,66 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 	documentTemplate.AddParameter(String(L"ProjectName"), String(projectName));
 
 	{
-		Map<StringView, u8> includePathsMap;
-		GatherIncludePaths(includePathsMap);
+		Array<StringView> includePaths = GatherIncludePaths();
 
-		String includePaths;
-		for (const auto& pair : includePathsMap)
+		String includePathsContent;
+		for (const StringView path : includePaths)
 		{
-			includePaths.Append(pair.key);
-			includePaths.Add(L';');
+			includePathsContent.Append(path);
+			includePathsContent.Add(L';');
 		}
 
-		includePaths.Replace(L'/', L'\\');
+		includePathsContent.Replace(L'/', L'\\');
 
-		documentTemplate.AddParameter(String(L"ExtraIncludePaths"), Move(includePaths));
+		documentTemplate.AddParameter(String(L"ExtraIncludePaths"), Move(includePathsContent));
 	}
 
 	{
-		Map<StringView, u8> libraryPathsMap;
-		GatherLibraryPaths(libraryPathsMap);
+		Array<StringView> libraryPaths = GatherLibraryPaths();
 
-		String libraryPaths;
-		for (const auto& pair : libraryPathsMap)
+		String libraryPathsContent;
+		for (const StringView path : libraryPaths)
 		{
-			libraryPaths.Append(pair.key);
-			libraryPaths.Add(L';');
+			libraryPathsContent.Append(path);
+			libraryPathsContent.Add(L';');
 		}
 
-		libraryPaths.Replace(L'/', L'\\');
+		libraryPathsContent.Replace(L'/', L'\\');
 
-		documentTemplate.AddParameter(String(L"ExtraLibraryPaths"), Move(libraryPaths));
+		documentTemplate.AddParameter(String(L"ExtraLibraryPaths"), Move(libraryPathsContent));
 	}
 
 	{
-		Map<StringView, u8> linkDependenciesMap;
-		GatherLinkDependencies(linkDependenciesMap);
+		Array<StringView> extraLinkDependencies = GatherLinkDependencies();
 
-		String extraLinkDependencies;
-		for (const auto& pair : linkDependenciesMap)
+		String extraLinkDependenciesContent;
+		for (const StringView dependency : extraLinkDependencies)
 		{
-			extraLinkDependencies.Append(pair.key);
-			extraLinkDependencies.Add(L';');
+			extraLinkDependenciesContent.Append(dependency);
+			extraLinkDependenciesContent.Add(L';');
 		}
 
-		extraLinkDependencies.Replace(L'/', L'\\');
+		extraLinkDependenciesContent.Replace(L'/', L'\\');
 
-		documentTemplate.AddParameter(String(L"ExtraLinkDependencies"), Move(extraLinkDependencies));
+		documentTemplate.AddParameter(String(L"ExtraLinkDependencies"), Move(extraLinkDependenciesContent));
 	}
 
 	{
-		Map<Project*, u8> projectReferencesMap;
-		GatherProjectReferences(projectReferencesMap);
+		Array<Project*> projectReferences = GatherProjectReferences();
 
-		String projectReferences;
+		String projectReferencesContent;
 
-		for (const auto& pair : projectReferencesMap)
+		for (const Project* project : projectReferences)
 		{
-			projectReferences.Append(Format(L"    <ProjectReference Include=\"..\\%\\%.vcxproj\">\n", pair.key->projectName, pair.key->projectName).View());
-			projectReferences.Append(Format(L"      <Project>%</Project>\n", pair.key->projectGuid).View());
-			projectReferences.Append(L"    </ProjectReference>\n");
+			projectReferencesContent.Append(Format(L"    <ProjectReference Include=\"..\\%\\%.vcxproj\">\n", project->projectName, project->projectName).View());
+			projectReferencesContent.Append(Format(L"      <Project>%</Project>\n", project->projectGuid).View());
+			projectReferencesContent.Append(L"    </ProjectReference>\n");
 		}
 
-		if (projectReferences.GetLength() > 0)
-			projectReferences.Pop();
+		if (projectReferencesContent.GetLength() > 0)
+			projectReferencesContent.Pop();
 
-		documentTemplate.AddParameter(String(L"ProjectReferences"), Move(projectReferences));
+		documentTemplate.AddParameter(String(L"ProjectReferences"), Move(projectReferencesContent));
 	}
 
 	{
@@ -304,7 +300,7 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 
 	const String pchFileName = Format(L"%Pch.h", projectName);
 
-	Array<String> cogClassNames;
+	Array<CogClass*> cogClasses;
 	Array<String> cogClassHeaderFiles;
 
 	for (const File* file : headerFiles)
@@ -335,8 +331,8 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 			headerIncludePath.Replace(L'\\', L'/');
 			cogClassHeaderFiles.Add(Move(headerIncludePath));
 
-			for (const CogClass* cogClass : generatedCode.GetCogClasses())
-				cogClassNames.Add(String(cogClass->GetTypeName()));
+			for (CogClass* cogClass : generatedCode.GetCogClasses())
+				cogClasses.Add(cogClass);
 		}
 	}
 
@@ -360,9 +356,12 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 		{
 			String typeListRegistrations;
 
-			for (StringView className : cogClassNames)
+			for (const CogClass* cogClass : cogClasses)
 			{
-				typeListRegistrations.Append(Format(L"\tREGISTER_TYPE(aTypeList, %);\n", className).View());
+				if (cogClass->SpecializesBaseClass())
+					typeListRegistrations.Append(Format(L"\tREGISTER_TYPE_SPECIALIZATION(aTypeList, %, %);\n", cogClass->GetBaseTypeName(), cogClass->GetTypeName()).View());
+				else
+					typeListRegistrations.Append(Format(L"\tREGISTER_TYPE(aTypeList, %);\n", cogClass->GetTypeName()).View());
 			}
 
 
@@ -371,7 +370,7 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 		
 		const String typeListContent = typeList.Evaluate();
 
-		String generatedTypeListSourceFile = Format(L"%/%TypeListRegistrator.cpp", generatedCodeDirectory, projectName);
+		String generatedTypeListSourceFile = Format(L"%/%TypeListRegistrator.generated.cpp", generatedCodeDirectory, projectName);
 		WriteToFileIfChanged(generatedTypeListSourceFile.View(), typeListContent);
 		generatedSourceFiles.Add(generatedTypeListSourceFile);
 	}
@@ -386,14 +385,11 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 			String declarations;
 			String invocations;
 
-			Map<Project*, u8> referencedProjects;
-			GatherProjectReferences(referencedProjects);
-			referencedProjects.Add(this, 0);
+			Array<Project*> referencedProjects = GatherProjectReferences();
+			referencedProjects.Add(this);
 
-			for (const auto& projectPair : referencedProjects)
+			for (Project* project : referencedProjects)
 			{
-				const Project* project = projectPair.key;
-
 				if (!project->preprocess)
 					continue;
 
@@ -407,7 +403,7 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 
 		const String typeListInvocatorContent = typeListInvocator.Evaluate();
 
-		String typeListInvocatorFile = Format(L"%/%TypeListInvocator.cpp", generatedCodeDirectory, projectName);
+		String typeListInvocatorFile = Format(L"%/%TypeListInvocator.generated.cpp", generatedCodeDirectory, projectName);
 		WriteToFileIfChanged(typeListInvocatorFile.View(), typeListInvocatorContent);
 		generatedSourceFiles.Add(typeListInvocatorFile);
 	}
@@ -415,56 +411,122 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 	return true;
 }
 
-void Project::GatherLibraryPaths(Map<StringView, u8>& aLibraryPaths) const
+void Project::GatherLibraryPathsMap(Map<StringView, u8>& aLibraryPaths) const
 {
 	for (const String& libraryPath : extraLibraryPaths)
 		aLibraryPaths.FindOrAdd(libraryPath.View()) = 0;
 
 	for (Project* reference : references)
-		reference->GatherLibraryPaths(aLibraryPaths);
+		reference->GatherLibraryPathsMap(aLibraryPaths);
 }
 
-void Project::GatherLinkDependencies(Map<StringView, u8>& aLinkDependencies) const
+Array<StringView> Project::GatherLibraryPaths() const
+{
+	Map<StringView, u8> map;
+	GatherLibraryPathsMap(map);
+	
+	Array<StringView> output = map.GetKeys();
+	output.QuickSort();
+
+	return output;
+}
+
+void Project::GatherLinkDependenciesMap(Map<StringView, u8>& aLinkDependencies) const
 {
 	for (const String& linkDependency : linkDependencies)
 		aLinkDependencies.FindOrAdd(linkDependency.View()) = 0;
 
 	for (Project* reference : references)
-		reference->GatherLinkDependencies(aLinkDependencies);
+		reference->GatherLinkDependenciesMap(aLinkDependencies);
 }
 
-void Project::GatherIncludePaths(Map<StringView, u8>& aIncludePaths) const
+Array<StringView> Project::GatherLinkDependencies() const
+{
+	Map<StringView, u8> map;
+	GatherLinkDependenciesMap(map);
+
+	Array<StringView> output = map.GetKeys();
+	output.QuickSort();
+
+	return output;
+}
+
+void Project::GatherIncludePathsMap(Map<StringView, u8>& aIncludePaths) const
 {
 	for (const String& includePath : extraIncludePaths)
 		aIncludePaths.FindOrAdd(includePath.View()) = 0;
 
 	for (Project* reference : references)
-		reference->GatherIncludePaths(aIncludePaths);
+		reference->GatherIncludePathsMap(aIncludePaths);
 }
 
-void Project::GatherProjectReferences(Map<Project*, u8>& aProjectReferences) const
+Array<StringView> Project::GatherIncludePaths() const
+{
+	Map<StringView, u8> map;
+	GatherIncludePathsMap(map);
+
+	Array<StringView> output = map.GetKeys();
+	output.QuickSort();
+
+	return output;
+}
+
+void Project::GatherProjectReferencesMap(Map<Project*, u8>& aProjectReferences) const
 {
 	for (Project* referencedProject : references)
 		aProjectReferences.FindOrAdd(referencedProject) = 0;
 
 	for (Project* reference : references)
-		reference->GatherProjectReferences(aProjectReferences);
+		reference->GatherProjectReferencesMap(aProjectReferences);
 }
 
-void Project::GatherHeaderFiles(Map<const File*, u8>& aHeaderFiles) const
+Array<Project*> Project::GatherProjectReferences() const
+{
+	Map<Project*, u8> map;
+	GatherProjectReferencesMap(map);
+
+	Array<Project*> output = map.GetKeys();
+	output.QuickSort([](Project* aA, Project* aB) { return aA->projectName < aB->projectName; });
+
+	return output;
+}
+
+void Project::GatherHeaderFilesMap(Map<const File*, u8>& aHeaderFiles) const
 {
 	for (const File* headerFile : headerFiles)
 		aHeaderFiles.FindOrAdd(headerFile) = 0;
 
 	for (Project* reference : references)
-		reference->GatherHeaderFiles(aHeaderFiles);
+		reference->GatherHeaderFilesMap(aHeaderFiles);
 }
 
-void Project::GatherSourceFiles(Map<const File*, u8>& aSourceFiles) const
+Array<const File*> Project::GatherHeaderFiles() const
+{
+	Map<const File*, u8> map;
+	GatherHeaderFilesMap(map);
+
+	Array<const File*> output = map.GetKeys();
+	output.QuickSort([](const File* aA, const File* aB) { return aA->GetAbsolutePath() < aB->GetAbsolutePath(); });
+
+	return output;
+}
+
+void Project::GatherSourceFilesMap(Map<const File*, u8>& aSourceFiles) const
 {
 	for (const File* sourceFile : sourceFiles)
 		aSourceFiles.FindOrAdd(sourceFile) = 0;
 
 	for (Project* reference : references)
-		reference->GatherSourceFiles(aSourceFiles);
+		reference->GatherSourceFilesMap(aSourceFiles);
+}
+
+Array<const File*> Project::GatherSourceFiles() const
+{
+	Map<const File*, u8> map;
+	GatherSourceFilesMap(map);
+
+	Array<const File*> output = map.GetKeys();
+	output.QuickSort([](const File* aA, const File* aB) { return aA->GetAbsolutePath() < aB->GetAbsolutePath(); });
+
+	return output;
 }

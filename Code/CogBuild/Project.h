@@ -22,13 +22,21 @@ struct Project
 	bool ParseHeaders(const DocumentTemplates& aTemplates);
 
 	/** These gather functions gather all the properties from this and all referenced projects */
-	void GatherLibraryPaths(Map<StringView, u8>& aLibraryPaths) const;
-	void GatherLinkDependencies(Map<StringView, u8>& aLinkDependencies) const;
-	void GatherIncludePaths(Map<StringView, u8>& aIncludePaths) const;
-	void GatherProjectReferences(Map<Project*, u8>& aProjectReferences) const;
+	Array<StringView> GatherLibraryPaths() const;
+	Array<StringView> GatherLinkDependencies() const;
+	Array<StringView> GatherIncludePaths() const;
+	Array<Project*> GatherProjectReferences() const;
+	
+	void GatherLibraryPathsMap(Map<StringView, u8>& aLibraryPaths) const;
+	void GatherLinkDependenciesMap(Map<StringView, u8>& aLinkDependencies) const;
+	void GatherIncludePathsMap(Map<StringView, u8>& aIncludePaths) const;
+	void GatherProjectReferencesMap(Map<Project*, u8>& aProjectReferences) const;
 
-	void GatherHeaderFiles(Map<const File*, u8>& aHeaderFiles) const;
-	void GatherSourceFiles(Map<const File*, u8>& aSourceFiles) const;
+	Array<const File*> GatherHeaderFiles() const;
+	Array<const File*> GatherSourceFiles() const;
+
+	void GatherHeaderFilesMap(Map<const File*, u8>& aHeaderFiles) const;
+	void GatherSourceFilesMap(Map<const File*, u8>& aSourceFiles) const;
 
 	String projectName;
 	String projectGuid;

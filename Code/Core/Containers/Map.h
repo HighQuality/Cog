@@ -246,6 +246,26 @@ public:
 	iterator end() { return iterator(&myBuckets, myBuckets.GetLength(), 0); }
 	const_iterator end() const { return const_iterator(&myBuckets, myBuckets.GetLength(), 0); }
 
+	Array<TKey> GetKeys() const
+	{
+		Array<TKey> keys;
+
+		for (const auto& keyValuePair : *this)
+			keys.Add(keyValuePair.key);
+
+		return keys;
+	}
+
+	Array<TValue> GetValues() const
+	{
+		Array<TValue> values;
+
+		for (const auto& keyValuePair : *this)
+			values.Add(keyValuePair.value);
+
+		return values;
+	}
+
 	FORCEINLINE Map() = default;
 	FORCEINLINE ~Map() = default;
 	FORCEINLINE Map(const Map& aCopy) = default;
@@ -338,7 +358,9 @@ public:
 
 	FORCEINLINE TValue& operator[](FindType aKey)
 	{
-		return FindOrAdd(aKey);
+		TValue* value = Find(aKey);
+		CHECK(value);
+		return *value;
 	}
 
 	FORCEINLINE const TValue& operator[](FindType aKey) const

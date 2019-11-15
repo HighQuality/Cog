@@ -137,39 +137,39 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	documentTemplate.AddParameter(String(L"CleanCommandLine"), Format(L"\"%\" -Clean %", aBuildToolPath, directory->GetAbsolutePath()));
 
 	{
-		Map<StringView, u8> includePathsMap;
+		Array<StringView> includePaths;
 		for (const auto& project : projects)
-			project->GatherIncludePaths(includePathsMap);
+			includePaths.Append(project->GatherIncludePaths());
 
-		String includePaths;
+		String includePathsContent;
 		
-		for (const auto& pair : includePathsMap)
+		for (const StringView& path : includePaths)
 		{
-			includePaths.Append(pair.key);
-			includePaths.Add(L';');
+			includePathsContent.Append(path);
+			includePathsContent.Add(L';');
 		}
 
-		includePaths.Replace(L'/', L'\\');
+		includePathsContent.Replace(L'/', L'\\');
 
-		documentTemplate.AddParameter(String(L"ExtraIncludePaths"), Move(includePaths));
+		documentTemplate.AddParameter(String(L"ExtraIncludePaths"), Move(includePathsContent));
 	}
 
 	{
-		Map<const File*, u8> sourceFiles;
+		Array<const File*> sourceFiles;
 		for (const auto& project : projects)
-			project->GatherSourceFiles(sourceFiles);
+			sourceFiles.Append(project->GatherSourceFiles());
 
 		String sourceFileList;
 
 		if (sourceFiles.GetLength() > 0)
 		{
-			for (const auto& sourceFilePair : sourceFiles)
+			for (const File* sourceFile : sourceFiles)
 			{
-				String sourceFile(sourceFilePair.key->GetRelativePath(*codeDirectory));
-				sourceFile.Replace(L'/', L'\\');
+				String sourceFilePath(sourceFile->GetRelativePath(*codeDirectory));
+				sourceFilePath.Replace(L'/', L'\\');
 
 				sourceFileList.Append(L"    <ClCompile Include=\"");
-				sourceFileList.Append(sourceFile);
+				sourceFileList.Append(sourceFilePath);
 				sourceFileList.Append(L"\" />\n");
 			}
 
@@ -181,21 +181,21 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	}
 
 	{
-		Map<const File*, u8> headerFiles;
+		Array<const File*> headerFiles;
 		for (const auto& project : projects)
-			project->GatherHeaderFiles(headerFiles);
+			headerFiles.Append(project->GatherHeaderFiles());
 
 		String headerFileList;
 
 		if (headerFiles.GetLength() > 0)
 		{
-			for (const auto& headerFilePair : headerFiles)
+			for (const File* headerFile : headerFiles)
 			{
-				String headerFile(headerFilePair.key->GetRelativePath(*codeDirectory));
-				headerFile.Replace(L'/', L'\\');
+				String headerFilePath(headerFile->GetRelativePath(*codeDirectory));
+				headerFilePath.Replace(L'/', L'\\');
 
 				headerFileList.Append(L"    <ClInclude Include=\"");
-				headerFileList.Append(headerFile);
+				headerFileList.Append(headerFilePath);
 				headerFileList.Append(L"\" />\n");
 			}
 

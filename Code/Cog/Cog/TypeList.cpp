@@ -11,7 +11,7 @@ void TypeList::BuildList()
 
 	for (auto& pair : myIDToData)
 	{
-		TypeData& type = pair.value;
+		TypeData& type = *pair.value;
 
 		const StringView& specializationOf = type.GetSpecializationOf();
 
@@ -19,10 +19,11 @@ void TypeList::BuildList()
 		{
 			if (const u16* specializationOfID = myTypeNameToID.Find(specializationOf))
 			{
-				TypeData* base = myIDToData.Find(*specializationOfID);
+				UniquePtr<TypeData>* base = myIDToData.Find(*specializationOfID);
 				CHECK(base);
-				CHECK(!base->GetSpecialization());
-				base->SetSpecialization(type);
+				CHECK(base->IsValid());
+				CHECK(!base->Get()->GetSpecialization());
+				base->Get()->SetSpecialization(type);
 			}
 			else
 			{
@@ -33,8 +34,8 @@ void TypeList::BuildList()
 
 	for (auto& pair : myIDToData)
 	{
-		if (!pair.value.HasOutermostSpecialization())
-			pair.value.AssignOutermostSpecialization();
+		if (!pair.value->HasOutermostSpecialization())
+			pair.value->AssignOutermostSpecialization();
 	}
 }
 
@@ -42,11 +43,9 @@ TypeData& TypeList::Internal_AddType(const u16 aTypeID, const StringView& aTypeN
 {
 	CHECK(aTypeName.GetLength() > 0);
 
-	u16& id = myTypeNameToID[aTypeName];
-	CHECK(id == 0);
-	id = aTypeID;
+	myTypeNameToID.Add(aTypeName, aTypeID);
 
-	TypeData& data = myIDToData[aTypeID];
+	TypeData& data = *myIDToData.Add(aTypeID, MakeUnique<TypeData>());
 
 	if (data.GetName().GetLength() > 0)
 		FATAL("Double registration on type ", aTypeName);

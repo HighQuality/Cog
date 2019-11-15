@@ -2,6 +2,7 @@
 #include "HeaderParser.h"
 #include <Filesystem\File.h>
 #include <CogBuildUtilities.h>
+#include "CogClass.h"
 
 HeaderParser::HeaderParser(const File* aMainFile)
 	: myGeneratedCode(aMainFile->GetFilenameWithoutExtension())
@@ -74,9 +75,7 @@ void HeaderParser::ParseCogType()
 	if (!MoveNextExpectParenthesisGroup())
 		return;
 
-	// GroupingWordReader parameterReader(reader.GetCurrentGroup());
-	// 
-	// while (parameterReader.Next());
+	GroupingWordReader parameterReader(myWordReader.GetCurrentGroup());
 
 	if (!MoveNextExpectWord())
 		return;
@@ -85,7 +84,7 @@ void HeaderParser::ParseCogType()
 
 	if (classType == L"class")
 	{
-		ParseCogTypeClass();
+		ParseCogTypeClass(parameterReader);
 	}
 	else if (classType != L"struct")
 	{
@@ -102,17 +101,17 @@ void HeaderParser::ParseCogType()
 	}
 }
 
-void HeaderParser::ParseCogTypeClass()
+void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 {
 	if (!MoveNextExpectWord())
 		return;
 
 	const StringView className = myWordReader.GetCurrentWordOrGroup();
-	
+
 	myWordReader.Next();
 
 	TryConsume(L"final");
-	
+
 	if (!Expect(L":"))
 		return;
 
@@ -159,8 +158,35 @@ void HeaderParser::ParseCogTypeClass()
 
 	CogClass& cogClass = myGeneratedCode.AddCogClass(String(className), String(baseClass), generatedBodyLineIndex);
 
-	// TODO: Remove
-	cogClass;
+	while (aParameterReader.Next())
+	{
+		if (!aParameterReader.IsAtWord())
+		{
+			ReportErrorAtLine(L"Expected parameter", generatedBodyLineIndex);
+			return;
+		}
+
+		const StringView currentParameter = aParameterReader.GetCurrentWordOrGroup();
+
+		if (currentParameter == L"Specialization")
+		{
+			cogClass.SetSpecializesBaseClass(true);
+		}
+		else
+		{
+			ReportErrorAtLine(Format(L"Unknown parameter ", currentParameter).View(), generatedBodyLineIndex);
+			return;
+		}
+
+		if (!aParameterReader.Next())
+			break;
+
+		if (aParameterReader.IsAtWord() && aParameterReader.GetCurrentWordOrGroup() != L",")
+		{
+			ReportErrorAtLine(L"Expected ','", generatedBodyLineIndex);
+			return;
+		}
+	}
 
 	while (bodyReader.Next())
 	{
@@ -173,6 +199,11 @@ void HeaderParser::ParseCogTypeClass()
 			}
 		}
 	}
+}
+
+void HeaderParser::ReportErrorAtLine(const StringView aMessage, const  i32 aLineIndex)
+{
+	myErrors.Add(Format(L"%(%): error: %", myFile->GetAbsolutePath(), aLineIndex + 1, aMessage));
 }
 
 void HeaderParser::ReportPreFormattedError(const StringView aMessage, GroupingWordReader* innerReader /* = nullptr*/)

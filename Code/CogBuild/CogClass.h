@@ -14,8 +14,12 @@ public:
 	String GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const override;
 	String GenerateSourceFileContents(const DocumentTemplates& aTemplates) const override;
 
+	void SetSpecializesBaseClass(const bool aSpecializesBaseClass) { mySpecializesBaseClass = aSpecializesBaseClass; }
+	bool SpecializesBaseClass() const { return mySpecializesBaseClass; }
+
 private:
 	Array<GeneratedFunction> myGeneratedFunctions;
 	i32 myGeneratedBodyLineIndex = -1;
+	bool mySpecializesBaseClass = false;
 };
 

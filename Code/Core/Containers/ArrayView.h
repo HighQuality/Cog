@@ -233,13 +233,40 @@ public:
 		return -1;
 	}
 
+	i32 Compare(const ArrayView& aOther) const
+	{
+		if (aOther.GetLength() > this->GetLength())
+			return -1;
+		if (aOther.GetLength() < this->GetLength())
+			return 1;
+
+		for (i32 i = 0; i < myLength; ++i)
+		{
+			if (aOther[i] > myData[i])
+				return -1;
+			if (aOther[i] < myData[i])
+				return 1;
+		}
+
+		return 0;
+	}
+
+	bool operator>=(const ArrayView& aOther) const { return Compare(aOther) >= 0; }
+	bool operator>(const ArrayView& aOther) const { return Compare(aOther) > 0; }
+	bool operator<=(const ArrayView& aOther) const { return Compare(aOther) <= 0; }
+	bool operator<(const ArrayView& aOther) const { return Compare(aOther) < 0; }
+
 	bool operator==(const ArrayView& aString) const
 	{
 		if (myLength != aString.myLength)
 			return false;
+
 		for (i32 i = 0; i < myLength; ++i)
+		{
 			if (myData[i] != aString.myData[i])
 				return false;
+		}
+
 		return true;
 	}
 

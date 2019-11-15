@@ -3,6 +3,7 @@
 #include "GeneratedCode.h"
 
 class File;
+class GroupingWordReader;
 
 class HeaderParser
 {
@@ -16,7 +17,8 @@ public:
 
 private:
 	void ParseCogType();
-	void ParseCogTypeClass();
+	void ParseCogTypeClass(GroupingWordReader& aParameterReader);
+	void ReportErrorAtLine(StringView aMessage, i32 aLine);
 	void ReportPreFormattedError(StringView aMessage, GroupingWordReader* innerReader = nullptr);
 
 	bool At(StringView aString) const;

@@ -53,7 +53,7 @@ public:
 		const auto* data = myIDToData.Find(aTypeID.GetUnderlyingInteger());
 		if (!data)
 			FATAL(L"This type has not been registered");
-		return aOutermost ? data->GetOutermostSpecialization() : *data;
+		return aOutermost ? data->Get()->GetOutermostSpecialization() : **data;
 	}
 
 	FORCEINLINE const TypeData& GetTypeData(const StringView& aTypeName, const bool aOutermost = true) const
@@ -64,7 +64,7 @@ public:
 		const auto* data = myIDToData.Find(*id);
 		if (!data)
 			FATAL(L"This type has not been registered");
-		return aOutermost ? data->GetOutermostSpecialization() : *data;
+		return aOutermost ? data->Get()->GetOutermostSpecialization() : **data;
 	}
 
 	// Use macros "REGISTER_TYPE" and "REGISTER_TYPE_SPECIALIZATION" instead
@@ -76,6 +76,6 @@ private:
 	Map<StringView, u16> myTypeNameToID;
 
 	// ID -> Component Data
-	Map<u16, TypeData> myIDToData;
+	Map<u16, UniquePtr<TypeData>> myIDToData;
 };
 
