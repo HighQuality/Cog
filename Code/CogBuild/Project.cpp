@@ -394,6 +394,9 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 			{
 				const Project* project = projectPair.key;
 
+				if (!project->preprocess)
+					continue;
+
 				declarations.Append(Format(L"void RegisterCogTypesForProject_%(TypeList* aTypeList);\n", project->projectName).View());
 				invocations.Append(Format(L"\tRegisterCogTypesForProject_%(aTypeList);\n", project->projectName).View());
 			}

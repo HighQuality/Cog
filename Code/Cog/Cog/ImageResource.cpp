@@ -1,4 +1,4 @@
-#include "GamePch.h"
+#include "CogPch.h"
 #include "ImageResource.h"
 #include <External/lodepng.h>
 #include <Images/Image.h>
