@@ -500,17 +500,6 @@ void Project::GatherHeaderFilesMap(Map<const File*, u8>& aHeaderFiles) const
 		reference->GatherHeaderFilesMap(aHeaderFiles);
 }
 
-Array<const File*> Project::GatherHeaderFiles() const
-{
-	Map<const File*, u8> map;
-	GatherHeaderFilesMap(map);
-
-	Array<const File*> output = map.GetKeys();
-	output.QuickSort([](const File* aA, const File* aB) { return aA->GetAbsolutePath() < aB->GetAbsolutePath(); });
-
-	return output;
-}
-
 void Project::GatherSourceFilesMap(Map<const File*, u8>& aSourceFiles) const
 {
 	for (const File* sourceFile : sourceFiles)
@@ -518,15 +507,4 @@ void Project::GatherSourceFilesMap(Map<const File*, u8>& aSourceFiles) const
 
 	for (Project* reference : references)
 		reference->GatherSourceFilesMap(aSourceFiles);
-}
-
-Array<const File*> Project::GatherSourceFiles() const
-{
-	Map<const File*, u8> map;
-	GatherSourceFilesMap(map);
-
-	Array<const File*> output = map.GetKeys();
-	output.QuickSort([](const File* aA, const File* aB) { return aA->GetAbsolutePath() < aB->GetAbsolutePath(); });
-
-	return output;
 }

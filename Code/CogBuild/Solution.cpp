@@ -155,9 +155,12 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	}
 
 	{
-		Array<const File*> sourceFiles;
+		Map<const File*, u8> sourceFilesMap;
 		for (const auto& project : projects)
-			sourceFiles.Append(project->GatherSourceFiles());
+			project->GatherSourceFilesMap(sourceFilesMap);
+
+		Array<const File*> sourceFiles = sourceFilesMap.GetKeys();
+		sourceFiles.QuickSort([](const File* aA, const File* aB) { return aA->GetAbsolutePath() < aB->GetAbsolutePath(); });
 
 		String sourceFileList;
 
@@ -181,9 +184,13 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 	}
 
 	{
-		Array<const File*> headerFiles;
+		Map<const File*, u8> headerFilesMap;
 		for (const auto& project : projects)
-			headerFiles.Append(project->GatherHeaderFiles());
+			project->GatherHeaderFilesMap(headerFilesMap);
+
+		Array<const File*> headerFiles = headerFilesMap.GetKeys();
+		headerFiles.QuickSort([](const File* aA, const File* aB) { return aA->GetAbsolutePath() < aB->GetAbsolutePath(); });
+
 
 		String headerFileList;
 

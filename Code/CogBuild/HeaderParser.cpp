@@ -192,13 +192,64 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 	{
 		if (bodyReader.IsAtWord())
 		{
-			if (bodyReader.GetCurrentWordOrGroup() == L"GENERATED_BODY")
+			const StringView currentSymbol = bodyReader.GetCurrentWordOrGroup();
+			
+			if (currentSymbol == L"GENERATED_BODY")
 			{
 				ReportErrorWithInnerReader(bodyReader, L"Found multiple generated bodies");
 				return;
 			}
+			else if (currentSymbol == L"COGLISTENER")
+			{
+				if (!ParseCogListener(cogClass, bodyReader))
+					return;
+			}
 		}
 	}
+}
+
+bool HeaderParser::ParseCogListener(CogClass& aClass, GroupingWordReader& aBodyReader)
+{
+	if (!aBodyReader.Next() || !aBodyReader.IsAtWord() || aBodyReader.GetCurrentWordOrGroup() != L";")
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Expected ';'");
+		return false;
+	}
+
+	if (!aBodyReader.Next())
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of body");
+		return false;
+	}
+
+	const bool isVirtual = aBodyReader.GetCurrentWordOrGroup() == L"virtual";
+
+	if (isVirtual)
+	{
+		if (!aBodyReader.Next())
+		{
+			ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of body");
+			return false;
+		}
+	}
+
+	if (!aBodyReader.IsAtWord() || aBodyReader.GetCurrentWordOrGroup() != L"void")
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Expected 'void'");
+		return false;
+	}
+
+	if (!aBodyReader.Next() || !aBodyReader.IsAtWord())
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Expected method name");
+		return false;
+	}
+
+	const StringView methodName = aBodyReader.GetCurrentWordOrGroup();
+
+	Println(L"COGLISTENER % registered for type % and is %", methodName, aClass.GetTypeName(), isVirtual ? L"virtual" : L"not virtual");
+
+	return true;
 }
 
 void HeaderParser::ReportErrorAtLine(const StringView aMessage, const  i32 aLineIndex)

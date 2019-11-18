@@ -36,6 +36,11 @@ inline void Append(String& aString, const char* aValue)
 		aString[oldLength + i] = aValue[i];
 }
 
+inline void Append(String& aString, const wchar_t* aValue)
+{
+	aString.Append(aValue);
+}
+
 template <>
 inline void Append(String& aString, const bool& aValue)
 {

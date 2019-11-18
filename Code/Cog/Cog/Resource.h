@@ -25,6 +25,9 @@ protected:
 	//GENCELFIXED
 	void RegisterCallback(const Function<void(Resource&)>& aFunctionCallback);
 
+	COGLISTENER;
+	void TestFunction();
+
 private:
 	bool myIsLoaded = false;
 };

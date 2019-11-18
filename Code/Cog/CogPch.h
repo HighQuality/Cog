@@ -5,6 +5,8 @@
 #define COGTYPE(...)
 #define COGFUNC(...)
 
+#define COGLISTENER
+
 // Should be placed very first on all class or struct COGTYPEs followed by a semicolon.
 #define GENERATED_BODY JOIN(JOIN(GENERATED_BODY, COG_CURRENT_GENERATED_HEADER_FILE), __LINE__)
 

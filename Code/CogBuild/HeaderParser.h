@@ -4,6 +4,7 @@
 
 class File;
 class GroupingWordReader;
+class CogClass;
 
 class HeaderParser
 {
@@ -18,6 +19,7 @@ public:
 private:
 	void ParseCogType();
 	void ParseCogTypeClass(GroupingWordReader& aParameterReader);
+	bool ParseCogListener(CogClass& aClass, GroupingWordReader& aBodyReader);
 	void ReportErrorAtLine(StringView aMessage, i32 aLine);
 	void ReportPreFormattedError(StringView aMessage, GroupingWordReader* innerReader = nullptr);
 

@@ -32,9 +32,6 @@ struct Project
 	void GatherIncludePathsMap(Map<StringView, u8>& aIncludePaths) const;
 	void GatherProjectReferencesMap(Map<Project*, u8>& aProjectReferences) const;
 
-	Array<const File*> GatherHeaderFiles() const;
-	Array<const File*> GatherSourceFiles() const;
-
 	void GatherHeaderFilesMap(Map<const File*, u8>& aHeaderFiles) const;
 	void GatherSourceFilesMap(Map<const File*, u8>& aSourceFiles) const;
 
