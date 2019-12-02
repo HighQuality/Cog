@@ -11,8 +11,10 @@ Array<u8> ReadFileAwaitable::Work()
 	std::wstring filePath = myPath.View().ToStdWString();
 	std::ifstream fileStream(filePath);
 
+	fmt::format(FMT_STRING(L"test {}"), myPath);
+	
 	if (!fileStream.good())
-		FATAL(L"Failed to open file \"%\"", myPath);
+		FATAL(L"Failed to open file \"{}\"", myPath);
 
 	fileStream.seekg(0, std::ios::end);
 	Array<u8> data;

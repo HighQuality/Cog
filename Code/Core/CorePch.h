@@ -1,5 +1,10 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
+
+#define STRINGIFY_INNER(x) #x
+#define STRINGIFY(x) STRINGIFY_INNER(x)
+
 #define JOIN_INNER(a, b) a ## b
 #define JOIN(a, b) JOIN_INNER(a, b)
 
@@ -65,6 +70,8 @@
 #include <utility>
 #include <array>
 
+#include "External/fmt/format.h"
+
 #include <Windows.h>
 
 #undef GetObject
@@ -99,6 +106,7 @@
 #include <String/CogStringView.h>
 #include <String/CogStringSlice.h>
 #include <String/CogString.h>
+#include <String/StringFormatters.h>
 
 #include <Debug/DebugAsserts.h>
 

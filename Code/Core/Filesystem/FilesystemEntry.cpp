@@ -59,7 +59,7 @@ String FileSystemEntry::EvaluatePath(const String aPath)
 
 	BOOL success = PathCanonicalizeW(buffer.get(), aPath.GetData());
 	if (!success)
-		FATAL("PathCanonicalizeW failed");
+		FATAL(L"PathCanonicalizeW failed");
 
 	return String(buffer.get());
 }

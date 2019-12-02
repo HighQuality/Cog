@@ -1,10 +1,15 @@
 #include "CogBuildPch.h"
 #include <Solution.h>
 #include <Time\Stopwatch.h>
+#include "External/fmt/format.h"
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
 	defer { if (IsDebuggerPresent()) std::cin.get(); };
+
+	Println(L"%", fmt::format(FMT_STRING(L"{} {}"), L"Hello", L"World").c_str());
+
+	std::cin.get();
 
 	// Println(L"% args", argc);
 	// for (i32 i = 0; i < argc; ++i)

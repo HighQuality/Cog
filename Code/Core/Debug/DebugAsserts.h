@@ -48,6 +48,7 @@ void ErrorLog(StringView aMessage);
 #define CHECK(condition) do { if (!(condition)) FATAL(L"Condition \"" #condition L"\" failed"); } while (false)
 
 #define PRINT_ERROR(format, ...) do { String _fatalmessage = Format(StringView(L"%:% (%):\n" format L"\n"), __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__); ErrorLog(_fatalmessage); } while (false)
+// #define PRINT_ERROR(errorFormat, ...) do { String _fatalmessage(L"" __FILE__ L":" STRINGIFY(__LINE__) L"(" __FUNCTION__ L"):\n"); _fatalmessage.Append(fmt::format(FMT_STRING(errorFormat), __VA_ARGS__).c_str()); ErrorLog(_fatalmessage); } while (false)
 
 // #ifdef _DEBUG
 #define FATAL(format, ...) do { PRINT_ERROR(format, __VA_ARGS__); DebugBreak(); abort(); } while (false)

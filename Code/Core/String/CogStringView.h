@@ -27,7 +27,7 @@ public:
 
 	FORCEINLINE bool operator==(const wchar_t* aString) const
 	{
-		const size_t length = wcslen(aString);
+		const i32 length = static_cast<i32>(wcslen(aString));
 		if (length != GetLength())
 			return false;
 		for (i32 i = 0; i < length; ++i)
@@ -190,3 +190,4 @@ inline String StringView::ToUpper() const
 		str[i] = towupper((*this)[i]);
 	return str;
 }
+
