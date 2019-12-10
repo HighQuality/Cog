@@ -52,6 +52,7 @@ public:
 	FORCEINLINE ArrayView(const T (&aArray)[TLength])
 	{
 		this->myData = const_cast<T*>(aArray);
+		// TODO high-prio: For some reason String/StringView construction from string literals take this path, so this is needed here but is unwanted behavior otherwise as it will truncate the end of the array
 		this->myLength = TLength == 0 ? 0 : TLength - 1;
 	}
 

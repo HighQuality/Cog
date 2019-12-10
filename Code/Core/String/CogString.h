@@ -10,21 +10,18 @@ public:
 	FORCEINLINE String() = default;
 
 	FORCEINLINE explicit String(const StringView& aString)
-		: Super()
 	{
 		this->Resize(aString.GetLength());
 		memcpy(this->myData, aString.GetData(), sizeof Char * GetLength());
 	}
 
 	FORCEINLINE explicit String(const Char* aString)
-		: Super()
 	{
 		this->Resize(static_cast<i32>(wcslen(aString)));
 		memcpy(this->myData, aString, sizeof Char * GetLength());
 	}
 
 	FORCEINLINE explicit String(const char* aString)
-		: Super()
 	{
 		this->Resize(static_cast<i32>(strlen(aString)));
 		for (i32 i=0; i<this->myLength; ++i)
