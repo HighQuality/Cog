@@ -1,7 +1,5 @@
 ﻿#pragma once
-#include <Memory/InlineVirtualObject.h>
 #include <Function/MemberFunctionPointer.h>
-#include "Pointer.h"
 
 template <typename TFunc>
 class ObjectFunctionView;
