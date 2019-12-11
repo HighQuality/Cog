@@ -1,41 +1,30 @@
 #pragma once
+#include "CogTypeChunk.h"
+#include "Object.generated.h"
 
-class BaseFactoryChunk;
-
+COGTYPE()
 class Object
 {
+	GENERATED_BODY;
+	
 public:
 	using Base = void;
 
 	Object();
 	virtual ~Object();
 	
-	// void ReceiveRawMessage(void* aMessage, const TypeID<MessageSystem::Message>& aTypeId) const;
-
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(Object);
 
 	virtual bool Destroy();
 
 	void ReturnToAllocator();
 
-	FORCEINLINE bool IsActivated() const;
-	FORCEINLINE bool IsPendingDestroy() const;
+	FORCEINLINE bool IsPendingDestroy() const { return GetChunk()->IsPendingDestroy(myChunkIndex); }
 
-	template <typename T>
-	void SendMessage(T aMessage)
-	{
-
-	}
-
-	virtual void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const
-	{
-		aFunction(TypeID<Object>::Resolve<Object>());
-	}
+	virtual void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const { aFunction(TypeID<Object>::Resolve<Object>()); }
 
 protected:
 	virtual void Destroyed();
-
-	void SetActivated(bool aIsActivated);
 
 	template <typename T>
 	friend class Ptr;
@@ -45,12 +34,6 @@ protected:
 
 	friend class CogGame;
 
-
-	BaseFactoryChunk* myChunk;
-	ChunkIndex myChunkIndex;
+	CogTypeChunk* myChunk;
+	u8 myChunkIndex;
 };
-
-#include <Memory/FactoryChunk.h>
-
-FORCEINLINE bool Object::IsActivated() const { return myChunk->IsActivated(myChunkIndex); }
-FORCEINLINE bool Object::IsPendingDestroy() const { return myChunk->IsPendingDestroy(myChunkIndex); }

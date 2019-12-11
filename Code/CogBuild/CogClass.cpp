@@ -13,9 +13,23 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 
 	generatedLines.Add(Format(L"#define GENERATED_BODY", aGeneratedHeaderIdentifier, myGeneratedBodyLineIndex + 1));
 	generatedLines.Add(String(L"public:"));
-	generatedLines.Add(Format(L"using Base = %;", GetBaseTypeName()));
-	generatedLines.Add(String(L"void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const override"));
-	generatedLines.Add(String(L"{ aFunction(TypeID<Object>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }"));
+
+	if (HasBaseType())
+		generatedLines.Add(Format(L"using Base = %;", GetBaseTypeName()));
+	else
+		generatedLines.Add(Format(L"using Base = void;"));
+
+	if (GetTypeName() != L"Object")
+	{
+		generatedLines.Add(String(L"void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const override"));
+		generatedLines.Add(String(L"{ aFunction(TypeID<Object>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }"));
+	}
+
+	// Reset the default visibility of class
+	generatedLines.Add(String(L"private:"));
+
+	generatedLines.Add(Format(L"FORCEINLINE const %CogTypeChunk& GetChunk() const { return static_cast<const %CogTypeChunk&>(*myChunk); };", GetBaseTypeName()));
+	generatedLines.Add(Format(L"FORCEINLINE %CogTypeChunk& GetChunk() { return static_cast<%CogTypeChunk&>(*myChunk); };", GetBaseTypeName()));
 
 	// Reset the default visibility of class
 	generatedLines.Add(String(L"private:"));

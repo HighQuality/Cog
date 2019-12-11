@@ -13,14 +13,16 @@ struct EventDispatcherInfo
 class CogTypeChunk
 {
 public:
-	CogTypeChunk() = default;
-	virtual ~CogTypeChunk() = default;
+	CogTypeChunk();
+	virtual ~CogTypeChunk();
 
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(CogTypeChunk);
-	
-	virtual Array<EventDispatcherInfo> GetInterestingEvents() const { return Array<EventDispatcherInfo>(); }
 
 	virtual void Initialize();
+
+	FORCEINLINE bool IsPendingDestroy(const u8 aIndex) const { return myIsPendingDestroy[aIndex]; }
+
+	virtual Array<EventDispatcherInfo> GetInterestingEvents() const { return Array<EventDispatcherInfo>(); }
 
 	template <typename T>
 	void BroadcastMessage(const T& aMessage)
@@ -39,6 +41,13 @@ public:
 	void SendMessageById(const Message& aMessage, TypeID<Message>::CounterType aIndex, u8 aReceiver);
 
 private:
-	Array<void(*)(const Message&, CogTypeChunk*)> myMessageBroadcasters;
+	Array<void(*)(const Message&, CogTypeChunk*, ArrayView<u8>)> myMessageBroadcasters;
 	Array<void(*)(const Message&, CogTypeChunk*, u8)> myMessageSenders;
+
+	bool OccupyFirstFreeSlot(u8& aFreeIndex);
+	/** Returns number of elements filled in aOccupiedSlots output */
+	u16 GatherOccupiedSlots(u8* aOccupiedSlots) const;
+
+	volatile u64 myFreeSlots[4];
+	bool myIsPendingDestroy[256];
 };

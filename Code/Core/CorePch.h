@@ -1,5 +1,10 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
+
+#define STRINGIFY_INNER(x) #x
+#define STRINGIFY(x) STRINGIFY_INNER(x)
+
 #define JOIN_INNER(a, b) a ## b
 #define JOIN(a, b) JOIN_INNER(a, b)
 

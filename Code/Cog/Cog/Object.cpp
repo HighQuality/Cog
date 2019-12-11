@@ -20,11 +20,6 @@ void Object::Destroyed()
 {
 }
 
-void Object::SetActivated(bool aIsActivated)
-{
-	myChunk->SetActivated(myChunkIndex, aIsActivated);
-}
-
 void Object::ReturnToAllocator()
 {
 	Destroyed();

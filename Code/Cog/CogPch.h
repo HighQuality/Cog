@@ -10,8 +10,6 @@
 // Should be placed very first on all class or struct COGTYPEs followed by a semicolon.
 #define GENERATED_BODY JOIN(JOIN(GENERATED_BODY, COG_CURRENT_GENERATED_HEADER_FILE), __LINE__)
 
-using ChunkIndex = u8;
-
 bool IsInGameThread();
 
 #define CHECK_COMPONENT_INCLUDED(Type) do { static_assert(IsComplete<Type>, "Component header must be included"); } while (false)

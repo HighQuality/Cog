@@ -5,7 +5,7 @@ void RegisterExecutableTypes_Generated(TypeList* aTypeList);
 
 void TypeList::BuildList()
 {
-	Internal_AddType(TypeID<Object>::Resolve<Object>().GetUnderlyingInteger(), L"Object", &CreateObjectFactory<Object>, nullptr);
+	Internal_AddType(TypeID<Object>::Resolve<Object>().GetUnderlyingInteger(), L"Object", &CreateObjectChunk<Object, ObjectCogTypeChunk>, nullptr);
 	
 	RegisterExecutableTypes_Generated(this);
 

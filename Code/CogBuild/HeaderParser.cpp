@@ -107,24 +107,28 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		return;
 
 	const StringView className = myWordReader.GetCurrentWordOrGroup();
+	StringView baseClass;
 
-	myWordReader.Next();
-
-	TryConsume(L"final");
-
-	if (!Expect(L":"))
-		return;
-
-	if (!Expect(L"public"))
-		return;
-
-	if (!myWordReader.IsAtWord())
+	if (className != L"Object")
 	{
-		ReportError(L"Expected word");
-		return;
-	}
+		myWordReader.Next();
+		
+		TryConsume(L"final");
 
-	const StringView baseClass = myWordReader.GetCurrentWordOrGroup();
+		if (!Expect(L":"))
+			return;
+
+		if (!Expect(L"public"))
+			return;
+
+		if (!myWordReader.IsAtWord())
+		{
+			ReportError(L"Expected word");
+			return;
+		}
+
+		baseClass = myWordReader.GetCurrentWordOrGroup();
+	}
 
 	if (!MoveNextExpectBracesGroup())
 		return;
@@ -155,7 +159,7 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		ReportErrorWithInnerReader(bodyReader, L"COGTYPE classes must begin with \"GENERATED_BODY;\", got \"%\"", bodyReader.GetCurrentWordOrGroup());
 		return;
 	}
-
+	
 	CogClass& cogClass = myGeneratedCode.AddCogClass(String(className), String(baseClass), generatedBodyLineIndex);
 
 	while (aParameterReader.Next())
@@ -277,7 +281,11 @@ bool HeaderParser::Expect(const StringView aString)
 {
 	if (!At(aString))
 	{
-		ReportError(L"Expected %, got %", aString, myWordReader.GetCurrentWordOrGroup());
+		if (myWordReader.IsAtWord())
+			ReportError(L"Expected %, got %", aString, myWordReader.GetCurrentWordOrGroup());
+		else
+			ReportError(L"Expected %, got group");
+
 		return false;
 	}
 
