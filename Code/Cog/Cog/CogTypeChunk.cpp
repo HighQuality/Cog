@@ -122,6 +122,23 @@ bool CogTypeChunk::OccupyFirstFreeSlot(u8& aFreeIndex)
 	}
 }
 
+
+void CogTypeChunk::CallThing()
+{
+	Resource r;
+	r.myChunk = this;
+	
+	u8 indices[256];
+	u16 count = GatherOccupiedSlots(indices);
+
+	for (u16 i = 0; i < count; ++i)
+	{
+		r.myChunkIndex = indices[i];
+
+		r.Thing();
+	}
+}
+
 u16 CogTypeChunk::GatherOccupiedSlots(u8* aOccupiedSlots) const
 {
 	u16 nextFreeIndex = 0;
@@ -190,7 +207,7 @@ u16 CogTypeChunk::GatherOccupiedSlots(u8* aOccupiedSlots) const
 		}
 	};
 
-	auto test64 = [testByte](const u64 aPart)
+	auto test64 = [testByte](const u64 aPart, const u8 aOffset)
 	{
 		if (aPart == 0)
 			return;
@@ -206,14 +223,14 @@ u16 CogTypeChunk::GatherOccupiedSlots(u8* aOccupiedSlots) const
 		{
 			if (aPart & firstQuarter)
 			{
-				testByte(*(reinterpret_cast<const u8*>(&aPart) + 0), 8 * 0);
-				testByte(*(reinterpret_cast<const u8*>(&aPart) + 1), 8 * 1);
+				testByte(*(reinterpret_cast<const u8*>(&aPart) + 0), aOffset + 8 * 0);
+				testByte(*(reinterpret_cast<const u8*>(&aPart) + 1), aOffset + 8 * 1);
 			}
 
 			if (aPart & secondQuarter)
 			{
-				testByte(*(reinterpret_cast<const u8*>(&aPart) + 2), 8 * 2);
-				testByte(*(reinterpret_cast<const u8*>(&aPart) + 3), 8 * 3);
+				testByte(*(reinterpret_cast<const u8*>(&aPart) + 2), aOffset + 8 * 2);
+				testByte(*(reinterpret_cast<const u8*>(&aPart) + 3), aOffset + 8 * 3);
 			}
 		}
 
@@ -221,22 +238,22 @@ u16 CogTypeChunk::GatherOccupiedSlots(u8* aOccupiedSlots) const
 		{
 			if (aPart & thirdQuarter)
 			{
-				testByte(*(reinterpret_cast<const u8*>(&aPart) + 4), 8 * 4);
-				testByte(*(reinterpret_cast<const u8*>(&aPart) + 5), 8 * 5);
+				testByte(*(reinterpret_cast<const u8*>(&aPart) + 4), aOffset + 8 * 4);
+				testByte(*(reinterpret_cast<const u8*>(&aPart) + 5), aOffset + 8 * 5);
 			}
 
 			if (aPart & fourthQuarter)
 			{
-				testByte(*(reinterpret_cast<const u8*>(&aPart) + 6), 8 * 6);
-				testByte(*(reinterpret_cast<const u8*>(&aPart) + 7), 8 * 7);
+				testByte(*(reinterpret_cast<const u8*>(&aPart) + 6), aOffset + 8 * 6);
+				testByte(*(reinterpret_cast<const u8*>(&aPart) + 7), aOffset + 8 * 7);
 			}
 		}
 	};
 
-	test64(~myFreeSlots[0]);
-	test64(~myFreeSlots[1]);
-	test64(~myFreeSlots[2]);
-	test64(~myFreeSlots[3]);
+	test64(~myFreeSlots[0], 0 * 64);
+	test64(~myFreeSlots[1], 1 * 64);
+	test64(~myFreeSlots[2], 2 * 64);
+	test64(~myFreeSlots[3], 3 * 64);
 
 	return nextFreeIndex;
 }

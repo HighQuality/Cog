@@ -25,11 +25,10 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 		generatedLines.Add(String(L"{ aFunction(TypeID<Object>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }"));
 	}
 
-	// Reset the default visibility of class
 	generatedLines.Add(String(L"private:"));
 
-	generatedLines.Add(Format(L"FORCEINLINE const %CogTypeChunk& GetChunk() const { return static_cast<const %CogTypeChunk&>(*myChunk); };", GetBaseTypeName()));
-	generatedLines.Add(Format(L"FORCEINLINE %CogTypeChunk& GetChunk() { return static_cast<%CogTypeChunk&>(*myChunk); };", GetBaseTypeName()));
+	generatedLines.Add(Format(L"FORCEINLINE const %CogTypeChunk& GetChunk() const { return static_cast<const %CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
+	generatedLines.Add(Format(L"FORCEINLINE %CogTypeChunk& GetChunk() { return static_cast<%CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
 
 	// Reset the default visibility of class
 	generatedLines.Add(String(L"private:"));

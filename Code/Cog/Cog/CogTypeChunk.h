@@ -5,7 +5,7 @@ class CogTypeChunk;
 
 struct EventDispatcherInfo
 {
-	void(*messageBroadcaster)(const Message&, CogTypeChunk*) = nullptr;
+	void(*messageBroadcaster)(const Message&, CogTypeChunk*, std::array<u8, 256>) = nullptr;
 	void(*messageSender)(const Message&, CogTypeChunk*, u8) = nullptr;
 	TypeID<Message>::CounterType typeId;
 };
