@@ -22,6 +22,8 @@ public:
 
 	FORCEINLINE bool IsPendingDestroy(const u8 aIndex) const { return myIsPendingDestroy[aIndex]; }
 
+	FORCEINLINE u8 GetGeneration(const u8 aIndex) const { return myGeneration[aIndex]; }
+	
 	virtual Array<EventDispatcherInfo> GetInterestingEvents() const { return Array<EventDispatcherInfo>(); }
 
 	template <typename T>
@@ -50,4 +52,5 @@ private:
 
 	volatile u64 myFreeSlots[4];
 	bool myIsPendingDestroy[256];
+	u8 myGeneration[256];
 };

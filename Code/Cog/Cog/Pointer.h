@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Object.h"
-#include <Memory/FactoryChunk.h>
 
 // Non-owning weak pointer to a Object, becomes null when object is destroyed
 template <typename T>
@@ -9,7 +8,6 @@ class Ptr final
 public:
 	FORCEINLINE Ptr()
 	{
-		myPointer = nullptr;
 		myGeneration = 0;
 	}
 
@@ -41,21 +39,14 @@ public:
 	FORCEINLINE explicit operator bool() const { return IsValid(); }
 
 	bool IsValid() const
-	{
-		if (myPointer)
-		{
-			if (myGeneration == ResolveGeneration())
-				return true;
-			*const_cast<Ptr*>(this) = Ptr();
-		}
-
-		return false;
+	{		 
+		return &reinterpret_cast<InlineObject<Object>*>(&myPointer)->Get()->IsValid();
 	}
 
 	FORCEINLINE operator T*() const
 	{
 		if (IsValid())
-			return reinterpret_cast<T*>(myPointer);
+			return &reinterpret_cast<InlineObject<Object>*>(&myPointer)->Get();
 		return nullptr;
 	}
 
@@ -65,17 +56,5 @@ public:
 	}
 
 private:
-	FORCEINLINE u16 ResolveGeneration() const
-	{
-		if (!myPointer)
-			return 0;
-
-		const Object& component = *reinterpret_cast<const Object*>(myPointer);
-		if (const BaseFactoryChunk* chunk = component.myChunk)
-			return chunk->FindGeneration(component.myChunkIndex);
-		return 0;
-	}
-
-	mutable Object* myPointer;
-	mutable u16 myGeneration;
+	mutable InlineObject<Object> myPointer;
 };

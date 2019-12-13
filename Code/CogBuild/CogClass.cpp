@@ -1,5 +1,7 @@
 #include "CogBuildPch.h"
 #include "CogClass.h"
+#include "String/StringTemplate.h"
+#include "DocumentTemplates.h"
 
 CogClass::CogClass(String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex)
 	: Base(Move(aClassName), Move(aBaseClassName))
@@ -36,18 +38,52 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 	return generatedLines;
 }
 
+Array<String> CogClass::GenerateCogTypeChunkContents() const
+{
+	Array<String> generatedLines;
+
+	const String chunkName = Format(L"%CogTypeChunk", GetTypeName());
+	const String baseChunkName = Format(L"%CogTypeChunk", HasBaseType() ? GetBaseTypeName() : L"");
+	const StringView finalSpecifier = myIsFinal ? L"final " : L"";
+
+	generatedLines.Add(Format(L"class % %: public %", chunkName, finalSpecifier, baseChunkName));
+	generatedLines.Add(String(L"{"));
+	generatedLines.Add(String(L"public:"));
+	generatedLines.Add(Format(L"\tusing Base = %;", baseChunkName));
+	generatedLines.Add(String(L"};"));
+	
+	return generatedLines;
+}
+
 String CogClass::GenerateHeaderFileContents(const DocumentTemplates& aTemplates, const StringView aGeneratedHeaderIdentifier) const
 {
 	String headerOutput = Base::GenerateHeaderFileContents(aTemplates, aGeneratedHeaderIdentifier);
-	
-	Array<String> generatedBodyContents = GenerateGeneratedBodyContents(aGeneratedHeaderIdentifier);
 
-	for (i32 i = 0; i < generatedBodyContents.GetLength(); ++i)
 	{
-		if (i > 0)
-			headerOutput.Append(L" \\\n\t");
+		const Array<String> generatedBodyContents = GenerateGeneratedBodyContents(aGeneratedHeaderIdentifier);
 
-		headerOutput.Append(generatedBodyContents[i].View());
+		for (i32 i = 0; i < generatedBodyContents.GetLength(); ++i)
+		{
+			if (i > 0)
+				headerOutput.Append(L" \\\n\t");
+
+			headerOutput.Append(generatedBodyContents[i].View());
+		}
+
+		headerOutput.Add(L'\n');
+	}
+
+	
+	{
+		const Array<String> chunkContents = GenerateCogTypeChunkContents();
+
+		for (i32 i = 0; i < chunkContents.GetLength(); ++i)
+		{
+			if (i > 0)
+				headerOutput.Add(L'\n');
+
+			headerOutput.Append(chunkContents[i].View());
+		}
 	}
 
 	return headerOutput;
@@ -58,4 +94,9 @@ String CogClass::GenerateSourceFileContents(const DocumentTemplates& aTemplates)
 	String sourceOutput = Base::GenerateSourceFileContents(aTemplates);
 
 	return sourceOutput;
+}
+
+void CogClass::SetIsFinal(const bool aIsFinal)
+{
+	myIsFinal = aIsFinal;
 }

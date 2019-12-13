@@ -1,5 +1,4 @@
 #pragma once
-#include <Memory/Factory.h>
 #include <Threading/ThreadID.h>
 #include "ObjectFunctionView.h"
 #include "ResourceManager.h"
@@ -12,10 +11,7 @@ template <typename TReturn, typename... TArgs>
 class FunctionView<TReturn(TArgs...)>;
 
 class MessageSystem;
-class BaseFactory;
-class ThreadPool;
 class Object;
-class TypeList;
 struct FrameData;
 
 COGTYPE()

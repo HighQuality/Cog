@@ -4,7 +4,6 @@
 
 class Window;
 class RenderEngine;
-class BaseObjectFactory;
 
 COGTYPE(Specialization)
 class ClientGame final : public Game

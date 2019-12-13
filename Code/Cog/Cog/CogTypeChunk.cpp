@@ -78,7 +78,7 @@ bool CogTypeChunk::OccupyFirstFreeSlot(u8& aFreeIndex)
 
 		if (_BitScanReverse64(&index, first))
 		{
-			if (_interlockedbittestandset64(PLONG64(&myFreeSlots[0]), index) == 1)
+			if (_interlockedbittestandreset64(PLONG64(&myFreeSlots[0]), index) == 1)
 				continue;
 
 			aFreeIndex = (64 * 0) + index;
@@ -89,7 +89,7 @@ bool CogTypeChunk::OccupyFirstFreeSlot(u8& aFreeIndex)
 
 		if (_BitScanReverse64(&index, second))
 		{
-			if (_interlockedbittestandset64(PLONG64(&myFreeSlots[1]), index) == 1)
+			if (_interlockedbittestandreset64(PLONG64(&myFreeSlots[1]), index) == 1)
 				continue;
 
 			aFreeIndex = (64 * 1) + index;
@@ -100,7 +100,7 @@ bool CogTypeChunk::OccupyFirstFreeSlot(u8& aFreeIndex)
 
 		if (_BitScanReverse64(&index, third))
 		{
-			if (_interlockedbittestandset64(PLONG64(&myFreeSlots[2]), index) == 0)
+			if (_interlockedbittestandreset64(PLONG64(&myFreeSlots[2]), index) == 0)
 				continue;
 
 			aFreeIndex = (64 * 2) + index;
@@ -111,7 +111,7 @@ bool CogTypeChunk::OccupyFirstFreeSlot(u8& aFreeIndex)
 
 		if (_BitScanReverse64(&index, fourth))
 		{
-			if (_interlockedbittestandset64(PLONG64(&myFreeSlots[3]), index) == 0)
+			if (_interlockedbittestandreset64(PLONG64(&myFreeSlots[3]), index) == 0)
 				continue;
 
 			aFreeIndex = (64 * 3) + index;

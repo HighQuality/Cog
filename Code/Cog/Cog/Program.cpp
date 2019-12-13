@@ -300,30 +300,6 @@ void Program::QueueBackgroundWork(void(*aFunction)(void*), void* aArgument)
 		});
 }
 
-void* Program::AllocateRaw(TypeID<void> aTypeID, BaseFactory & (*aFactoryAllocator)())
-{
-	BaseFactory*& allocator = myAllocators.FindOrAdd(aTypeID.GetUnderlyingInteger());
-
-	if (!allocator)
-		allocator = &aFactoryAllocator();
-
-	return allocator->AllocateRawObject();
-}
-
-void Program::Return(TypeID<void> aTypeID, void* aObject)
-{
-	if (BaseFactory * *allocatorPtrPtr = myAllocators.Find(aTypeID.GetUnderlyingInteger()))
-	{
-		if (BaseFactory * allocator = *allocatorPtrPtr)
-		{
-			allocator->ReturnRawObject(aObject);
-			return;
-		}
-	}
-
-	FATAL(L"Tried to a return a object to a removed object allocator.");
-}
-
 Fiber* Program::GetUnusedFiber()
 {
 	{

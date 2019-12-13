@@ -10,6 +10,7 @@ public:
 	CogClass(String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex);
 
 	Array<String> GenerateGeneratedBodyContents(StringView aGeneratedHeaderIdentifier) const;
+	Array<String> GenerateCogTypeChunkContents() const;
 
 	String GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const override;
 	String GenerateSourceFileContents(const DocumentTemplates& aTemplates) const override;
@@ -17,9 +18,12 @@ public:
 	void SetSpecializesBaseClass(const bool aSpecializesBaseClass) { mySpecializesBaseClass = aSpecializesBaseClass; }
 	bool SpecializesBaseClass() const { return mySpecializesBaseClass; }
 
+	void SetIsFinal(bool aIsFinal);
+	
 private:
 	Array<GeneratedFunction> myGeneratedFunctions;
 	i32 myGeneratedBodyLineIndex = -1;
 	bool mySpecializesBaseClass = false;
+	bool myIsFinal = false;
 };
 

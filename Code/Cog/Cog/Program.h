@@ -1,16 +1,13 @@
  #pragma once
 #include <TypeFundamentals/TypeID.h>
 #include <Threading/ThreadID.h>
-#include <Memory/BaseFactory.h>
-#include <Function/Function.h>
 #include <Threading/Fibers/Await.h>
 #include <Time/Stopwatch.h>
+#include "Pointer.h"
 
+class Object;
 class ThreadPool;
 class Fiber;
-
-template <typename T>
-BaseFactory& AllocateFactory();
 
 template <typename T>
 T& DefaultAllocate();
@@ -18,18 +15,9 @@ template <typename T>
 void DefaultFree(T& aObject);
 
 template <typename T, typename ...TArgs>
-T& Allocate(TArgs ...aArgs)
+Ptr<T> NewObject(TArgs ...aArgs)
 {
-	T& object = DefaultAllocate<T>();
-	new (static_cast<void*>(&object)) T(std::forward<TArgs>(aArgs)...);
-	return object;
-}
-
-template <typename T>
-void Free(T& aObject)
-{
-	aObject.~T();
-	DefaultFree<T>(aObject);
+	return static_cast<T&>( TypeID<Object>::Resolve<T>().GetUnderlyingInteger();
 }
 
 class Program
@@ -44,18 +32,6 @@ public:
 	static void Destroy();
 
 	static Program& Get();
-
-	template <typename T>
-	T& AllocateUninitialized()
-	{
-		return *static_cast<T*>(AllocateRaw(TypeID<void>::Resolve<T>(), &AllocateFactory<T>));
-	}
-
-	template <typename T>
-	void ReturnUninitialized(T& aObject)
-	{
-		Return(TypeID<void>::Resolve<T>(), &aObject);
-	}
 
 	bool IsInMainThread() const { return myMainThread == ThreadID::Get(); }
 	bool IsInManagedThread() const;
