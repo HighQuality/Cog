@@ -4,8 +4,8 @@
 #include <CogBuildUtilities.h>
 #include "CogClass.h"
 
-HeaderParser::HeaderParser(const File* aMainFile)
-	: myGeneratedCode(aMainFile->GetFilenameWithoutExtension())
+HeaderParser::HeaderParser(const File* aMainFile, String aHeaderIncludePath)
+	: myGeneratedCode(aMainFile->GetFilenameWithoutExtension(), Move(aHeaderIncludePath))
 {
 	myFile = aMainFile;
 	myFileContents = myFile->ReadString();
@@ -112,7 +112,7 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 	if (className != L"Object")
 	{
 		myWordReader.Next();
-		
+
 		TryConsume(L"final");
 
 		if (!Expect(L":"))
@@ -159,7 +159,7 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		ReportErrorWithInnerReader(bodyReader, L"COGTYPE classes must begin with \"GENERATED_BODY;\", got \"%\"", bodyReader.GetCurrentWordOrGroup());
 		return;
 	}
-	
+
 	CogClass& cogClass = myGeneratedCode.AddCogClass(String(className), String(baseClass), generatedBodyLineIndex);
 
 	while (aParameterReader.Next())
@@ -197,7 +197,7 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		if (bodyReader.IsAtWord())
 		{
 			const StringView currentSymbol = bodyReader.GetCurrentWordOrGroup();
-			
+
 			if (currentSymbol == L"GENERATED_BODY")
 			{
 				ReportErrorWithInnerReader(bodyReader, L"Found multiple generated bodies");
@@ -206,6 +206,11 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 			else if (currentSymbol == L"COGLISTENER")
 			{
 				if (!ParseCogListener(cogClass, bodyReader))
+					return;
+			}
+			else if (currentSymbol == L"COGPROPERTY")
+			{
+				if (!ParseCogProperty(cogClass, bodyReader))
 					return;
 			}
 		}
@@ -252,6 +257,84 @@ bool HeaderParser::ParseCogListener(CogClass& aClass, GroupingWordReader& aBodyR
 	const StringView methodName = aBodyReader.GetCurrentWordOrGroup();
 
 	Println(L"COGLISTENER % registered for type % and is %", methodName, aClass.GetTypeName(), isVirtual ? L"virtual" : L"not virtual");
+
+	return true;
+}
+
+bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyReader)
+{
+	if (!aBodyReader.Next() || !aBodyReader.IsAtGroup() || aBodyReader.GetOpeningCharacter() != L'(')
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Expected '('");
+		return false;
+	}
+
+	GroupingWordReader parameterReader(aBodyReader.GetCurrentGroup());
+	parameterReader.SetLineOffset(aBodyReader.GetCurrentGroupFirstContentLineIndex());
+
+	if (!parameterReader.Next())
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Expected COGPROPERTY declaration");
+		return false;
+	}
+
+	String propertyType;
+
+	while (parameterReader.GetCurrentWord() == L"const"/* ||
+		parameterReader.GetCurrentWord() == L"volatile"*/)
+	{
+		propertyType.Append(parameterReader.GetCurrentWord());
+		propertyType.Add(L' ');
+
+		if (!parameterReader.Next())
+		{
+			ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
+			return false;
+		}
+	}
+
+	propertyType.Append(parameterReader.GetCurrentWordOrGroup());
+
+	if (parameterReader.IsAtGroup())
+	{
+
+	}
+
+	if (parameterReader.Next())
+	{
+		while (parameterReader.GetCurrentWord() == L"*" ||
+			parameterReader.GetCurrentWord() == L"&" ||
+			parameterReader.GetCurrentWord() == L"const")
+		{
+			propertyType.Append(parameterReader.GetCurrentWord());
+			propertyType.Add(L' ');
+
+			if (!parameterReader.Next())
+			{
+				ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
+				return false;
+			}
+		}
+
+		while (parameterReader.Next())
+		{
+
+		}
+	}
+
+	if (!aBodyReader.Next())
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of body");
+		return false;
+	}
+
+	if (!aBodyReader.IsAtWord() || aBodyReader.GetCurrentWordOrGroup() != L";")
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Expected ';'");
+		return false;
+	}
+
+	Println(L"COGPROPERTY '%' of type '%' registered in type %", propertyName, propertyType, aClass.GetTypeName());
 
 	return true;
 }

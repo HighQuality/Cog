@@ -9,7 +9,7 @@ class CogClass;
 class HeaderParser
 {
 public:
-	HeaderParser(const File* aMainFile);
+	HeaderParser(const File* aMainFile, String aHeaderIncludePath);
 
 	GeneratedCode& Parse();
 
@@ -20,6 +20,7 @@ private:
 	void ParseCogType();
 	void ParseCogTypeClass(GroupingWordReader& aParameterReader);
 	bool ParseCogListener(CogClass& aClass, GroupingWordReader& aBodyReader);
+	bool ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyReader);
 	void ReportErrorAtLine(StringView aMessage, i32 aLine);
 	void ReportPreFormattedError(StringView aMessage, GroupingWordReader* innerReader = nullptr);
 

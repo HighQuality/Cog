@@ -24,9 +24,11 @@ public:
 	{
 		CHECK(aFunctionCallback.IsValid());
 
-		std::unique_lock<std::mutex> lck(myMutex);
+		std::unique_lock<std::mutex> lck(GetMutexRef());
 
-		if (Ptr<Resource>* alreadyLoadedResource = myLoadedResources.Find(aResourcePath))
+		auto& loadedResources = GetLoadedResourcesRef();
+
+		if (Ptr<Resource>* alreadyLoadedResource = loadedResources.Find(aResourcePath))
 		{
 			if (alreadyLoadedResource->IsValid())
 			{
@@ -41,14 +43,14 @@ public:
 			
 		String resourcePath(aResourcePath);
 
-		myScheduledLoads.Submit([this, resourcePath, aFunctionCallback]()
+		GetScheduledLoadsRef().Submit([&loadedResources, resourcePath, aFunctionCallback]()
 		{
 			auto callback = [aFunctionCallback](Resource& aResource)
 			{
 				aFunctionCallback.TryCall(static_cast<TResourceType&>(aResource));
 			};
 
-			if (Ptr<Resource>* alreadyLoadedResource = myLoadedResources.Find(resourcePath.View()))
+			if (Ptr<Resource>* alreadyLoadedResource = loadedResources.Find(resourcePath.View()))
 			{
 				if (CheckResourcePtrValid(*alreadyLoadedResource))
 				{
@@ -59,7 +61,7 @@ public:
 			}
 
 			TResourceType& resource = GetCogGame().template CreateObject<TResourceType>();
-			myLoadedResources.Add(resourcePath, resource);
+			loadedResources.Add(resourcePath, resource);
 			resource.RegisterCallback(callback);
 			resource.BeginLoad(resourcePath);
 		});
@@ -72,8 +74,8 @@ private:
 
 	static CogGame& GetCogGame();
 
-	EventList<Function<void()>> myScheduledLoads;
-	Map<String, Ptr<Resource>> myLoadedResources;
+	COGPROPERTY(EventList<Function<void()>> ScheduledLoads);
+	COGPROPERTY(Map<String, Ptr<Resource>> LoadedResources);
 
-	std::mutex myMutex;
+	COGPROPERTY(std::mutex Mutex);
 };

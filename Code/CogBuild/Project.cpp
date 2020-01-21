@@ -308,8 +308,11 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 		if (file->GetName() == pchFileName.View())
 			continue;
 
-		HeaderParser& parser = *myHeaderParsers.Add(MakeUnique<HeaderParser>(file));
-		
+		String headerIncludePath = file->GetRelativePath(*directory);
+		headerIncludePath.Replace(L'\\', L'/');
+
+		HeaderParser& parser = *myHeaderParsers.Add(MakeUnique<HeaderParser>(file, String(headerIncludePath)));
+
 		GeneratedCode& generatedCode = parser.Parse();
 
 		if (parser.HasErrors())
@@ -327,9 +330,7 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 			generatedHeaderFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetHeaderFileName()));
 			generatedSourceFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetSourceFileName()));
 
-			String headerIncludePath = file->GetRelativePath(*directory);
-			headerIncludePath.Replace(L'\\', L'/');
-			cogClassHeaderFiles.Add(Move(headerIncludePath));
+			cogClassHeaderFiles.Add(String(headerIncludePath));
 
 			for (CogClass* cogClass : generatedCode.GetCogClasses())
 				cogClasses.Add(cogClass);

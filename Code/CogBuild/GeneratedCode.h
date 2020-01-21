@@ -9,7 +9,7 @@ struct DocumentTemplates;
 class GeneratedCode
 {
 public:
-	GeneratedCode(StringView aMainFileName);
+	GeneratedCode(StringView aMainFileName, String aMainHeaderIncludePath);
 
 	void WriteFiles(const DocumentTemplates& aTemplates, StringView aProjectName, StringView aOutputDirectory);
 
@@ -33,6 +33,7 @@ private:
 	Array<UniquePtr<CogType>> myDeclaredCogTypes;
 	Array<CogClass*> myCogClasses;
 
+	String myMainHeaderIncludePath;
 	String myMainHeaderFileName;
 	String myGeneratedHeaderFileName;
 	String myGeneratedSourceFileName;

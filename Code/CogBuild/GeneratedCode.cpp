@@ -5,9 +5,10 @@
 #include "DocumentTemplates.h"
 #include <String/StringTemplate.h>
 
-GeneratedCode::GeneratedCode(const StringView aMainFileName)
+GeneratedCode::GeneratedCode(const StringView aMainFileName, String aMainHeaderIncludePath)
 {
 	myMainHeaderFileName = Format(L"%.h", aMainFileName);
+	myMainHeaderIncludePath = Move(aMainHeaderIncludePath);
 	myGeneratedHeaderFileName = Format(L"%.generated.h", aMainFileName);
 	myGeneratedSourceFileName = Format(L"%.generated.cpp", aMainFileName);
 
@@ -73,7 +74,7 @@ void GeneratedCode::GenerateSourceFile(const DocumentTemplates& aTemplates, cons
 {
 	StringTemplate document(String(aTemplates.generatedSourceTemplate));
 
-	document.AddParameter(String(L"MainHeaderFile"), String(myMainHeaderFileName));
+	document.AddParameter(String(L"MainHeaderFile"), String(myMainHeaderIncludePath));
 	document.AddParameter(String(L"PchFileName"), Format(L"%Pch.h", aProjectName));
 
 	{

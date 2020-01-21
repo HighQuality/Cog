@@ -4,6 +4,7 @@
 
 #define COGTYPE(...)
 #define COGFUNC(...)
+#define COGPROPERTY(Declaration, ...)
 
 #define COGLISTENER
 
