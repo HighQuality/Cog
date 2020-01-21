@@ -91,6 +91,14 @@
 
 #define TimeScope Stopwatch _timeScopeWatch; defer { Println(L"%ms", _timeScopeWatch.GetElapsedTime().Milliseconds()); }
 
+#define DELETE_MOVES(Type) Type(Type&&) = delete;\
+	Type& operator=(Type&&) = delete;
+
+#define DELETE_COPYCONSTRUCTORS_AND_MOVES(Type) Type(Type&&) = delete;\
+	Type& operator=(Type&&) = delete;\
+	Type(const Type&) = delete;\
+	Type& operator=(const Type&) = delete;
+
 #include <TypeFundamentals/Types.h>
 #include <TypeFundamentals/TypeTraits.h>
 
@@ -112,18 +120,9 @@
 #include <Function/Function.h>
 #include <Function/FunctionView.h>
 
+#include "CoreTLS.h"
+
 #include <Memory/UniquePtr.h>
-
-#define DELETE_MOVES(Type) Type(Type&&) = delete;\
-	Type& operator=(Type&&) = delete;
-
-#define DELETE_COPYCONSTRUCTORS_AND_MOVES(Type) Type(Type&&) = delete;\
-	Type& operator=(Type&&) = delete;\
-	Type(const Type&) = delete;\
-	Type& operator=(const Type&) = delete;
-
-#include <UtilitiesTLS.h>
-
 
 #include <Images/ByteColor.h>
 #include <Images/LinearColor.h>

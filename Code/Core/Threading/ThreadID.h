@@ -16,17 +16,17 @@ public:
 
 	static const ThreadID& Get()
 	{
-		if (const ThreadID* threadID = UtilitiesTLS::GetThreadID())
+		if (const ThreadID* threadID = CoreTLS::GetThreadID())
 			return *threadID;
 
 		ThreadID* newThreadID = new ThreadID();
-		UtilitiesTLS::SetThreadID(newThreadID);
+		CoreTLS::SetThreadID(newThreadID);
 		return *newThreadID;
 	}
 
 	static StringView GetName()
 	{
-		return UtilitiesTLS::GetThreadName();
+		return CoreTLS::GetThreadName();
 	}
 
 	static void SetName(String aThreadName);
@@ -41,9 +41,9 @@ public:
 		return myID != aOther.myID;
 	}
 	
-	void NotifyThreadShuttingDown()
+	static void DestroyThreadID(ThreadID* aThreadID)
 	{
-		delete this;
+		delete aThreadID;
 	}
 
 private:

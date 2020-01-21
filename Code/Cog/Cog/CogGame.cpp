@@ -2,7 +2,7 @@
 #include "CogGame.h"
 
 #include <Time/Stopwatch.h>
-#include <Threading/Fibers/Await.h>
+#include <Cog/Threading/Fibers/Await.h>
 #include "Program.h"
 
 #include "ResourceManager.h"
@@ -23,10 +23,10 @@ void RunGame()
 
 	Program::Create();
 
-	CogGame& game = NewObject<CogGame>();
-	game.Run();
+	Ptr<CogGame> game = NewObject<CogGame>();
+	game->Run();
 
-	game.ReturnToAllocator();
+	game->ReturnToAllocator();
 
 	Program::Destroy();
 }
@@ -153,9 +153,6 @@ void CogGame::TickDestroys()
 
 void CogGame::ScheduleDestruction(Object& aObject)
 {
-	CHECK(!aObject.IsPendingDestroy());
-	aObject.myChunk->MarkPendingDestroy(aObject.myChunkIndex);
-
 	std::unique_lock<std::mutex> lck(myDestroyMutex);
 	myScheduledDestroys.Last().Add(&aObject);
 }

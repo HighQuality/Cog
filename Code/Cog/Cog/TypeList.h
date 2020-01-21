@@ -1,6 +1,5 @@
 #pragma once
 #include "TypeData.h"
-#include <Memory/Factory.h>
 #include "CogTypeChunk.h"
 
 class Object;
@@ -69,8 +68,8 @@ public:
 	}
 
 	// Use macros "REGISTER_TYPE" and "REGISTER_TYPE_SPECIALIZATION" instead
-	TypeData& Internal_AddType(u16 aTypeID, const StringView& aTypeName, UniquePtr<BaseFactory>(*aFactoryAllocator)(), nullptr_t);
-	void Internal_AddSpecialization(const StringView& aBaseName, u16 aTypeID, const StringView& aSpecializationName, UniquePtr<BaseFactory>(*aFactoryAllocator)(), nullptr_t);
+	TypeData& Internal_AddType(u16 aTypeID, const StringView& aTypeName, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t);
+	void Internal_AddSpecialization(const StringView& aBaseName, u16 aTypeID, const StringView& aSpecializationName, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t);
 
 private:
 	// Name -> ID

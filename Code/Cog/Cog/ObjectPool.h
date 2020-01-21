@@ -1,16 +1,19 @@
 #pragma once
 #include <TypeFundamentals/TypeID.h>
 
-class BaseFactory;
+class CogTypeChunk;
 class Object;
+
+template <typename T>
+class Ptr;
 
 class ObjectPool
 {
 public:
-	Object& CreateObjectByType(const TypeID<Object>& aType);
+	Ptr<Object> CreateObjectByType(const TypeID<Object>& aType);
 
 private:
-	BaseFactory& FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, UniquePtr<BaseFactory>(*aFactoryCreator)(const TypeID<Object>&));
+	CogTypeChunk& FindOrCreateObjectChunk(const TypeID<Object>& aObjectType, UniquePtr<CogTypeChunk>(*aChunkCreator)(const TypeID<Object>&));
 
-	Array<UniquePtr<BaseFactory>> myObjectFactories;
+	Array<UniquePtr<CogTypeChunk>> myObjectChunks;
 };

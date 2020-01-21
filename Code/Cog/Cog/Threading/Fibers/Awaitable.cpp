@@ -1,7 +1,7 @@
-#include "CorePch.h"
+#include "CogPch.h"
 #include "Awaitable.h"
 #include "Fiber.h"
-#include "Program.h"
+#include <Cog/Program.h>
 
 AwaitableBase::AwaitableBase()
 {

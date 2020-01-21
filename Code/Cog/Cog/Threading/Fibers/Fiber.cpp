@@ -1,7 +1,8 @@
-#include "CorePch.h"
+#include "CogPch.h"
 #include "Fiber.h"
-#include "FiberResumeData.h"
 #include <Threading/ThreadID.h>
+#include "FiberResumeData.h"
+#include <Cog/CogTLS.h>
 
 static std::mutex gFiberIndexMutex;
 static Array<Fiber*> gFiberIndex;
@@ -53,7 +54,7 @@ Fiber::~Fiber()
 
 FiberResumeData Fiber::Resume(const FiberResumeData& aResumeData)
 {
-	UtilitiesTLS::SetFiberResumeData(aResumeData);
+	CogTLS::SetFiberResumeData(aResumeData);
 
 	if (false)
 	{
@@ -64,19 +65,19 @@ FiberResumeData Fiber::Resume(const FiberResumeData& aResumeData)
 
 	SwitchToFiber(myFiberHandle.GetHandle());
 
-	return UtilitiesTLS::RetrieveFiberResumeData();
+	return CogTLS::RetrieveFiberResumeData();
 }
 
 Fiber* Fiber::ConvertCurrentThreadToFiber(StringView aName)
 {
-	CHECK(UtilitiesTLS::GetThisThreadsStartingFiber() == nullptr);
+	CHECK(CogTLS::GetThisThreadsStartingFiber() == nullptr);
 
 	Fiber* fiber = new Fiber(aName);
 	fiber->myFiberHandle = FiberHandle(ConvertThreadToFiber(fiber));
 	CHECK(fiber->myFiberHandle);
 
-	UtilitiesTLS::SetThisThreadsStartingFiber(fiber);
-	UtilitiesTLS::SetProhibitAwaits(false);
+	CogTLS::SetThisThreadsStartingFiber(fiber);
+	CogTLS::SetProhibitAwaits(false);
 
 	return fiber;
 }

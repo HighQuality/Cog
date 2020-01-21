@@ -1,7 +1,7 @@
 #include "CogPch.h"
 #include "Object.h"
-#include <Memory/FactoryChunk.h>
 #include "CogGame.h"
+#include "CogTypeChunk.h"
 
 Object::Object() = default;
 
@@ -12,7 +12,10 @@ bool Object::Destroy()
 	if (IsPendingDestroy())
 		return false;
 
+	myChunk->MarkPendingDestroy(myChunkIndex);
+
 	GetGame().ScheduleDestruction(*this);
+	
 	return true;
 }
 
@@ -24,5 +27,15 @@ void Object::ReturnToAllocator()
 {
 	Destroyed();
 
-	myChunk->ReturnByIndex(myChunkIndex);
+	ObjectReturner(*myChunk, myChunkIndex);
+}
+
+bool Object::IsPendingDestroy() const
+{
+	return GetChunk().IsPendingDestroy(myChunkIndex);
+}
+
+u8 Object::GetGeneration() const
+{
+	return GetChunk().GetGeneration(myChunkIndex);
 }

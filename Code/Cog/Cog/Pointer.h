@@ -5,56 +5,83 @@
 template <typename T>
 class Ptr final
 {
+	static_assert(sizeof(T) == sizeof(Object), "Derived class from Object may not declare member variables");
+	
 public:
 	FORCEINLINE Ptr()
 	{
-		myGeneration = 0;
+		memset(&myObject, 0, sizeof T);
 	}
 
 	Ptr(T* aPointer)
-		: Ptr()
 	{
 		if (aPointer)
-		{
-			myPointer = aPointer;
-			myGeneration = ResolveGeneration();
-		}
+			memcpy(&myObject, aPointer, sizeof T);
+		else
+			memset(&myObject, 0, sizeof T);
 	}
 
 	FORCEINLINE Ptr(T& aPointer)
-		: Ptr(&aPointer)
 	{
+		memcpy(&myObject, &aPointer, sizeof T);
 	}
 
-	FORCEINLINE bool operator==(const Ptr& aOther) const
+	Ptr(const Ptr& aOther)
 	{
-		return myPointer == aOther.myPointer;
+		memcpy(&myObject, &aOther.myObject, sizeof T);
 	}
 
-	FORCEINLINE bool operator!=(const Ptr& aOther) const
+	~Ptr()
 	{
-		return myPointer != aOther.myPointer;
+#ifdef _DEBUG
+		myObject.myChunk = nullptr;
+#endif
+	}
+	
+	template <typename TOther>
+	bool operator==(const Ptr<TOther>& aOther) const
+	{
+		// Perf: This comparison could skip the vtable
+		return memcmp(&myObject, &aOther.myObject, sizeof T) == 0;
+	}
+
+	template <typename TOther>
+	FORCEINLINE bool operator!=(const Ptr<TOther>& aOther) const
+	{
+		return !(*this == aOther);
 	}
 
 	FORCEINLINE explicit operator bool() const { return IsValid(); }
 
-	bool IsValid() const
-	{		 
-		return &reinterpret_cast<InlineObject<Object>*>(&myPointer)->Get()->IsValid();
+	FORCEINLINE bool IsValid() const
+	{
+		return myObject.myChunk && myObject.IsValid();
+	}
+	
+	FORCEINLINE T* Get() const
+	{
+		return IsValid() ? &myObject : nullptr;
 	}
 
 	FORCEINLINE operator T*() const
 	{
-		if (IsValid())
-			return &reinterpret_cast<InlineObject<Object>*>(&myPointer)->Get();
-		return nullptr;
+		return Get();
 	}
 
 	FORCEINLINE T* operator->() const
 	{
+		// TODO: This should probably be compiled out in shipping builds?
+		CHECK(IsValid());
 		return *this;
 	}
 
 private:
-	mutable InlineObject<Object> myPointer;
+	template <typename TOther>
+	friend class Ptr;
+
+	// Wrapped in union in order to avoid construction of Object
+	union
+	{
+		mutable Object myObject;
+	};
 };

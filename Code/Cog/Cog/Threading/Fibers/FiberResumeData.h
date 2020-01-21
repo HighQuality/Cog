@@ -1,6 +1,6 @@
 #pragma once
 
-enum class FiberResumeType
+enum class FiberResumeType : u8
 {
 	Starting,
 	Await,

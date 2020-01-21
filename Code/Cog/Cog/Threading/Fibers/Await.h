@@ -1,7 +1,8 @@
 #pragma once
 #include "Fiber.h"
 #include "Awaitable.h"
- 
+#include <Cog/CogTLS.h>
+
 class AwaitContext
 {
 public:
@@ -170,7 +171,7 @@ template <typename T, typename ...TArgs>
 AwaitExecuter<typename T::ReturnType> Await(TArgs & ...aArgs)
 {
 	// We're either in a fiber where you can't temporarily can't await (look further into the callstack) or in a non-fiber thread
-	CHECK(!UtilitiesTLS::GetProhibitAwaits());
+	CHECK(!CogTLS::GetProhibitAwaits());
 
 	AwaitExecuter<T::ReturnType> awaitExec;
 	awaitExec.Simultaneously<T>(std::forward<TArgs>(aArgs)...);
@@ -182,13 +183,13 @@ class ProhibitAwaits
 public:
 	ProhibitAwaits()
 	{
-		gPreviousProhibitAwaits = UtilitiesTLS::GetProhibitAwaits();
-		UtilitiesTLS::SetProhibitAwaits(true);
+		gPreviousProhibitAwaits = CogTLS::GetProhibitAwaits();
+		CogTLS::SetProhibitAwaits(true);
 	}
 
 	~ProhibitAwaits()
 	{
-		UtilitiesTLS::SetProhibitAwaits(gPreviousProhibitAwaits);
+		CogTLS::SetProhibitAwaits(gPreviousProhibitAwaits);
 	}
 
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(ProhibitAwaits);

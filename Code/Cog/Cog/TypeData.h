@@ -1,6 +1,6 @@
 #pragma once
 
-class BaseFactory;
+class CogTypeChunk;
 
 class TypeData
 {
@@ -14,9 +14,9 @@ public:
 	const TypeData* GetSpecialization() const { return mySpecialization; }
 	void SetSpecialization(TypeData& aSpecialization) { mySpecialization = &aSpecialization; }
 
-	void SetFactoryAllocator(UniquePtr<BaseFactory>(*aFactoryAllocator)()) { myFactoryAllocator = aFactoryAllocator; }
+	void SetFactoryAllocator(UniquePtr<CogTypeChunk>(*aFactoryAllocator)()) { myFactoryAllocator = aFactoryAllocator; }
 
-	UniquePtr<BaseFactory> AllocateFactory() const { return myFactoryAllocator(); }
+	UniquePtr<CogTypeChunk> AllocateFactory() const { return myFactoryAllocator(); }
 
 	bool operator==(const TypeData& aRight) const
 	{
@@ -58,5 +58,5 @@ private:
 	TypeData* mySpecialization = nullptr;
 	StringView myName; 
 	StringView mySpecializationOf;
-	UniquePtr<BaseFactory>(*myFactoryAllocator)() = nullptr;
+	UniquePtr<CogTypeChunk>(*myFactoryAllocator)() = nullptr;
 };

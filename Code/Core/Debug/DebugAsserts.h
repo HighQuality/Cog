@@ -67,7 +67,7 @@ void ErrorLog(StringView aMessage);
 #else
 #define ASSUME(e) __assume(e)
 #define ASSUME_UNREACHABLE() __assume(0)
-#define CHECK_PEDANTIC(e) do { __noop(e); } while (false)
+#define CHECK_PEDANTIC(e) do { } while (false)
 #endif
 
 #define ALWAYS_ASSUME(e) __assume(e)

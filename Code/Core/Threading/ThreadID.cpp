@@ -7,7 +7,7 @@ void ThreadID::SetName(String aThreadName)
 {
 	aThreadName.CheckEndsWithZero();
 	SetThreadDescription(GetCurrentThread(), aThreadName.GetData());
-	UtilitiesTLS::SetThreadName(Move(aThreadName));
+	CoreTLS::SetThreadName(Move(aThreadName));
 }
 
 std::mutex ThreadID::ourMutex;

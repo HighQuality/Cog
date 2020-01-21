@@ -33,6 +33,7 @@ private:
 	Array<UniquePtr<CogType>> myDeclaredCogTypes;
 	Array<CogClass*> myCogClasses;
 
+	String myMainHeaderFileName;
 	String myGeneratedHeaderFileName;
 	String myGeneratedSourceFileName;
 	String myGeneratedHeaderIdentifier;

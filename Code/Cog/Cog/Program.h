@@ -1,8 +1,8 @@
  #pragma once
 #include <TypeFundamentals/TypeID.h>
 #include <Threading/ThreadID.h>
-#include <Threading/Fibers/Await.h>
 #include <Time/Stopwatch.h>
+#include "Threading/Fibers/Await.h"
 #include "Pointer.h"
 
 class Object;
@@ -13,12 +13,6 @@ template <typename T>
 T& DefaultAllocate();
 template <typename T>
 void DefaultFree(T& aObject);
-
-template <typename T, typename ...TArgs>
-Ptr<T> NewObject(TArgs ...aArgs)
-{
-	return static_cast<T&>( TypeID<Object>::Resolve<T>().GetUnderlyingInteger();
-}
 
 class Program
 {
@@ -135,16 +129,11 @@ public:
 	Fiber* GetUnusedFiber();
 
 private:
-	void* AllocateRaw(TypeID<void> aTypeID, BaseFactory & (*aFactoryAllocator)());
-	void Return(TypeID<void> aTypeID, void* aObject);
 	void WorkerThread(i32 aThreadIndex);
 
 	void FiberMain();
 
 	const ThreadID& myMainThread;
-	// TODO: Change key to TypeID<void>
-	Map<TypeID<void>::CounterType, BaseFactory*> myAllocators;
-
 	ThreadPool* myBackgroundWorkThreadPool;
 
 	std::mutex myFiberMutex;
@@ -186,18 +175,4 @@ extern Program* gProgram;
 FORCEINLINE Program& Program::Get()
 {
 	return *gProgram;
-}
-
-template <typename T>
-T& DefaultAllocate()
-{
-	// TODO: Use tag on T in order to figure out whether or not to use synchronized allocation (supports iterations)
-	return Program::Get().AllocateUninitialized<T>();
-}
-
-template <typename T>
-void DefaultFree(T& aObject)
-{
-	// TODO: Use tag on T in order to figure out whether or not to use synchronized allocation (supports iterations)
-	Program::Get().ReturnUninitialized<T>(aObject);
 }

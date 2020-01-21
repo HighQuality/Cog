@@ -13,29 +13,32 @@ void RegisterTypeList()
 	gTypeList = Move(typeList);
 }
 
-Object& NewObjectByType(const TypeID<Object>& aTypeID)
+Ptr<Object> NewObjectByType(const TypeID<Object>& aTypeID)
 {
 	return gObjectPool.CreateObjectByType(aTypeID);
 }
 
-static UniquePtr<BaseFactory> CreateFactoryOfType(const TypeID<Object>& aType)
+static UniquePtr<CogTypeChunk> CreateChunkOfType(const TypeID<Object>& aType)
 {
 	return gTypeList->GetTypeData(aType).AllocateFactory();
 }
 
-Object& ObjectPool::CreateObjectByType(const TypeID<Object>& aType)
+Ptr<Object> ObjectPool::CreateObjectByType(const TypeID<Object>& aType)
 {
-	BaseFactory& factory = FindOrCreateObjectFactory(aType, &CreateFactoryOfType);
+	CogTypeChunk& factory = FindOrCreateObjectChunk(aType, &CreateChunkOfType);
 
-	return *static_cast<Object*>(factory.AllocateRawObject());
+	return factory.Allocate();
 }
 
-BaseFactory& ObjectPool::FindOrCreateObjectFactory(const TypeID<Object>& aObjectType, UniquePtr<BaseFactory> (*aFactoryCreator)(const TypeID<Object>&))
+CogTypeChunk& ObjectPool::FindOrCreateObjectChunk(const TypeID<Object>& aObjectType, UniquePtr<CogTypeChunk> (*aChunkCreator)(const TypeID<Object>&))
 {
 	const u16 index = aObjectType.GetUnderlyingInteger();
-	myObjectFactories.Resize(TypeID<Object>::MaxUnderlyingInteger());
-	auto& factory = myObjectFactories[index];
-	if (!factory)
-		factory = aFactoryCreator(aObjectType);
-	return *factory;
+	myObjectChunks.Resize(TypeID<Object>::MaxUnderlyingInteger());
+	auto& chunk = myObjectChunks[index];
+	if (!chunk)
+	{
+		chunk = aChunkCreator(aObjectType);
+		chunk->Initialize();
+	}
+	return *chunk;
 }

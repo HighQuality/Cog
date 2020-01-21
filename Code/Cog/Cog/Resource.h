@@ -29,5 +29,5 @@ protected:
 	void TestFunction();
 
 private:
-	bool myIsLoaded = false;
+	// bool myIsLoaded = false;
 };

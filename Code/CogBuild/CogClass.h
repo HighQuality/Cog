@@ -10,7 +10,8 @@ public:
 	CogClass(String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex);
 
 	Array<String> GenerateGeneratedBodyContents(StringView aGeneratedHeaderIdentifier) const;
-	Array<String> GenerateCogTypeChunkContents() const;
+	Array<String> GenerateCogTypeChunkHeaderContents() const;
+	Array<String> GenerateCogTypeChunkSourceContents() const;
 
 	String GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const override;
 	String GenerateSourceFileContents(const DocumentTemplates& aTemplates) const override;
@@ -22,6 +23,7 @@ public:
 	
 private:
 	Array<GeneratedFunction> myGeneratedFunctions;
+	String myChunkTypeName;
 	i32 myGeneratedBodyLineIndex = -1;
 	bool mySpecializesBaseClass = false;
 	bool myIsFinal = false;

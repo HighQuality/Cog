@@ -7,6 +7,7 @@ CogClass::CogClass(String aClassName, String aBaseClassName, i32 aGeneratedBodyL
 	: Base(Move(aClassName), Move(aBaseClassName))
 {
 	myGeneratedBodyLineIndex = aGeneratedBodyLineIndex;
+	myChunkTypeName = Format(L"%CogTypeChunk", GetTypeName());
 }
 
 Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGeneratedHeaderIdentifier) const
@@ -38,20 +39,34 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 	return generatedLines;
 }
 
-Array<String> CogClass::GenerateCogTypeChunkContents() const
+Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 {
 	Array<String> generatedLines;
 
-	const String chunkName = Format(L"%CogTypeChunk", GetTypeName());
 	const String baseChunkName = Format(L"%CogTypeChunk", HasBaseType() ? GetBaseTypeName() : L"");
 	const StringView finalSpecifier = myIsFinal ? L"final " : L"";
 
-	generatedLines.Add(Format(L"class % %: public %", chunkName, finalSpecifier, baseChunkName));
+	generatedLines.Add(Format(L"class % %: public %", myChunkTypeName, finalSpecifier, baseChunkName));
 	generatedLines.Add(String(L"{"));
 	generatedLines.Add(String(L"public:"));
 	generatedLines.Add(Format(L"\tusing Base = %;", baseChunkName));
+
+	generatedLines.Add(Format(L"\tUniquePtr<Object> CreateDefaultObject() const override;"));
+
 	generatedLines.Add(String(L"};"));
 	
+	return generatedLines;
+}
+
+Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
+{
+	Array<String> generatedLines;
+
+	generatedLines.Add(Format(L"UniquePtr<Object> %::CreateDefaultObject() const", myChunkTypeName));
+	generatedLines.Add(String(L"{"));
+	generatedLines.Add(Format(L"\treturn MakeUnique<%>();", GetTypeName()));
+	generatedLines.Add(String(L"}"));
+
 	return generatedLines;
 }
 
@@ -75,7 +90,7 @@ String CogClass::GenerateHeaderFileContents(const DocumentTemplates& aTemplates,
 
 	
 	{
-		const Array<String> chunkContents = GenerateCogTypeChunkContents();
+		const Array<String> chunkContents = GenerateCogTypeChunkHeaderContents();
 
 		for (i32 i = 0; i < chunkContents.GetLength(); ++i)
 		{
@@ -93,6 +108,18 @@ String CogClass::GenerateSourceFileContents(const DocumentTemplates& aTemplates)
 {
 	String sourceOutput = Base::GenerateSourceFileContents(aTemplates);
 
+	{
+		const Array<String> chunkContents = GenerateCogTypeChunkSourceContents();
+
+		for (i32 i = 0; i < chunkContents.GetLength(); ++i)
+		{
+			if (i > 0)
+				sourceOutput.Add(L'\n');
+
+			sourceOutput.Append(chunkContents[i].View());
+		}
+	}
+	
 	return sourceOutput;
 }
 

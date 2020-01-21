@@ -1,9 +1,9 @@
-#include "CorePch.h"
-#include "Program.h"
-#include <Threading/Fibers/Fiber.h>
+#include "CogPch.h"
 #include <Time/Stopwatch.h>
-#include <Threading/Fibers/Awaitable.h>
 #include <Threading/ThreadPool/ThreadPool.h>
+#include "Program.h"
+#include "Threading/Fibers/Fiber.h"
+#include "Threading/Fibers/Awaitable.h"
 
 Program* gProgram = nullptr;
 
@@ -225,7 +225,7 @@ void Program::FiberMain()
 		}
 	}
 
-	UtilitiesTLS::GetThisThreadsStartingFiber()->Resume(FiberResumeData(FiberResumeType::Exiting));
+	CogTLS::GetThisThreadsStartingFiber()->Resume(FiberResumeData(FiberResumeType::Exiting));
 }
 
 void Program::WorkerThread(const i32 aThreadIndex)

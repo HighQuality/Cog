@@ -1,6 +1,6 @@
-#include "CorePch.h"
+#include "CogPch.h"
 #include "Await.h"
-#include <Program.h>
+#include <Cog/Program.h>
 
 void AwaitContext::Execute()
 {
@@ -21,7 +21,7 @@ void AwaitContext::Execute()
 	FiberResumeData resumeData;
 	resumeData.type = FiberResumeType::Await;
 	resumeData.awaitData.workItems = &myAwaitables;
-	FiberResumeData returnedData = UtilitiesTLS::GetThisThreadsStartingFiber()->Resume(resumeData);
+	FiberResumeData returnedData = CogTLS::GetThisThreadsStartingFiber()->Resume(resumeData);
 
 	CHECK(returnedData.type == FiberResumeType::ResumeFromAwait);
 	CHECK(returnedData.resumeFromAwaitData.sleepingFiber);

@@ -1,6 +1,6 @@
 #pragma once
 #include "Awaitable.h"
-#include "Program.h"
+#include <Cog/Program.h>
 
 template <typename T>
 class BackgroundWorkAwaitable : public Awaitable<T>

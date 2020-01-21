@@ -7,6 +7,7 @@
 
 GeneratedCode::GeneratedCode(const StringView aMainFileName)
 {
+	myMainHeaderFileName = Format(L"%.h", aMainFileName);
 	myGeneratedHeaderFileName = Format(L"%.generated.h", aMainFileName);
 	myGeneratedSourceFileName = Format(L"%.generated.cpp", aMainFileName);
 
@@ -72,7 +73,7 @@ void GeneratedCode::GenerateSourceFile(const DocumentTemplates& aTemplates, cons
 {
 	StringTemplate document(String(aTemplates.generatedSourceTemplate));
 
-	document.AddParameter(String(L"HeaderFile"), String(myGeneratedHeaderFileName));
+	document.AddParameter(String(L"MainHeaderFile"), String(myMainHeaderFileName));
 	document.AddParameter(String(L"PchFileName"), Format(L"%Pch.h", aProjectName));
 
 	{
