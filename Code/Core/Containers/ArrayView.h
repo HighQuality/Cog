@@ -32,9 +32,7 @@ public:
 		return &myData[myLength];
 	}
 
-	FORCEINLINE ArrayView()
-	{
-	}
+	FORCEINLINE ArrayView() = default;
 
 	FORCEINLINE ArrayView(const T* aArray, const i32 aLength)
 	{

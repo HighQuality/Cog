@@ -170,7 +170,7 @@ bool CogTypeChunk::OccupyFirstFreeSlot(u8& aFreeIndex)
 // 	}
 // }
 
-// TODO: Benchmark GatherOccupiedIndicesFromByte and GatherOccupiedIndicesFromU64 with and without FORCEINLINE, FORCEINLINE results in GatherOccupiedSlots being ~3.2k instructions and without it it's ~500, potentially we may want to remove FORCEINLINE from GatherOccupiedIndicesFromU64 only
+// TODO: Benchmark GatherOccupiedIndicesFromByte and GatherOccupiedIndicesFromU64 with and without FORCEINLINE
 
 FORCEINLINE static void GatherOccupiedIndicesFromByte(u8* aOccupiedSlots, u16& aNextFreeIndex, const u8 aByte, const u8 aOffset)
 {
@@ -237,7 +237,7 @@ FORCEINLINE static void GatherOccupiedIndicesFromByte(u8* aOccupiedSlots, u16& a
 	}
 }
 
-FORCEINLINE static void GatherOccupiedIndicesFromU64(u8* aOccupiedSlots, u16& aNextFreeIndex, const u64 aPart, const u8 aOffset)
+static void GatherOccupiedIndicesFromU64(u8* aOccupiedSlots, u16& aNextFreeIndex, const u64 aPart, const u8 aOffset)
 {
 	if (aPart == 0)
 		return;

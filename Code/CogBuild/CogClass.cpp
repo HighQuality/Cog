@@ -33,6 +33,28 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 	generatedLines.Add(Format(L"FORCEINLINE const %CogTypeChunk& GetChunk() const { return static_cast<const %CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
 	generatedLines.Add(Format(L"FORCEINLINE %CogTypeChunk& GetChunk() { return static_cast<%CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
 
+	for (const CogProperty& prop : myProperties)
+	{
+		if (prop.publicRead)
+			generatedLines.Add(String(L"public:"));
+		else
+			generatedLines.Add(String(L"private:"));
+		
+		generatedLines.Add(Format(L"FORCEINLINE const %& Get%() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
+		
+		if (prop.directAccess)
+		{
+			generatedLines.Add(String(L"private:"));
+			generatedLines.Add(Format(L"FORCEINLINE const %& %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE %& %() { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
+		}
+		else
+		{
+			generatedLines.Add(String(L"private:"));
+			generatedLines.Add(Format(L"FORCEINLINE void Set%(% aNewValue) { GetChunk().Access%(myChunkIndex) = Move(aNewValue); }", prop.propertyName, prop.propertyType, prop.propertyName));
+		}
+	}
+	
 	// Reset the default visibility of class
 	generatedLines.Add(String(L"private:"));
 
@@ -52,6 +74,19 @@ Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 	generatedLines.Add(Format(L"\tusing Base = %;", baseChunkName));
 
 	generatedLines.Add(Format(L"\tUniquePtr<Object> CreateDefaultObject() const override;"));
+	
+	generatedLines.Add(String(L"private:"));
+	
+	for (const CogProperty& prop : myProperties)
+		generatedLines.Add(Format(L"\tstd::aligned_storage_t<sizeof(%[256])> my%Data;", prop.propertyType, prop.propertyName));
+
+	generatedLines.Add(String(L"public:"));
+
+	for (const CogProperty& prop : myProperties)
+	{
+		generatedLines.Add(Format(L"\tFORCEINLINE const %& Access%(const u8 aIndex) const { return reinterpret_cast<const %*>(&my%Data)[aIndex]; };", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+		generatedLines.Add(Format(L"\tFORCEINLINE %& Access%(const u8 aIndex) { return reinterpret_cast<%*>(&my%Data)[aIndex]; };", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+	}
 
 	generatedLines.Add(String(L"};"));
 	
@@ -61,10 +96,12 @@ Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
 {
 	Array<String> generatedLines;
-
+	
 	generatedLines.Add(Format(L"UniquePtr<Object> %::CreateDefaultObject() const", myChunkTypeName));
 	generatedLines.Add(String(L"{"));
-	generatedLines.Add(Format(L"\treturn MakeUnique<%>();", GetTypeName()));
+	generatedLines.Add(Format(L"\tif constexpr (!std::is_abstract_v<%>)", GetTypeName()));
+	generatedLines.Add(Format(L"\t\treturn MakeUnique<%>();", GetTypeName()));
+	generatedLines.Add(Format(L"\tFATAL(L\"Can't instantiate object of abstract type\");"));
 	generatedLines.Add(String(L"}"));
 
 	return generatedLines;
@@ -126,4 +163,9 @@ String CogClass::GenerateSourceFileContents(const DocumentTemplates& aTemplates)
 void CogClass::SetIsFinal(const bool aIsFinal)
 {
 	myIsFinal = aIsFinal;
+}
+
+void CogClass::RegisterCogProperty(CogProperty aProperty)
+{
+	myProperties.Add(Move(aProperty));
 }

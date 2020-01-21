@@ -133,6 +133,7 @@
     <ClInclude Include="CogBuildPch.h" />
     <ClInclude Include="CogBuildUtilities.h" />
     <ClInclude Include="CogClass.h" />
+    <ClInclude Include="CogProperty.h" />
     <ClInclude Include="CogType.h" />
     <ClInclude Include="DocumentTemplates.h" />
     <ClInclude Include="GeneratedCode.h" />

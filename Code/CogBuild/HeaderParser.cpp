@@ -176,6 +176,10 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		{
 			cogClass.SetSpecializesBaseClass(true);
 		}
+		else if (currentParameter == L"Replicated") /* Should be inherited by subclasses. */
+		{
+			TODO;
+		}
 		else
 		{
 			ReportErrorAtLine(Format(L"Unknown parameter ", currentParameter).View(), generatedBodyLineIndex);
@@ -278,36 +282,15 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 		return false;
 	}
 
-	String propertyType;
+	CogProperty property;
 
-	while (parameterReader.GetCurrentWord() == L"const"/* ||
-		parameterReader.GetCurrentWord() == L"volatile"*/)
+	for (;;)
 	{
-		propertyType.Append(parameterReader.GetCurrentWord());
-		propertyType.Add(L' ');
-
-		if (!parameterReader.Next())
+		while (parameterReader.GetCurrentWord() == L"const" ||
+			parameterReader.GetCurrentWord() == L"volatile")
 		{
-			ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
-			return false;
-		}
-	}
-
-	propertyType.Append(parameterReader.GetCurrentWordOrGroup());
-
-	if (parameterReader.IsAtGroup())
-	{
-
-	}
-
-	if (parameterReader.Next())
-	{
-		while (parameterReader.GetCurrentWord() == L"*" ||
-			parameterReader.GetCurrentWord() == L"&" ||
-			parameterReader.GetCurrentWord() == L"const")
-		{
-			propertyType.Append(parameterReader.GetCurrentWord());
-			propertyType.Add(L' ');
+			property.propertyType.Append(parameterReader.GetCurrentWord());
+			property.propertyType.Add(L' ');
 
 			if (!parameterReader.Next())
 			{
@@ -316,12 +299,124 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 			}
 		}
 
-		while (parameterReader.Next())
-		{
+		property.propertyType.Append(parameterReader.GetCurrentWordOrGroup());
 
+		if (!parameterReader.Next())
+		{
+			ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
+			return false;
+		}
+
+		if (parameterReader.IsAtGroup())
+		{
+			property.propertyType.Add(parameterReader.GetOpeningCharacter());
+			property.propertyType.Append(parameterReader.GetCurrentWordOrGroup());
+			property.propertyType.Add(parameterReader.GetClosingCharacter());
+
+			if (!parameterReader.Next())
+			{
+				ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
+				return false;
+			}
+		}
+
+		while (parameterReader.GetCurrentWord() == L"*" ||
+			parameterReader.GetCurrentWord() == L"&" ||
+			parameterReader.GetCurrentWord() == L"const")
+		{
+			property.propertyType.Append(parameterReader.GetCurrentWord());
+			property.propertyType.Add(L' ');
+
+			if (!parameterReader.Next())
+			{
+				ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
+				return false;
+			}
+		}
+
+		if (parameterReader.IsAtGroup())
+		{
+			ReportErrorWithInnerReader(aBodyReader, L"Invalid C++ type in COGPROPERTY");
+			return false;
+		}
+
+		if (parameterReader.GetCurrentWordOrGroup() == L"::")
+		{
+			property.propertyType.Append(L"::");
+			
+			if (!parameterReader.Next())
+			{
+				ReportErrorWithInnerReader(aBodyReader, L"Invalid C++ type in COGPROPERTY");
+				return false;
+			}
+
+			continue;
+		}
+		
+		break;
+	}
+	
+	property.propertyName = String(parameterReader.GetCurrentWordOrGroup());
+
+	// TODO: Parse default value
+	
+	while (parameterReader.Next())
+	{
+		if (parameterReader.GetCurrentWordOrGroup() == L",")
+		{
+			if (!parameterReader.Next())
+			{
+				ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY parameter list", parameterReader.GetCurrentWordOrGroup());
+				return false;
+			}
+
+			const StringView parameter = parameterReader.GetCurrentWordOrGroup();
+			
+			if (parameter == L"DirectAccess") /* Generates "TYPE& PROPERTY();" and "const TYPE& PROPERTY() const;" */
+			{
+				property.directAccess = true;
+			}
+			else if (parameter == L"PublicRead") /* Exposes const TYPE& GetPROPERTY() to other classes, not affected by DirectAccess. Be aware of thread synchronization. */
+			{
+				property.publicRead = true;
+			}
+			else if (parameter == L"Replicated") /* Replicates over the network, should require "Replicated" in COGTYPE() or base class, a parameter which should be inherited. Incompatible with DirectAccess because we want to be notified of changes to these variables. */
+			{
+				TODO;
+			}
+			else if (parameter == L"OnChanged") /* OnChanged = FunctionName, calls function when value is changed, incompatible with DirectAccess so it can't be written to without our knowledge. (Should this happen immediately or be scheduled? Scheduling would be consistent but would make it hard to debug. Anything writing to it would also only have handled synchronization of that property only.) */
+			{
+				TODO;
+			}
+			else if (parameter == L"Borrowable") /* Generates "Borrowed<TYPE> BorrowPROPERTY()". This moves the property out of the chunk into the Borrowed instance and on destruction calls "SetPROPERTY(Move(myValue));". This allows for nicer access to variables that do not support DirectAccess due to change notifies. Accessing the underlying property during borrows is UB, could potentially be checked for in debug builds though. */
+			{
+				TODO;
+			}
+			else if (parameter == L"PerType") /* This variable is not stored per instance, but instead is shared between instances. Only readable, subclasses may override the default through a TBD syntax. */
+			{
+				TODO;
+			}
+			else if (parameter == L"DoubleBuffered") /* Every frame, save a copy of this value so the old value safely can be accessed from other threads. GetBufferedPROPERTY() (?) (publicly accessible?) */
+			{
+				TODO;
+			}
+			else if (parameter == L"Config") /* Default value read from config file, default value from declaration is used if not specified in config file. Figure out priority system and syntax for these files. */
+			{
+				TODO;
+			}
+			else
+			{
+				ReportErrorWithInnerReader(aBodyReader, L"Unknown COGPROPERTY parameter %", parameterReader.GetCurrentWordOrGroup());
+				return false;
+			}
+		}
+		else
+		{
+			ReportErrorWithInnerReader(aBodyReader, L"Expected ',' or end of COGPROPERTY declaration, instead got ", parameterReader.GetCurrentWordOrGroup());
+			return false;
 		}
 	}
-
+	
 	if (!aBodyReader.Next())
 	{
 		ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of body");
@@ -333,9 +428,9 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 		ReportErrorWithInnerReader(aBodyReader, L"Expected ';'");
 		return false;
 	}
-
-	Println(L"COGPROPERTY '%' of type '%' registered in type %", propertyName, propertyType, aClass.GetTypeName());
-
+		
+	aClass.RegisterCogProperty(Move(property));
+	
 	return true;
 }
 

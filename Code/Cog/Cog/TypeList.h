@@ -18,21 +18,21 @@ UniquePtr<CogTypeChunk> CreateObjectChunk()
 
 #define CHECK_BASE_DECLARED(TType) \
 	do { \
-	static_assert(!IsSame<TType::Base, TType::Base::Base>, "Component " #TType " does not declare it's base"); \
+	static_assert(!IsSame<TType::Base, TType::Base::Base>, "Type " #TType " does not declare it's base"); \
 	static_assert(IsDerivedFrom<TType, TType::Base>, #TType "::Base is not in inheritance chain."); \
 	} while (false)
 
 #define REGISTER_TYPE(TypeListObject, TType) \
 	do { \
 	CHECK_BASE_DECLARED(TType); \
-	TypeListObject->Internal_AddType(TypeID<Object>::Resolve<TType>().GetUnderlyingInteger(), L"" #TType, &CreateObjectChunk<JOIN(TType, CogTypeChunk), TType>, nullptr); \
+	TypeListObject->Internal_AddType(TypeID<Object>::Resolve<TType>().GetUnderlyingInteger(), L"" #TType, &CreateObjectChunk<TType, JOIN(TType, CogTypeChunk)>, nullptr); \
 	} while (false)
 
 #define REGISTER_TYPE_SPECIALIZATION(TypeListObject, BaseType, Specialization) \
 	do { \
 	CHECK_BASE_DECLARED(Specialization); \
 	static_assert(IsDerivedFrom<Specialization, BaseType>, #Specialization " does not derive from " #BaseType); \
-	TypeListObject->Internal_AddSpecialization(L"" #BaseType, TypeID<Object>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateObjectChunk<JOIN(TType, CogTypeChunk), TType>, nullptr); \
+	TypeListObject->Internal_AddSpecialization(L"" #BaseType, TypeID<Object>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateObjectChunk<TType, JOIN(TType, CogTypeChunk)>, nullptr); \
 	} while (false)
 
 class TypeList

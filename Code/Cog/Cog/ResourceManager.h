@@ -24,9 +24,9 @@ public:
 	{
 		CHECK(aFunctionCallback.IsValid());
 
-		std::unique_lock<std::mutex> lck(GetMutexRef());
+		std::unique_lock<std::mutex> lck(Mutex());
 
-		auto& loadedResources = GetLoadedResourcesRef();
+		auto& loadedResources = LoadedResources();
 
 		if (Ptr<Resource>* alreadyLoadedResource = loadedResources.Find(aResourcePath))
 		{
@@ -43,7 +43,7 @@ public:
 			
 		String resourcePath(aResourcePath);
 
-		GetScheduledLoadsRef().Submit([&loadedResources, resourcePath, aFunctionCallback]()
+		ScheduledLoads().Submit([&loadedResources, resourcePath, aFunctionCallback]()
 		{
 			auto callback = [aFunctionCallback](Resource& aResource)
 			{
@@ -74,8 +74,8 @@ private:
 
 	static CogGame& GetCogGame();
 
-	COGPROPERTY(EventList<Function<void()>> ScheduledLoads);
-	COGPROPERTY(Map<String, Ptr<Resource>> LoadedResources);
+	COGPROPERTY(EventList<Function<void()>> ScheduledLoads, DirectAccess);
+	COGPROPERTY(Map<String, Ptr<Resource>> LoadedResources, DirectAccess);
 
-	COGPROPERTY(std::mutex Mutex);
+	COGPROPERTY(std::mutex Mutex, DirectAccess);
 };

@@ -16,17 +16,17 @@ bool GroupingWordReader::Next()
 		return false;
 	}
 
-	if (current.Find(myStopAtCharacter) >= 0)
-	{
-		Rewind(current.GetLength() - 1);
-		myIsAtGroup = false;
-		return false;
-	}
-
-	const Char closingCharacter = GetCorrespondingEndCharacter(current[0]);
+	const Char closingCharacter = myStopAtCharacter != current[0] ? GetCorrespondingEndCharacter(current[0]) : L'\0';
 
 	if (closingCharacter == L'\0')
 	{
+		if (current.Find(myStopAtCharacter) >= 0)
+		{
+			Rewind(current.GetLength() - 1);
+			myIsAtGroup = false;
+			return false;
+		}
+
 		myCurrentContent = current;
 		myIsAtGroup = false;
 		return true;

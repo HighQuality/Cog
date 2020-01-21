@@ -24,22 +24,24 @@ public:
 		: Super(aString, static_cast<i32>(wcslen(aString)))
 	{
 	}
-
-	FORCEINLINE bool operator==(const wchar_t* aString) const
-	{
-		const size_t length = wcslen(aString);
-		if (length != GetLength())
-			return false;
-		for (i32 i = 0; i < length; ++i)
-			if (this->myData[i] != aString[i])
-				return false;
-		return true;
-	}
-
-	FORCEINLINE bool operator!=(const wchar_t* aString) const
-	{
-		return !(*this == aString);
-	}
+	
+	// These should not be necessary due to implicit conversion from const wchar_t* to StringView
+	//
+	// FORCEINLINE bool operator==(const wchar_t* aString) const
+	// {
+	// 	const size_t length = wcslen(aString);
+	// 	if (length != GetLength())
+	// 		return false;
+	// 	for (i32 i = 0; i < length; ++i)
+	// 		if (this->myData[i] != aString[i])
+	// 			return false;
+	// 	return true;
+	// }
+	// 
+	// FORCEINLINE bool operator!=(const wchar_t* aString) const
+	// {
+	// 	return !(*this == aString);
+	// }
 
 	FORCEINLINE bool operator==(const StringView& aString) const
 	{

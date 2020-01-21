@@ -5,44 +5,64 @@
 template <typename T>
 class Ptr final
 {
-	static_assert(sizeof(T) == sizeof(Object), "Derived class from Object may not declare member variables");
+	static_assert(sizeof(T) == sizeof(Object), "Subclass of Object may not declare member variables");
 	
 public:
 	FORCEINLINE Ptr()
 	{
-		memset(&myObject, 0, sizeof T);
-	}
-
-	Ptr(T* aPointer)
-	{
-		if (aPointer)
-			memcpy(&myObject, aPointer, sizeof T);
-		else
-			memset(&myObject, 0, sizeof T);
-	}
-
-	FORCEINLINE Ptr(T& aPointer)
-	{
-		memcpy(&myObject, &aPointer, sizeof T);
-	}
-
-	Ptr(const Ptr& aOther)
-	{
-		memcpy(&myObject, &aOther.myObject, sizeof T);
-	}
-
-	~Ptr()
-	{
-#ifdef _DEBUG
-		myObject.myChunk = nullptr;
-#endif
+		memset(&myObject, 0, sizeof Object);
 	}
 	
+	FORCEINLINE Ptr(nullptr_t)
+		: Ptr()
+	{
+	}
+
+	FORCEINLINE ~Ptr()
+	{
+	}
+
+	FORCEINLINE Ptr(T& aReference)
+	{
+		memcpy(&myObject, &aReference, sizeof Object);
+	}
+
+	template <typename TOther, typename = EnableIf<IsDerivedFrom<TOther, T>>>
+	FORCEINLINE Ptr(TOther& aReference)
+		: Ptr(static_cast<T&>(aReference))
+	{
+	}
+
+	FORCEINLINE Ptr(T* aPointer)
+	{
+		if (aPointer)
+			memcpy(&myObject, aPointer, sizeof Object);
+		else
+			memset(&myObject, 0, sizeof Object);
+	}
+
+	template <typename TOther, typename = EnableIf<IsDerivedFrom<TOther, T>>>
+	FORCEINLINE Ptr(TOther* aPointer)
+		: Ptr(static_cast<T*>(aPointer))
+	{
+	}
+
+	FORCEINLINE Ptr(const Ptr& aOther)
+	{
+		memcpy(&myObject, &aOther.myObject, sizeof Object);
+	}
+
+	template <typename TOther, typename = EnableIf<IsDerivedFrom<TOther, T>>>
+	FORCEINLINE Ptr(const Ptr<TOther>& aOther)
+	{
+		memcpy(&myObject, &aOther.myObject, sizeof Object);
+	}
+
 	template <typename TOther>
-	bool operator==(const Ptr<TOther>& aOther) const
+	FORCEINLINE bool operator==(const Ptr<TOther>& aOther) const
 	{
 		// Perf: This comparison could skip the vtable
-		return memcmp(&myObject, &aOther.myObject, sizeof T) == 0;
+		return memcmp(&myObject, &aOther.myObject, sizeof Object) == 0;
 	}
 
 	template <typename TOther>
@@ -60,7 +80,7 @@ public:
 	
 	FORCEINLINE T* Get() const
 	{
-		return IsValid() ? &myObject : nullptr;
+		return IsValid() ? static_cast<T*>(&myObject) : nullptr;
 	}
 
 	FORCEINLINE operator T*() const

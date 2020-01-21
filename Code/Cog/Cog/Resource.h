@@ -29,5 +29,5 @@ protected:
 	void TestFunction();
 
 private:
-	// bool myIsLoaded = false;
+	COGPROPERTY(bool IsLoaded);
 };
