@@ -3,6 +3,7 @@
 
 enum class GroupingWordReaderGroup : u8
 {
+	None = 0,
 	CurlyBraces = 1 << 0,
 	Parenthesis = 1 << 1,
 	SquareBracket = 1 << 2,
@@ -61,10 +62,9 @@ public:
 	void CopySettingsFrom(const GroupingWordReader& aOther);
 
 private:
-	StringView GetCorrespondingClosingSequence(StringView aView, StringView& aOpeningSequence) const;
-	StringView GetCorrespondingOpeningSequence(StringView aView, StringView& aClosingSequence) const;
-	bool GetGroupingPair(StringView aView, StringView& aOpeningSequence, StringView& aClosingSequence, bool &aIsOpening, bool &aIsClosing) const;
+	bool GetGroupingPair(StringView aView, GroupingWordReaderGroup& aGroup, StringView& aOpeningSequence, StringView& aClosingSequence, bool &aIsOpening, bool &aIsClosing) const;
 	bool AnyParentWantsToStopAtSequence(StringView aSequence, i32& aStopAtDepth, i32 aCurrentDepth = 0) const;
+	static bool IsGroupExclusive(GroupingWordReaderGroup aGroup);
 
 	StringView myCurrentContent;
 	GroupingWordReader* myParentReader = nullptr;

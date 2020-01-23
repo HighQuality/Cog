@@ -1,4 +1,4 @@
- #pragma once
+#pragma once
 #include <TypeFundamentals/TypeID.h>
 #include <Threading/ThreadID.h>
 #include <Time/Stopwatch.h>

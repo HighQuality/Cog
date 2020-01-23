@@ -15,6 +15,8 @@ bool GroupingWordReader::Next()
 	if (!current)
 		return false;
 
+	GroupingWordReaderGroup currentGroup = GroupingWordReaderGroup::None;
+
 	for (i32 i = 0; i < current.GetLength(); ++i)
 	{
 		StringView openingSequence;
@@ -23,7 +25,7 @@ bool GroupingWordReader::Next()
 		bool isOpening;
 		bool isClosing;
 
-		if (GetGroupingPair(current.ChopFromStart(i), openingSequence, closingSequence, isOpening, isClosing))
+		if (GetGroupingPair(current.ChopFromStart(i), currentGroup, openingSequence, closingSequence, isOpening, isClosing))
 		{
 			if (isClosing)
 			{
@@ -73,21 +75,49 @@ bool GroupingWordReader::Next()
 		return true;
 	}
 
+	CHECK(currentGroup != GroupingWordReaderGroup::None);
+
 	myCurrentGroupFirstContentLineIndex = CalculateAndGetCurrentLineIndex();
+
+	const bool exclusiveMode = IsGroupExclusive(currentGroup);
 
 	const i32 innerReaderStart = GetReadIndex();
 	const StringView innerReaderString = GetString().ChopFromStart(innerReaderStart);
+	i32 innerReaderStop = -1;
 
-	// Include nested groups inside this group, also fixes cases where end character inside of our own group ends the group prematurely
-	GroupingWordReader innerReader(innerReaderString);
-	innerReader.CopySettingsFrom(*this);
-	innerReader.SetIgnoreNewlines(false);
-	innerReader.myParentReader = this;
+	if (!exclusiveMode)
+	{
+		// Include nested groups inside this group, also fixes cases where end character inside of our own group ends the group prematurely
+		GroupingWordReader innerReader(innerReaderString);
+		innerReader.CopySettingsFrom(*this);
+		innerReader.SetIgnoreNewlines(false);
+		innerReader.myParentReader = this;
 
-	while (innerReader.Next())
-	{ }
+		while (innerReader.Next())
+		{ }
 
-	const i32 innerReaderStop = innerReaderStart + innerReader.GetReadIndex();
+		innerReaderStop = innerReaderStart + innerReader.GetReadIndex();
+	}
+	else
+	{
+		const i32 innerLength = innerReaderString.GetLength();
+		for (i32 i = 0; i < innerLength; ++i)
+		{
+			if (innerReaderString.ChopFromStart(i).StartsWith(myCurrentClosingSequence))
+			{
+				innerReaderStop = innerReaderStart + i;
+				break;
+			}
+		}
+
+		if (innerReaderStop == -1)
+		{
+			myHasShortCircuited = true;
+			innerReaderStop = innerReaderStart + innerLength;
+		}
+	}
+
+	CHECK(innerReaderStop >= 0);
 
 	if (!myHasShortCircuited)
 		SetReadIndex(innerReaderStop + myCurrentClosingSequence.GetLength());
@@ -96,7 +126,7 @@ bool GroupingWordReader::Next()
 
 	myCurrentContent = GetString().Slice(innerReaderStart, innerReaderStop - innerReaderStart);
 	myCurrentContent.Trim();
-	
+
 	return !myHasShortCircuited;
 }
 
@@ -121,7 +151,7 @@ void GroupingWordReader::CopySettingsFrom(const GroupingWordReader& aOther)
 	SetIgnoreNewlines(aOther.IsIgnoringNewlines());
 }
 
-bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningSequence, StringView& aClosingSequence, bool &aIsOpening, bool& aIsClosing) const
+bool GroupingWordReader::GetGroupingPair(StringView aView, GroupingWordReaderGroup& aGroup, StringView& aOpeningSequence, StringView& aClosingSequence, bool &aIsOpening, bool& aIsClosing) const
 {
 	if (aView.GetLength() == 0)
 		return false;
@@ -132,6 +162,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 	case L'}':
 		if (IsGroupEnabled(GroupingWordReaderGroup::CurlyBraces))
 		{
+			aGroup = GroupingWordReaderGroup::CurlyBraces;
 			aOpeningSequence = L"{";
 			aClosingSequence = L"}";
 			aIsOpening = aView[0] == aOpeningSequence[0];
@@ -143,6 +174,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 	case L')':
 		if (IsGroupEnabled(GroupingWordReaderGroup::Parenthesis))
 		{
+			aGroup = GroupingWordReaderGroup::Parenthesis;
 			aOpeningSequence = L"(";
 			aClosingSequence = L")";
 			aIsOpening = aView[0] == aOpeningSequence[0];
@@ -154,6 +186,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 	case L']':
 		if (IsGroupEnabled(GroupingWordReaderGroup::SquareBracket))
 		{
+			aGroup = GroupingWordReaderGroup::SquareBracket;
 			aOpeningSequence = L"[";
 			aClosingSequence = L"]";
 			aIsOpening = aView[0] == aOpeningSequence[0];
@@ -165,6 +198,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 	case L'>':
 		if (IsGroupEnabled(GroupingWordReaderGroup::AngleBracket))
 		{
+			aGroup = GroupingWordReaderGroup::AngleBracket;
 			aOpeningSequence = L"<";
 			aClosingSequence = L">";
 			aIsOpening = aView[0] == aOpeningSequence[0];
@@ -175,6 +209,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 	case L'\n':
 		if (IsGroupEnabled(GroupingWordReaderGroup::CppSingleLineComment))
 		{
+			aGroup = GroupingWordReaderGroup::CppSingleLineComment;
 			aOpeningSequence = L"//";
 			aClosingSequence = L"\n";
 			aIsOpening = false;
@@ -185,6 +220,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 	case L'"':
 		if (IsGroupEnabled(GroupingWordReaderGroup::CppLiteralStringWithEscapeCharacters))
 		{
+			aGroup = GroupingWordReaderGroup::CppLiteralStringWithEscapeCharacters;
 			aOpeningSequence = L"\"";
 			aClosingSequence = L"\"";
 			aIsOpening = true;
@@ -204,6 +240,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 			{
 				if (aView[1] == L'/')
 				{
+					aGroup = GroupingWordReaderGroup::CppSingleLineComment;
 					aOpeningSequence = L"//";
 					aClosingSequence = L"\n";
 					aIsOpening = true;
@@ -213,6 +250,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 
 			if (IsGroupEnabled(GroupingWordReaderGroup::CppMultiLineComment))
 			{
+				aGroup = GroupingWordReaderGroup::CppMultiLineComment;
 				aOpeningSequence = L"/*";
 				aClosingSequence = L"*/";
 				aIsOpening = true;
@@ -223,6 +261,7 @@ bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningS
 		{
 			if (IsGroupEnabled(GroupingWordReaderGroup::CppMultiLineComment))
 			{
+				aGroup = GroupingWordReaderGroup::CppMultiLineComment;
 				aOpeningSequence = L"/*";
 				aClosingSequence = L"*/";
 				aIsOpening = false;
@@ -246,4 +285,18 @@ bool GroupingWordReader::AnyParentWantsToStopAtSequence(const StringView aSequen
 	}
 
 	return myParentReader->AnyParentWantsToStopAtSequence(aSequence, aStopAtDepth, aCurrentDepth + 1);
+}
+
+bool GroupingWordReader::IsGroupExclusive(const GroupingWordReaderGroup aGroup)
+{
+	switch (aGroup)
+	{
+	case GroupingWordReaderGroup::CppSingleLineComment:
+	case GroupingWordReaderGroup::CppMultiLineComment:
+	case GroupingWordReaderGroup::CppLiteralStringWithEscapeCharacters:
+		return true;
+
+	default:
+		return false;
+	}
 }
