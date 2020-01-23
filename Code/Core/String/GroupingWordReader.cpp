@@ -85,7 +85,8 @@ bool GroupingWordReader::Next()
 			myCurrentOpeningSequence = openingSequence;
 			myCurrentClosingSequence = closingSequence;
 
-			Rewind(current.GetLength() - openingSequence.GetLength());
+			const i32 rewindAmount = current.GetLength() - openingSequence.GetLength();
+			Rewind(rewindAmount);
 			break;
 		}
 	}
@@ -114,14 +115,32 @@ bool GroupingWordReader::Next()
 	innerReader.CopySettingsFrom(*this);
 	innerReader.myParentReader = this;
 	innerReader.myStopAtSequence = myCurrentClosingSequence;
-	while (innerReader.Next());
+
+	bool hadAnyContent = false;
+
+	while (innerReader.Next())
+	{
+		hadAnyContent = true;
+	}
+
 
 	const i32 innerReaderStop = GetReadIndex() + innerReader.GetReadIndex();
-	SetReadIndex(innerReaderStop);
+	SetReadIndex(innerReaderStop + 1);
 
-	myCurrentContent = GetString().Slice(innerReaderStart, innerReaderStop - innerReaderStart);
+	if (hadAnyContent)
+	{
+		myCurrentContent = GetString().Slice(innerReaderStart, innerReaderStop - innerReaderStart);
+	}
+	else
+	{
+		myCurrentContent = GetString().Slice(innerReaderStart - myCurrentOpeningSequence.GetLength(), innerReaderStop - innerReaderStart + myCurrentOpeningSequence.GetLength());
+
+		myIsAtGroup = false;
+	}
+
 	myCurrentContent.Trim();
-	return myCurrentContent.GetLength() > 0;
+
+	return true;
 }
 
 void GroupingWordReader::EnableGroup(GroupingWordReaderGroup aGroup)
