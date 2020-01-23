@@ -86,7 +86,7 @@ void HeaderParser::ParseCogType()
 	{
 		ParseCogTypeClass(parameterReader);
 	}
-	else if (classType != L"struct")
+	else if (classType == L"struct")
 	{
 		TODO;
 	}

@@ -8,44 +8,41 @@ WordReader::WordReader(const StringView aContent)
 
 StringView WordReader::NextWord()
 {
-	bring_into_scope(index, myCurrentIndex);
 	const i32 contentLength = myString.GetLength();
 
-	if (index >= contentLength)
+	if (myCurrentIndex >= contentLength)
 	{
-		myPreviouslyReturnedWordIndex = index;
+		myPreviouslyReturnedWordIndex = myCurrentIndex;
 		return StringView();
 	}
 
-	while (IsWhitespace(myString[index]))
+	while (IsWhitespace(myString[myCurrentIndex]))
 	{
-		++index;
+		++myCurrentIndex;
 
-		if (index >= contentLength)
+		if (myCurrentIndex >= contentLength)
 		{
-			myPreviouslyReturnedWordIndex = index;
+			myPreviouslyReturnedWordIndex = myCurrentIndex;
 			return StringView();
 		}
 	}
 
-	const auto continueWhile = [this, &_index = index, contentLength](bool(*const aPredicate)(Char)) -> StringView
+	const auto continueWhile = [this, contentLength](bool(*const aPredicate)(Char)) -> StringView
 	{
-		bring_into_scope(index, _index);
-		
-		const i32 startIndex = index;
+		const i32 startIndex = myCurrentIndex;
 
-		while (index < contentLength)
+		while (myCurrentIndex < contentLength)
 		{
-			if (!aPredicate(myString[index]))
+			if (!aPredicate(myString[myCurrentIndex]))
 				break;
 
-			++index;
+			++myCurrentIndex;
 		}
 
-		return myString.Slice(startIndex, index - startIndex);
+		return myString.Slice(startIndex, myCurrentIndex - startIndex);
 	};
 
-	myPreviouslyReturnedWordIndex = index;
+	myPreviouslyReturnedWordIndex = myCurrentIndex;
 
 	const StringView alphanumericWord = continueWhile([](const Char aCharacter) { return IsLetterDigitOrUnderscore(aCharacter); });
 	
@@ -57,7 +54,17 @@ StringView WordReader::NextWord()
 	if (specialCharacterWord.GetLength() > 0)
 		return specialCharacterWord;
 
-	FATAL(L"Unexpected end of content");
+	if (myString[myCurrentIndex] == L'\n')
+	{
+		++myCurrentIndex;
+
+		if (myIgnoreNewlines)
+			return NextWord();
+
+		return L"\n";
+	}
+
+	FATAL(L"Unexpected character '%' (%)", static_cast<i32>(myString[myCurrentIndex]), myString[myCurrentIndex]);
 }
 
 void WordReader::SetReadIndex(i32 aNewIndex)
@@ -97,6 +104,11 @@ void WordReader::Forward(const i32 aOffset)
 
 	if (myCurrentIndex > myString.GetLength())
 		myCurrentIndex = myString.GetLength();
+}
+
+void WordReader::SetIgnoreNewlines(const bool aIgnoreNewline)
+{
+	myIgnoreNewlines = aIgnoreNewline;
 }
 
 void WordReader::RefreshLineAndColumnIndex()
@@ -156,25 +168,21 @@ i32 WordReader::CalculateColumnIndexAt(const i32 aIndex) const
 
 bool WordReader::IsWhitespace(const Char aCharacter)
 {
-	return iswspace(aCharacter) || aCharacter == L'\0';
-}
-
-bool WordReader::IsLetterDigitOrUnderscore(const Char aCharacter)
-{
-	return iswalnum(aCharacter) || aCharacter == L'_';
-}
-
-bool WordReader::IsNewline(const Char aCharacter)
-{
 	switch (aCharacter)
 	{
+	case L'\t':
+	case L' ':
 	case L'\r':
-	case L'\n':
 		return true;
 
 	default:
 		return false;
 	}
+}
+
+bool WordReader::IsLetterDigitOrUnderscore(const Char aCharacter)
+{
+	return iswalnum(aCharacter) || aCharacter == L'_';
 }
 
 bool WordReader::IsControlCharacter(const Char aCharacter)

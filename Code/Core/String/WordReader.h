@@ -2,10 +2,11 @@
 
 /**
 Reads one "word" at a time from a source string.
-A word is any continuous substring of characters of the same type and may never contain whitespaces.
+A word is any continuous substring of characters of the same type and may never contain whitespaces with the exception of \n which is treated a standalone word.
 The categories are:
 	1) Letter, Digits and underscores (e.g. "123_abc" is one word)
 	2) Special Character (. , { % " + - etc) (Multiple ones in a row, e.g. "+=" is a single word)
+	3) Newline (Consecutive ones are treated as separate words, \r is ignored) (Can be set to ignored)
 */
 class WordReader
 {
@@ -26,11 +27,13 @@ public:
 	i32 CalculateAndGetCurrentLineIndex() { RefreshLineAndColumnIndex(); return myCurrentLineIndex; }
 	/** Current refers to the word that was previously returned by NextWord */
 	i32 CalculateAndGetCurrentColumnIndex() { RefreshLineAndColumnIndex(); return myCurrentColumnIndex; }
+	
+	void SetIgnoreNewlines(bool aIgnoreNewline);
+	FORCEINLINE bool IsIgnoringNewlines() const { return myIgnoreNewlines; }
 
 private:
 	static bool IsWhitespace(Char aCharacter);
 	static bool IsLetterDigitOrUnderscore(Char aCharacter);
-	static bool IsNewline(Char aCharacter);
 	static bool IsControlCharacter(Char aCharacter);
 	static bool IsSpecialCharacter(Char aCharacter);
 
@@ -44,4 +47,6 @@ private:
 	i32 myCachedLineAndColumnIndex = 0;
 	i32 myCurrentLineIndex = 0;
 	i32 myCurrentColumnIndex = 0;
+
+	bool myIgnoreNewlines = true;
 };

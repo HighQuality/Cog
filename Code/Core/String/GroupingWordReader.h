@@ -63,15 +63,16 @@ public:
 private:
 	StringView GetCorrespondingClosingSequence(StringView aView, StringView& aOpeningSequence) const;
 	StringView GetCorrespondingOpeningSequence(StringView aView, StringView& aClosingSequence) const;
-	bool AnyParentWantsToStopAtSequence(StringView aSequence) const;
+	bool GetGroupingPair(StringView aView, StringView& aOpeningSequence, StringView& aClosingSequence, bool &aIsOpening, bool &aIsClosing) const;
+	bool AnyParentWantsToStopAtSequence(StringView aSequence, i32& aStopAtDepth, i32 aCurrentDepth = 0) const;
 
 	StringView myCurrentContent;
-	const GroupingWordReader* myParentReader = nullptr;
+	GroupingWordReader* myParentReader = nullptr;
 	i32 myLineOffset = 0;
 	i32 myCurrentGroupFirstContentLineIndex = 0;
 	StringView myCurrentOpeningSequence;
 	StringView myCurrentClosingSequence;
-	StringView myStopAtSequence;
 	u8 myEnabledGroups = static_cast<u8>(GroupingWordReaderGroup::Default);
 	bool myIsAtGroup = false;
+	bool myHasShortCircuited = false;
 };

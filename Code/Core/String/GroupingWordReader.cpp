@@ -9,138 +9,95 @@ GroupingWordReader::GroupingWordReader(const StringView aContent)
 bool GroupingWordReader::Next()
 {
 	myIsAtGroup = false;
-
+	
 	const StringView current = NextWord();
 
 	if (!current)
 		return false;
 
-	if (myParentReader || myStopAtSequence)
-	{
-		i32 stopIndex = MaxOf<i32>;
-
-		// In cases such as "if (a < b)" we need to respect our parents' stop characters
-		if (myParentReader)
-		{
-			for (i32 i = 0; i < current.GetLength(); ++i)
-			{
-				StringView closingSequence;
-
-				if (GetCorrespondingOpeningSequence(current.ChopFromStart(i), closingSequence) && AnyParentWantsToStopAtSequence(closingSequence))
-				{
-					stopIndex = i;
-					break;
-				}
-			}
-		}
-
-		if (myStopAtSequence)
-		{
-			i32 j = Min(stopIndex, current.GetLength());
-
-			for (i32 i = 0; i < j; ++i)
-			{
-				if (current.ChopFromStart(i).StartsWith(myStopAtSequence))
-				{
-					stopIndex = i;
-					break;
-				}
-			}
-		}
-
-		if (stopIndex != MaxOf<i32>)
-		{
-			if (stopIndex > 0)
-			{
-				myCurrentContent = current.SliceFromStart(stopIndex);
-
-				const i32 rewindAmount = current.GetLength() - stopIndex - 1;
-				Rewind(rewindAmount);
-				return true;
-			}
-
-			// Rewind ourself so our user can continue reading at the appropriate location
-			const i32 rewindAmount = current.GetLength() - stopIndex;
-			Rewind(rewindAmount);
-			return false;
-		}
-	}
-
 	for (i32 i = 0; i < current.GetLength(); ++i)
 	{
 		StringView openingSequence;
+		StringView closingSequence;
 
-		if (const StringView closingSequence = GetCorrespondingClosingSequence(current.ChopFromStart(i), openingSequence))
+		bool isOpening;
+		bool isClosing;
+
+		if (GetGroupingPair(current.ChopFromStart(i), openingSequence, closingSequence, isOpening, isClosing))
 		{
-			if (i > 0)
+			if (isClosing)
 			{
-				myCurrentContent = current.SliceFromStart(i);
+				i32 stopAtDepth = 0;
+				if (AnyParentWantsToStopAtSequence(closingSequence, stopAtDepth))
+				{
+					SetReadIndex(GetReadIndex() - current.GetLength() + i);
 
-				const i32 rewindAmount = current.GetLength() - i - 1;
-				Rewind(rewindAmount);
-				return true;
+					if (i > 0)
+					{
+						myCurrentContent = current.SliceFromStart(i);
+						return true;
+					}
+
+					GroupingWordReader* currentParent = myParentReader;
+					for (i32 iShortCircuit = 0; iShortCircuit < stopAtDepth; ++iShortCircuit)
+					{
+						currentParent->myHasShortCircuited = true;
+						currentParent = currentParent->myParentReader;
+					}
+
+					return false;
+				}
 			}
 
-			myIsAtGroup = true;
-			myCurrentOpeningSequence = openingSequence;
-			myCurrentClosingSequence = closingSequence;
-
-			const i32 rewindAmount = current.GetLength() - openingSequence.GetLength();
-			Rewind(rewindAmount);
-			break;
+			if (isOpening)
+			{
+				if (i > 0)
+				{
+					SetReadIndex(GetReadIndex() - current.GetLength() + i);
+					myCurrentContent = current.SliceFromStart(i);
+					return true;
+				}
+					
+				SetReadIndex(GetReadIndex() - current.GetLength() + i + openingSequence.GetLength());
+				myIsAtGroup = true;
+				myCurrentOpeningSequence = openingSequence;
+				myCurrentClosingSequence = closingSequence;
+				break;
+			}
 		}
 	}
-
+	
 	if (!myIsAtGroup)
 	{
 		myCurrentContent = current;
 		return true;
 	}
 
-	// Calculate content line index, PERF: disable
-	{
-		const i32 previousIndex = GetReadIndex();
-		NextWord();
-
-		myCurrentGroupFirstContentLineIndex = CalculateAndGetCurrentLineIndex();
-
-		SetReadIndex(previousIndex);
-	}
+	myCurrentGroupFirstContentLineIndex = CalculateAndGetCurrentLineIndex();
 
 	const i32 innerReaderStart = GetReadIndex();
-	const StringView stringFromGroupContentStart = GetString().ChopFromStart(innerReaderStart);
+	const StringView innerReaderString = GetString().ChopFromStart(innerReaderStart);
 
 	// Include nested groups inside this group, also fixes cases where end character inside of our own group ends the group prematurely
-	GroupingWordReader innerReader(stringFromGroupContentStart);
+	GroupingWordReader innerReader(innerReaderString);
 	innerReader.CopySettingsFrom(*this);
+	innerReader.SetIgnoreNewlines(false);
 	innerReader.myParentReader = this;
-	innerReader.myStopAtSequence = myCurrentClosingSequence;
-
-	bool hadAnyContent = false;
 
 	while (innerReader.Next())
-	{
-		hadAnyContent = true;
-	}
+	{ }
 
+	const i32 innerReaderStop = innerReaderStart + innerReader.GetReadIndex();
 
-	const i32 innerReaderStop = GetReadIndex() + innerReader.GetReadIndex();
-	SetReadIndex(innerReaderStop + 1);
-
-	if (hadAnyContent)
-	{
-		myCurrentContent = GetString().Slice(innerReaderStart, innerReaderStop - innerReaderStart);
-	}
+	if (!myHasShortCircuited)
+		SetReadIndex(innerReaderStop + myCurrentClosingSequence.GetLength());
 	else
-	{
-		myCurrentContent = GetString().Slice(innerReaderStart - myCurrentOpeningSequence.GetLength(), innerReaderStop - innerReaderStart + myCurrentOpeningSequence.GetLength());
+		SetReadIndex(innerReaderStop);
 
-		myIsAtGroup = false;
-	}
-
+	myCurrentContent = GetString().Slice(innerReaderStart, innerReaderStop - innerReaderStart);
 	myCurrentContent.Trim();
-
-	return true;
+	
+	return !myHasShortCircuited;
 }
 
 void GroupingWordReader::EnableGroup(GroupingWordReaderGroup aGroup)
@@ -161,48 +118,78 @@ void GroupingWordReader::DisableAllGroups()
 void GroupingWordReader::CopySettingsFrom(const GroupingWordReader& aOther)
 {
 	myEnabledGroups = aOther.myEnabledGroups;
+	SetIgnoreNewlines(aOther.IsIgnoringNewlines());
 }
 
-StringView GroupingWordReader::GetCorrespondingClosingSequence(const StringView aView, StringView& aOpeningSequence) const
+bool GroupingWordReader::GetGroupingPair(StringView aView, StringView& aOpeningSequence, StringView& aClosingSequence, bool &aIsOpening, bool& aIsClosing) const
 {
 	if (aView.GetLength() == 0)
-		return StringView();
+		return false;
 
 	switch (aView[0])
 	{
 	case L'{':
+	case L'}':
 		if (IsGroupEnabled(GroupingWordReaderGroup::CurlyBraces))
 		{
 			aOpeningSequence = L"{";
-			return L"}";
+			aClosingSequence = L"}";
+			aIsOpening = aView[0] == aOpeningSequence[0];
+			aIsClosing = !aIsOpening;
+			return true;
 		}
 		break;
 	case L'(':
+	case L')':
 		if (IsGroupEnabled(GroupingWordReaderGroup::Parenthesis))
 		{
 			aOpeningSequence = L"(";
-			return L")";
+			aClosingSequence = L")";
+			aIsOpening = aView[0] == aOpeningSequence[0];
+			aIsClosing = !aIsOpening;
+			return true;
 		}
 		break;
 	case L'[':
+	case L']':
 		if (IsGroupEnabled(GroupingWordReaderGroup::SquareBracket))
 		{
 			aOpeningSequence = L"[";
-			return L"]";
+			aClosingSequence = L"]";
+			aIsOpening = aView[0] == aOpeningSequence[0];
+			aIsClosing = !aIsOpening;
+			return true;
 		}
 		break;
 	case L'<':
+	case L'>':
 		if (IsGroupEnabled(GroupingWordReaderGroup::AngleBracket))
 		{
 			aOpeningSequence = L"<";
-			return L">";
+			aClosingSequence = L">";
+			aIsOpening = aView[0] == aOpeningSequence[0];
+			aIsClosing = !aIsOpening;
+			return true;
+		}
+		break;
+	case L'\n':
+		if (IsGroupEnabled(GroupingWordReaderGroup::CppSingleLineComment))
+		{
+			aOpeningSequence = L"//";
+			aClosingSequence = L"\n";
+			aIsOpening = false;
+			aIsClosing = !aIsOpening;
+			return true;
 		}
 		break;
 	case L'"':
 		if (IsGroupEnabled(GroupingWordReaderGroup::CppLiteralStringWithEscapeCharacters))
 		{
 			aOpeningSequence = L"\"";
-			return L"\"";
+			aClosingSequence = L"\"";
+			aIsOpening = true;
+			aIsClosing = true;
+			return true;
 		}
 		break;
 	default:
@@ -218,99 +205,45 @@ StringView GroupingWordReader::GetCorrespondingClosingSequence(const StringView 
 				if (aView[1] == L'/')
 				{
 					aOpeningSequence = L"//";
-					return L"\n";
+					aClosingSequence = L"\n";
+					aIsOpening = true;
+					return true;
 				}
 			}
 
 			if (IsGroupEnabled(GroupingWordReaderGroup::CppMultiLineComment))
 			{
-				if (aView[1] == L'*')
-				{
-					aOpeningSequence = L"/*";
-					return L"*/";
-				}
-			}
-		}
-	}
-
-	return StringView();
-}
-
-StringView GroupingWordReader::GetCorrespondingOpeningSequence(const StringView aView, StringView& aClosingSequence) const
-{
-	if (aView.GetLength() == 0)
-		return StringView();
-
-	switch (aView[0])
-	{
-	case L'}':
-		if (IsGroupEnabled(GroupingWordReaderGroup::CurlyBraces))
-		{
-			aClosingSequence = L"}";
-			return L"{";
-		}
-		break;
-	case L')':
-		if (IsGroupEnabled(GroupingWordReaderGroup::Parenthesis))
-		{
-			aClosingSequence = L")";
-			return L"(";
-		}
-		break;
-	case L']':
-		if (IsGroupEnabled(GroupingWordReaderGroup::SquareBracket))
-		{
-			aClosingSequence = L"]";
-			return L"[";
-		}
-		break;
-	case L'>':
-		if (IsGroupEnabled(GroupingWordReaderGroup::AngleBracket))
-		{
-			aClosingSequence = L">";
-			return L"<";
-		}
-		break;
-	case L'"':
-		if (IsGroupEnabled(GroupingWordReaderGroup::CppLiteralStringWithEscapeCharacters))
-		{
-			aClosingSequence = L"\"";
-			return L"\"";
-		}
-		break;
-	case L'\n':
-		if (IsGroupEnabled(GroupingWordReaderGroup::CppSingleLineComment))
-		{
-			aClosingSequence = L"\n";
-			return L"//";
-		}
-		break;
-	default:
-		break;
-	}
-
-	if (IsGroupEnabled(GroupingWordReaderGroup::CppMultiLineComment))
-	{
-		if (aView.GetLength() >= 2)
-		{
-			if (aView[0] == L'*' && aView[1] == L'/')
-			{
+				aOpeningSequence = L"/*";
 				aClosingSequence = L"*/";
-				return L"/*";
+				aIsOpening = true;
+				return true;
+			}
+		}
+		else if (aView[0] == L'*' && aView[1] == L'/')
+		{
+			if (IsGroupEnabled(GroupingWordReaderGroup::CppMultiLineComment))
+			{
+				aOpeningSequence = L"/*";
+				aClosingSequence = L"*/";
+				aIsOpening = false;
+				return true;
 			}
 		}
 	}
 
-	return StringView();
+	return false;
 }
 
-bool GroupingWordReader::AnyParentWantsToStopAtSequence(const StringView aSequence) const
+bool GroupingWordReader::AnyParentWantsToStopAtSequence(const StringView aSequence, i32& aStopAtDepth, const i32 aCurrentDepth) const
 {
 	if (!myParentReader)
 		return false;
 
-	if (myParentReader->myStopAtSequence == aSequence)
+	if (myParentReader->myCurrentClosingSequence == aSequence)
+	{
+		aStopAtDepth = aCurrentDepth;
 		return true;
+	}
 
-	return myParentReader->AnyParentWantsToStopAtSequence(aSequence);
+	return myParentReader->AnyParentWantsToStopAtSequence(aSequence, aStopAtDepth, aCurrentDepth + 1);
 }

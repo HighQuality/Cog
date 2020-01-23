@@ -6,7 +6,12 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
 	// QueueHighPrioWork(void(*aFunction)(TExtraData*), TExtraData* aArgument)
 	// (*aFunction)(TExtraData*)
-	GroupingWordReader reader(L"{< }abc");
+	GroupingWordReader reader(L"\
+{\n\
+// {\n\
+// }\n\
+}");
+
 	while (reader.Next())
 	{
 		if (reader.IsAtGroup())
