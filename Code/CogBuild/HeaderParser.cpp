@@ -48,8 +48,8 @@ GeneratedCode& HeaderParser::Parse()
 						return myGeneratedCode;
 					}
 
-					const bool isOpenedByAngleBracket = IsAtGroup(L'<');
-					const bool isOpenedByQuotationMarks = IsAtGroup(L'\"');
+					const bool isOpenedByAngleBracket = IsAtGroup(L"<");
+					const bool isOpenedByQuotationMarks = IsAtGroup(L"\"");
 
 					if (isOpenedByAngleBracket || isOpenedByQuotationMarks)
 					{
@@ -180,6 +180,10 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		{
 			TODO;
 		}
+		else if (currentParameter == L"SetDebugFlag")
+		{
+			cogClass.SetDebugFlag(true);
+		}
 		else
 		{
 			ReportErrorAtLine(Format(L"Unknown parameter ", currentParameter).View(), generatedBodyLineIndex);
@@ -267,7 +271,7 @@ bool HeaderParser::ParseCogListener(CogClass& aClass, GroupingWordReader& aBodyR
 
 bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyReader)
 {
-	if (!aBodyReader.Next() || !aBodyReader.IsAtGroup() || aBodyReader.GetOpeningCharacter() != L'(')
+	if (!aBodyReader.Next() || !aBodyReader.IsAtGroup() || aBodyReader.GetOpeningSequence() != L"(")
 	{
 		ReportErrorWithInnerReader(aBodyReader, L"Expected '('");
 		return false;
@@ -309,9 +313,9 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 
 		if (parameterReader.IsAtGroup())
 		{
-			property.propertyType.Add(parameterReader.GetOpeningCharacter());
+			property.propertyType.Append(parameterReader.GetOpeningSequence());
 			property.propertyType.Append(parameterReader.GetCurrentWordOrGroup());
-			property.propertyType.Add(parameterReader.GetClosingCharacter());
+			property.propertyType.Append(parameterReader.GetClosingSequence());
 
 			if (!parameterReader.Next())
 			{
@@ -392,7 +396,11 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 			{
 				TODO;
 			}
-			else if (parameter == L"PerType") /* This variable is not stored per instance, but instead is shared between instances. Only readable, subclasses may override the default through a TBD syntax. */
+			else if (parameter == L"PerType") /* This variable is not stored per instance, but instead is shared between instances. Subclasses may override the default through a TBD syntax. */
+			{
+				TODO;
+			}
+			else if (parameter == L"ReadOnly") /* The value may never differ from the default, implies PerType. */
 			{
 				TODO;
 			}
@@ -400,7 +408,11 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 			{
 				TODO;
 			}
-			else if (parameter == L"Config") /* Default value read from config file, default value from declaration is used if not specified in config file. Figure out priority system and syntax for these files. */
+			else if (parameter == L"Config") /* Default value read from config file, default value from declaration is used if not specified in config file. Figure out priority system and syntax for these files. Subclasses that override the default value will override the config. If the config wants priority it should change the subclass' default for this property. */
+			{
+				TODO;
+			}
+			else if (parameter == L"Uninitialized") /* The memory occupied by this property should not be zeroed before a new instance gets access to it. We might want to be implicit if a default value is specified. */
 			{
 				TODO;
 			}
@@ -482,9 +494,9 @@ bool HeaderParser::TryConsume(const StringView aString)
 	return false;
 }
 
-bool HeaderParser::IsAtGroup(const Char aOpener)
+bool HeaderParser::IsAtGroup(const StringView aOpener)
 {
-	if (myWordReader.IsAtGroup() && myWordReader.GetOpeningCharacter() == aOpener)
+	if (myWordReader.IsAtGroup() && myWordReader.GetOpeningSequence() == aOpener)
 	{
 		return true;
 	}
@@ -528,9 +540,9 @@ bool HeaderParser::MoveNextExpectParenthesisGroup()
 		return false;
 	}
 
-	if (myWordReader.GetOpeningCharacter() != L'(')
+	if (myWordReader.GetOpeningSequence() != L"(")
 	{
-		ReportError(L"Expected '(', got '%'", myWordReader.GetOpeningCharacter());
+		ReportError(L"Expected '(', got '%'", myWordReader.GetOpeningSequence());
 		return false;
 	}
 
@@ -551,9 +563,9 @@ bool HeaderParser::MoveNextExpectBracesGroup()
 		return false;
 	}
 
-	if (myWordReader.GetOpeningCharacter() != L'{')
+	if (myWordReader.GetOpeningSequence() != L"{")
 	{
-		ReportError(L"Expected '{', got '%'", myWordReader.GetOpeningCharacter());
+		ReportError(L"Expected '{', got '%'", myWordReader.GetOpeningSequence());
 		return false;
 	}
 

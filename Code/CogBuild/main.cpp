@@ -4,6 +4,25 @@
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
+	// QueueHighPrioWork(void(*aFunction)(TExtraData*), TExtraData* aArgument)
+	// (*aFunction)(TExtraData*)
+	GroupingWordReader reader(L"{< }abc");
+	while (reader.Next())
+	{
+		if (reader.IsAtGroup())
+			Println(L" \"%\"", reader.GetOpeningSequence());
+
+		Println(L"% \"%\"", reader.IsAtGroup() ? L"\t" : L"", reader.GetCurrentWordOrGroup());
+
+		if (reader.IsAtGroup())
+		{
+			Println(L" \"%\"", reader.GetClosingSequence());
+			Println(L"---");
+		}
+	}
+
+	std::cin.get();
+
 	defer { if (IsDebuggerPresent()) std::cin.get(); };
 
 	// Println(L"% args", argc);

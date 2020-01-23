@@ -279,6 +279,22 @@ public:
 		return *this;
 	}
 
+	bool StartsWith(const ArrayView& aArray) const
+	{
+		if (GetLength() < aArray.GetLength())
+			return false;
+
+		return SliceFromStart(aArray.GetLength()) == aArray;
+	}
+
+	bool EndsWith(const ArrayView& aArray) const
+	{
+		if (GetLength() < aArray.GetLength())
+			return false;
+
+		return SliceFromEnd(aArray.GetLength()) == aArray;
+	}
+
 protected:
 #if ARRAY_BOUNDSCHECK
 	static void OutOfBounds()

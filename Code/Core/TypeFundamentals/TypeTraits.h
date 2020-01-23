@@ -186,7 +186,7 @@ template <typename T>
 RemoveReference<T>&& Move(const T& Object) = delete;
 
 template <typename T>
-RemoveReference<T>&& Move(T&& Object)
+FORCEINLINE RemoveReference<T>&& Move(T&& Object)
 {
 	return static_cast<RemoveReference<T>&&>(Object);
 }

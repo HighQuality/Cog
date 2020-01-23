@@ -20,6 +20,8 @@ public:
 	void SetSpecializesBaseClass(const bool aSpecializesBaseClass) { mySpecializesBaseClass = aSpecializesBaseClass; }
 	bool SpecializesBaseClass() const { return mySpecializesBaseClass; }
 
+	void SetDebugFlag(const bool aDebugFlag) { myDebugFlag = aDebugFlag; }
+
 	void SetIsFinal(bool aIsFinal);
 
 	void RegisterCogProperty(CogProperty aProperty);
@@ -32,5 +34,6 @@ private:
 	i32 myGeneratedBodyLineIndex = -1;
 	bool mySpecializesBaseClass = false;
 	bool myIsFinal = false;
+	bool myDebugFlag = false;
 };
 

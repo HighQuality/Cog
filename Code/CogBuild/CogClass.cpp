@@ -40,18 +40,25 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 		else
 			generatedLines.Add(String(L"private:"));
 		
-		generatedLines.Add(Format(L"FORCEINLINE const %& Get%() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
-		
+		const bool hasSpecialName = prop.propertyName.StartsWith(L"Is");
+		const String getterName = hasSpecialName ? String(prop.propertyName) : Format(L"Get%", prop.propertyName);
+
+		// Only generate the shorthand special name if we haven't specified DirectAccess in order to avoid a naming conflict
+		if (!hasSpecialName || !prop.directAccess)
+			generatedLines.Add(Format(L"FORCEINLINE const %& %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, getterName, prop.propertyName));
+
+		generatedLines.Add(String(L"private:"));
+
 		if (prop.directAccess)
 		{
-			generatedLines.Add(String(L"private:"));
+			generatedLines.Add(Format(L"FORCEINLINE %& Set%(% aNewValue) { auto& value = GetChunk().Access%(myChunkIndex); value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+			
 			generatedLines.Add(Format(L"FORCEINLINE const %& %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
 			generatedLines.Add(Format(L"FORCEINLINE %& %() { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
 		}
 		else
 		{
-			generatedLines.Add(String(L"private:"));
-			generatedLines.Add(Format(L"FORCEINLINE void Set%(% aNewValue) { GetChunk().Access%(myChunkIndex) = Move(aNewValue); }", prop.propertyName, prop.propertyType, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE const %& Set%(% aNewValue) { auto& value = GetChunk().Access%(myChunkIndex); value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
 		}
 	}
 	

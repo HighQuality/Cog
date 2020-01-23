@@ -27,7 +27,7 @@ private:
 	bool At(StringView aString) const;
 	bool Expect(StringView aString);
 	bool TryConsume(StringView aString);
-	bool IsAtGroup(Char aOpener);
+	bool IsAtGroup(StringView aOpener);
 	bool MoveNext();
 	bool MoveNextExpectWord();
 	bool MoveNextExpectParenthesisGroup();

@@ -4,21 +4,21 @@
 #include <Time/Stopwatch.h>
 #include "Threading/Fibers/Await.h"
 #include "Pointer.h"
+#include "QueuedProgramWork.h"
+#include "Program.generated.h"
 
 class Object;
 class ThreadPool;
 class Fiber;
 
-template <typename T>
-T& DefaultAllocate();
-template <typename T>
-void DefaultFree(T& aObject);
-
-class Program
+COGTYPE(SetDebugFlag)
+class Program : public Object
 {
+	GENERATED_BODY;
+	
 public:
 	Program();
-	~Program();
+	virtual ~Program();
 
 	void Run(bool aPrintDebugInfo);
 
@@ -27,7 +27,7 @@ public:
 
 	static Program& Get();
 
-	bool IsInMainThread() const { return myMainThread == ThreadID::Get(); }
+	bool IsInMainThread() const;
 	bool IsInManagedThread() const;
 
 	void RegisterUnusedFiber(Fiber* aFiber);
@@ -35,21 +35,21 @@ public:
 	template <typename TExtraData>
 	void QueueHighPrioWork(void(*aFunction)(TExtraData*), TExtraData* aArgument)
 	{
-		std::unique_lock<std::mutex> lck(myWorkMutex);
-		myHighPrioWorkQueue.Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
+		std::unique_lock<std::mutex> lck(WorkMutex());
+		HighPrioWorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
 		lck.unlock();
 
-		myWorkNotify.notify_one();
+		WorkNotify().notify_one();
 	}
 
 	template <typename TExtraData>
 	void QueueWork(void(*aFunction)(TExtraData*), TExtraData* aArgument)
 	{
-		std::unique_lock<std::mutex> lck(myWorkMutex);
-		myWorkQueue.Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
+		std::unique_lock<std::mutex> lck(WorkMutex());
+		WorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
 		lck.unlock();
 
-		myWorkNotify.notify_one();
+		WorkNotify().notify_one();
 	}
 
 	void QueueFiber(Fiber* aFiber);
@@ -79,16 +79,17 @@ public:
 	// 
 	// 	i32 numWorkPerWorker = 1;
 	// 	i32 extraWorkForLastWorker = 0;
-	// 
-	// 	if (aWorkItems.GetLength() > myNumWorkers)
+	//	const i32 numWorkers = GetNumWorkers(); 
+	//
+	// 	if (aWorkItems.GetLength() > numWorkers)
 	// 	{
-	// 		aWorkItems.GetLength() / myNumWorkers;
+	// 		aWorkItems.GetLength() / numWorkers;
 	// 		extraWorkForLastWorker = aWorkItems.GetLength() - numWorkPerWorker;
 	// 	}
 	// 
-	// 	const i32 numWorks = Min(aWorkItems.GetLength(), myNumWorkers);
+	// 	const i32 numWorks = Min(aWorkItems.GetLength(), numWorkers);
 	// 
-	// 	std::unique_lock<std::mutex> lck(myWorkMutex);
+	// 	std::unique_lock<std::mutex> lck(WorkMutex());
 	// 
 	// 	i32 from = 0;
 	// 
@@ -133,41 +134,35 @@ private:
 
 	void FiberMain();
 
-	const ThreadID& myMainThread;
-	ThreadPool* myBackgroundWorkThreadPool;
+	COGPROPERTY(UniquePtr<ThreadPool> BackgroundWorkThreadPool, DirectAccess);
 
-	std::mutex myFiberMutex;
-	Stack<Fiber*> myUnusedFibers;
+	COGPROPERTY(std::mutex FiberMutex, DirectAccess);
+	COGPROPERTY(Stack<Fiber*> UnusedFibers, DirectAccess);
 
-	std::mutex myWorkMutex;
-	std::condition_variable myWorkNotify;
-	Array<std::thread> myWorkers;
+	COGPROPERTY(std::mutex WorkMutex, DirectAccess);
+	COGPROPERTY(std::condition_variable WorkNotify, DirectAccess);
+	COGPROPERTY(Array<std::thread> Workers, DirectAccess);
 
-	bool myIsStopping = false;
+	COGPROPERTY(bool IsStopping = false);
 
-	std::condition_variable myWakeMainNotify;
-	std::mutex myWakeMainMutex;
+	COGPROPERTY(std::condition_variable WakeMainNotify, DirectAccess);
+	COGPROPERTY(std::mutex WakeMainMutex, DirectAccess);
 
-	i32 mySleepingThreads = 0;
+	COGPROPERTY(i32 SleepingThreads = 0);
 
-	i32 myNumWorkers;
+	COGPROPERTY(i32 NumWorkers);
 
-	struct QueuedWork
-	{
-		void(*function)(void*) = nullptr;
-		void* argument = nullptr;
-	};
+	COGPROPERTY(Array<QueuedProgramWork> HighPrioWorkQueue, DirectAccess);
+	COGPROPERTY(Array<QueuedProgramWork> WorkQueue, DirectAccess);
+	COGPROPERTY(Array<Fiber*> QueuedFibers, DirectAccess);
 
-	Array<QueuedWork> myHighPrioWorkQueue;
-	Array<QueuedWork> myWorkQueue;
-	Array<Fiber*> myQueuedFibers;
-
-	bool myIsMainRunning = true;
+	COGPROPERTY(bool IsMainRunning = true);
 	
-	Stopwatch myWatch;
-	i32 myFrames = 0;
-	i32 myElapsedSeconds = 0;
+	COGPROPERTY(Stopwatch Watch, DirectAccess);
+	COGPROPERTY(i32 Frames);
+	COGPROPERTY(i32 ElapsedSeconds);
 
+	COGPROPERTY(const ThreadID* MainThreadID);
 };
 
 extern Program* gProgram;

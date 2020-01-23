@@ -8,8 +8,6 @@
 #include "ResourceManager.h"
 #include "MessageSystem.h"
 
-CogGame* CogGame::ourGame;
-
 bool IsInGameThread()
 {
 	return GetGame().IsInGameThread();
@@ -32,7 +30,7 @@ void RunGame()
 }
 
 CogGame::CogGame()
-	: myGameThreadID(ThreadID::Get()),
+	: myMainThreadID(ThreadID::Get()),
 	myFrameData(MakeUnique<FrameData>()),
 	myMessageSystem(MakeUnique<MessageSystem>())
 {
@@ -84,6 +82,11 @@ void CogGame::Run()
 
 		TickDestroys();
 	}
+}
+
+bool CogGame::IsInGameThread() const
+{
+	return myMainThreadID == ThreadID::Get();
 }
 
 void CogGame::SynchronizedTick(const Time& aDeltaTime)

@@ -13,4 +13,7 @@ namespace CogTLS
 	
 	NOINLINE void SetProhibitAwaits(bool aProhibitAwaits);
 	NOINLINE bool GetProhibitAwaits();
+
+	NOINLINE void MarkThreadAsManaged();
+	NOINLINE bool IsInManagedThread();
 }

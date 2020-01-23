@@ -18,6 +18,8 @@ public:
 	FORCEINLINE StringView(const ArrayView& aStringView)
 		: Super(aStringView)
 	{
+		if (GetLength() > 0 && Last() == L'\0')
+			--this->myLength;
 	}
 
 	FORCEINLINE StringView(const Char* aString)
@@ -147,6 +149,10 @@ public:
 		copy.Trim();
 		return copy;
 	}
+
+	bool StartsWith(const StringView& aArray) const { return ArrayView<Char>::StartsWith(aArray); }
+
+	bool EndsWith(const StringView& aArray) const { return ArrayView<Char>::EndsWith(aArray); }
 
 	FORCEINLINE explicit operator bool() const { return GetLength() > 0; }
 
