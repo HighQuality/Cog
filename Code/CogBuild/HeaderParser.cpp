@@ -282,40 +282,40 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 
 	if (!parameterReader.Next())
 	{
-		ReportErrorWithInnerReader(aBodyReader, L"Expected COGPROPERTY declaration");
+		ReportErrorWithInnerReader(parameterReader, L"Expected COGPROPERTY declaration");
 		return false;
 	}
 
-	CogProperty property;
+	CogProperty newProperty;
 
 	for (;;)
 	{
 		while (parameterReader.GetCurrentWord() == L"const" ||
 			parameterReader.GetCurrentWord() == L"volatile")
 		{
-			property.propertyType.Append(parameterReader.GetCurrentWord());
-			property.propertyType.Add(L' ');
+			newProperty.propertyType.Append(parameterReader.GetCurrentWord());
+			newProperty.propertyType.Add(L' ');
 
 			if (!parameterReader.Next())
 			{
-				ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
+				ReportErrorWithInnerReader(parameterReader, L"Unexpected end of COGPROPERTY");
 				return false;
 			}
 		}
 
-		property.propertyType.Append(parameterReader.GetCurrentWordOrGroup());
+		newProperty.propertyType.Append(parameterReader.GetCurrentWordOrGroup());
 
 		if (!parameterReader.Next())
 		{
-			ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
+			ReportErrorWithInnerReader(parameterReader, L"Unexpected end of COGPROPERTY");
 			return false;
 		}
 
 		if (parameterReader.IsAtGroup())
 		{
-			property.propertyType.Append(parameterReader.GetOpeningSequence());
-			property.propertyType.Append(parameterReader.GetCurrentWordOrGroup());
-			property.propertyType.Append(parameterReader.GetClosingSequence());
+			newProperty.propertyType.Append(parameterReader.GetOpeningSequence());
+			newProperty.propertyType.Append(parameterReader.GetCurrentWordOrGroup());
+			newProperty.propertyType.Append(parameterReader.GetClosingSequence());
 
 			if (!parameterReader.Next())
 			{
@@ -328,29 +328,29 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 			parameterReader.GetCurrentWord() == L"&" ||
 			parameterReader.GetCurrentWord() == L"const")
 		{
-			property.propertyType.Append(parameterReader.GetCurrentWord());
-			property.propertyType.Add(L' ');
+			newProperty.propertyType.Append(parameterReader.GetCurrentWord());
+			newProperty.propertyType.Add(L' ');
 
 			if (!parameterReader.Next())
 			{
-				ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY");
+				ReportErrorWithInnerReader(parameterReader, L"Unexpected end of COGPROPERTY");
 				return false;
 			}
 		}
 
 		if (parameterReader.IsAtGroup())
 		{
-			ReportErrorWithInnerReader(aBodyReader, L"Invalid C++ type in COGPROPERTY");
+			ReportErrorWithInnerReader(parameterReader, L"Invalid C++ type in COGPROPERTY");
 			return false;
 		}
 
 		if (parameterReader.GetCurrentWordOrGroup() == L"::")
 		{
-			property.propertyType.Append(L"::");
+			newProperty.propertyType.Append(L"::");
 			
 			if (!parameterReader.Next())
 			{
-				ReportErrorWithInnerReader(aBodyReader, L"Invalid C++ type in COGPROPERTY");
+				ReportErrorWithInnerReader(parameterReader, L"Invalid C++ type in COGPROPERTY");
 				return false;
 			}
 
@@ -360,75 +360,116 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 		break;
 	}
 	
-	property.propertyName = String(parameterReader.GetCurrentWordOrGroup());
+	newProperty.propertyName = String(parameterReader.GetCurrentWordOrGroup());
 
-	// TODO: Parse default value
-	
-	while (parameterReader.Next())
+	if (parameterReader.Next())
 	{
-		if (parameterReader.GetCurrentWordOrGroup() == L",")
-		{
-			if (!parameterReader.Next())
-			{
-				ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY parameter list", parameterReader.GetCurrentWordOrGroup());
-				return false;
-			}
+		bool reachedEnd = false;
 
-			const StringView parameter = parameterReader.GetCurrentWordOrGroup();
-			
-			if (parameter == L"DirectAccess") /* Generates "TYPE& PROPERTY();" and "const TYPE& PROPERTY() const;" */
+		if (parameterReader.GetCurrentWordOrGroup() == L"=")
+		{
+			newProperty.zeroMemory = false;
+
+			if (parameterReader.Next())
 			{
-				property.directAccess = true;
-			}
-			else if (parameter == L"PublicRead") /* Exposes const TYPE& GetPROPERTY() to other classes, not affected by DirectAccess. Be aware of thread synchronization. */
-			{
-				property.publicRead = true;
-			}
-			else if (parameter == L"Replicated") /* Replicates over the network, should require "Replicated" in COGTYPE() or base class, a parameter which should be inherited. Incompatible with DirectAccess because we want to be notified of changes to these variables. */
-			{
-				TODO;
-			}
-			else if (parameter == L"OnChanged") /* OnChanged = FunctionName, calls function when value is changed, incompatible with DirectAccess so it can't be written to without our knowledge. (Should this happen immediately or be scheduled? Scheduling would be consistent but would make it hard to debug. Anything writing to it would also only have handled synchronization of that property only.) */
-			{
-				TODO;
-			}
-			else if (parameter == L"Borrowable") /* Generates "Borrowed<TYPE> BorrowPROPERTY()". This moves the property out of the chunk into the Borrowed instance and on destruction calls "SetPROPERTY(Move(myValue));". This allows for nicer access to variables that do not support DirectAccess due to change notifies. Accessing the underlying property during borrows is UB, could potentially be checked for in debug builds though. */
-			{
-				TODO;
-			}
-			else if (parameter == L"PerType") /* This variable is not stored per instance, but instead is shared between instances. Subclasses may override the default through a TBD syntax. */
-			{
-				TODO;
-			}
-			else if (parameter == L"ReadOnly") /* The value may never differ from the default, implies PerType. */
-			{
-				TODO;
-			}
-			else if (parameter == L"DoubleBuffered") /* Every frame, save a copy of this value so the old value safely can be accessed from other threads. GetBufferedPROPERTY() (?) (publicly accessible?) */
-			{
-				TODO;
-			}
-			else if (parameter == L"Config") /* Default value read from config file, default value from declaration is used if not specified in config file. Figure out priority system and syntax for these files. Subclasses that override the default value will override the config. If the config wants priority it should change the subclass' default for this property. */
-			{
-				TODO;
-			}
-			else if (parameter == L"Uninitialized") /* The memory occupied by this property should not be zeroed before a new instance gets access to it. We might want to be implicit if a default value is specified. */
-			{
-				TODO;
+				for (;;)
+				{
+					if (parameterReader.IsAtGroup())
+						newProperty.defaultValue.Append(parameterReader.GetOpeningSequence());
+
+					newProperty.defaultValue.Append(parameterReader.GetCurrentWordOrGroup());
+
+					if (parameterReader.IsAtGroup())
+						newProperty.defaultValue.Append(parameterReader.GetClosingSequence());
+
+					newProperty.defaultValue.Add(L' ');
+
+					if (!parameterReader.Next())
+					{
+						reachedEnd = true;
+						break;
+					}
+
+					if (parameterReader.GetCurrentWordOrGroup() == L",")
+						break;
+				}
 			}
 			else
 			{
-				ReportErrorWithInnerReader(aBodyReader, L"Unknown COGPROPERTY parameter %", parameterReader.GetCurrentWordOrGroup());
+				ReportErrorWithInnerReader(aBodyReader, L"Invalid C++ type in COGPROPERTY");
 				return false;
 			}
 		}
-		else
+
+		if (!reachedEnd)
 		{
-			ReportErrorWithInnerReader(aBodyReader, L"Expected ',' or end of COGPROPERTY declaration, instead got ", parameterReader.GetCurrentWordOrGroup());
-			return false;
+			do
+			{
+				if (parameterReader.GetCurrentWordOrGroup() == L",")
+				{
+					if (!parameterReader.Next())
+					{
+						ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of COGPROPERTY parameter list", parameterReader.GetCurrentWordOrGroup());
+						return false;
+					}
+
+					const StringView parameter = parameterReader.GetCurrentWordOrGroup();
+
+					if (parameter == L"DirectAccess") /* Generates "TYPE& PROPERTY();" and "const TYPE& PROPERTY() const;" */
+					{
+						newProperty.directAccess = true;
+					}
+					else if (parameter == L"PublicRead") /* Exposes const TYPE& GetPROPERTY() to other classes, not affected by DirectAccess. Be aware of thread synchronization. */
+					{
+						newProperty.publicRead = true;
+					}
+					else if (parameter == L"Replicated") /* Replicates over the network, should require "Replicated" in COGTYPE() or base class, a parameter which should be inherited. Incompatible with DirectAccess because we want to be notified of changes to these variables. */
+					{
+						TODO;
+					}
+					else if (parameter == L"OnChanged") /* OnChanged = FunctionName, calls function when value is changed, incompatible with DirectAccess so it can't be written to without our knowledge. (Should this happen immediately or be scheduled? Scheduling would be consistent but would make it hard to debug. Anything writing to it would also only have handled synchronization of that property only.) */
+					{
+						TODO;
+					}
+					else if (parameter == L"Borrowable") /* Generates "Borrowed<TYPE> BorrowPROPERTY()". This moves the property out of the chunk into the Borrowed instance and on destruction calls "SetPROPERTY(Move(myValue));". This allows for nicer access to variables that do not support DirectAccess due to change notifies. Accessing the underlying property during borrows is UB, could potentially be checked for in debug builds though. */
+					{
+						TODO;
+					}
+					else if (parameter == L"PerType") /* This variable is not stored per instance, but instead is shared between instances. Subclasses may override the default through a TBD syntax. */
+					{
+						TODO;
+					}
+					else if (parameter == L"ReadOnly") /* The value may never differ from the default, implies PerType. */
+					{
+						TODO;
+					}
+					else if (parameter == L"DoubleBuffered") /* Every frame, save a copy of this value so the old value safely can be accessed from other threads. GetBufferedPROPERTY() (?) (publicly accessible?) */
+					{
+						TODO;
+					}
+					else if (parameter == L"Config") /* Default value read from config file, default value from declaration is used if not specified in config file. Figure out priority system and syntax for these files. Subclasses that override the default value will override the config. If the config wants priority it should change the subclass' default for this property. */
+					{
+						TODO;
+					}
+					else if (parameter == L"Uninitialized") /* The memory occupied by this property should not be zeroed before a new instance gets access to it. We might want to be implicit if a default value is specified. */
+					{
+						newProperty.zeroMemory = false;
+					}
+					else
+					{
+						ReportErrorWithInnerReader(aBodyReader, L"Unknown COGPROPERTY parameter %", parameterReader.GetCurrentWordOrGroup());
+						return false;
+					}
+				}
+				else
+				{
+					ReportErrorWithInnerReader(aBodyReader, L"Expected ',' or end of COGPROPERTY declaration, instead got ", parameterReader.GetCurrentWordOrGroup());
+					return false;
+				}
+			} while (parameterReader.Next());
 		}
 	}
-	
+
 	if (!aBodyReader.Next())
 	{
 		ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of body");
@@ -440,8 +481,8 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 		ReportErrorWithInnerReader(aBodyReader, L"Expected ';'");
 		return false;
 	}
-		
-	aClass.RegisterCogProperty(Move(property));
+	
+	aClass.RegisterCogProperty(Move(newProperty));
 	
 	return true;
 }
