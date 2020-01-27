@@ -3,12 +3,14 @@
 #include "GeneratedFunction.h"
 #include "CogProperty.h"
 
+struct ClassPropertyInitializerData;
+
 class CogClass : public CogType
 {
 public:
 	using Base = CogType;
 
-	CogClass(String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex);
+	CogClass(String aAbsoluteFilePath, i32 aDeclarationLine, String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex);
 
 	Array<String> GenerateGeneratedBodyContents(StringView aGeneratedHeaderIdentifier) const;
 	Array<String> GenerateCogTypeChunkHeaderContents() const;
@@ -25,7 +27,12 @@ public:
 	void SetIsFinal(bool aIsFinal);
 
 	void RegisterCogProperty(CogProperty aProperty);
+
+protected:
+	FORCEINLINE const CogClass* GetBaseType() const { return static_cast<const CogClass*>(Base::GetBaseType()); }
 	
+	void GatherPropertyInitializers(Map<StringView, ClassPropertyInitializerData>& aPropertyInitializers) const;
+
 private:
 	Array<GeneratedFunction> myGeneratedFunctions;
 	Array<CogProperty> myProperties;
@@ -37,3 +44,9 @@ private:
 	bool myDebugFlag = false;
 };
 
+struct ClassPropertyInitializerData
+{
+	StringView defaultValue;
+	StringView propertyType;
+	bool zeroMemory;
+};

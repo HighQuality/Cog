@@ -25,6 +25,7 @@
 #pragma warning ( disable : 4505 ) // Unreferenced local function has been removed
 #pragma warning ( disable : 4714 ) // Function marked as __forceinline not inlined
 #pragma warning ( disable : 4065 )
+#pragma warning ( disable : 4702 ) // Unreachable code
 
 #define _HAS_EXCEPTIONS 0
 #define _ITERATOR_DEBUG_LEVEL 0

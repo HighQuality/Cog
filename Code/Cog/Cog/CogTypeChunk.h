@@ -54,7 +54,15 @@ protected:
 	friend class Ptr;
 
 	virtual UniquePtr<Object> CreateDefaultObject() const;
-	
+	virtual void InitializeObjectAtIndex(u8 aIndex);
+	virtual void DestructObjectAtIndex(u8 aIndex);
+
+	template <typename T>
+	static void DestructObjectHelper(T* aObject)
+	{
+		aObject->~T();
+	}
+
 private:
 	Array<void(*)(const Message&, CogTypeChunk*, ArrayView<u8>)> myMessageBroadcasters;
 	Array<void(*)(const Message&, CogTypeChunk*, u8)> myMessageSenders;

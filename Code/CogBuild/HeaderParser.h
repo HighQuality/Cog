@@ -11,10 +11,14 @@ class HeaderParser
 public:
 	HeaderParser(const File* aMainFile, String aHeaderIncludePath);
 
-	GeneratedCode& Parse();
+	void Parse();
 
-	bool HasErrors() const { return myErrors.GetLength() > 0; }
-	ArrayView<String> GetErrors() { return myErrors; }
+	FORCEINLINE bool HasErrors() const { return myErrors.GetLength() > 0; }
+	FORCEINLINE ArrayView<String> GetErrors() { return myErrors; }
+
+	FORCEINLINE bool HasGeneratedCode() const { return myGeneratedCode.HasGeneratedCode(); }
+
+	FORCEINLINE const GeneratedCode& GetGeneratedCode() const { return myGeneratedCode; }
 
 private:
 	void ParseCogType();

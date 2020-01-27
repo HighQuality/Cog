@@ -70,6 +70,19 @@ public:
 		*this = aCopy;
 	}
 
+	// TODO: Rewrite to support non-default constructible types
+	template <typename U>
+	explicit Array(const ArrayView<U>& aCopy)
+		: Super()
+	{
+		const i32 length = aCopy.GetLength();
+
+		Resize(length);
+
+		for (i32 i = 0; i < length; ++i)
+			(*this)[i] = aCopy[i];
+	}
+
 	FORCEINLINE Array& operator=(const Array& aCopy)
 	{
 		*this = static_cast<const ArraySlice<T>&>(aCopy);

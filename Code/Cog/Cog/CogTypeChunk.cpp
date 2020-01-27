@@ -87,6 +87,9 @@ Ptr<Object> CogTypeChunk::Allocate()
 		obj->myChunk = this;
 		obj->myChunkIndex = allocatedIndex;
 		obj->myGeneration = ++myGeneration[allocatedIndex];
+
+		InitializeObjectAtIndex(allocatedIndex);
+
 		return obj;
 	}
 
@@ -94,6 +97,16 @@ Ptr<Object> CogTypeChunk::Allocate()
 }
 
 UniquePtr<Object> CogTypeChunk::CreateDefaultObject() const
+{
+	FATAL_PURE_VIRTUAL();
+}
+
+void CogTypeChunk::InitializeObjectAtIndex(const u8 aIndex)
+{
+	FATAL_PURE_VIRTUAL();
+}
+
+void CogTypeChunk::DestructObjectAtIndex(const u8 aIndex)
 {
 	FATAL_PURE_VIRTUAL();
 }
@@ -299,6 +312,11 @@ void CogTypeChunk::ReturnByIndex(const u8 aIndex)
 	const u8 part = aIndex >> 6;
 	const u8 partStart = part << 6;
 	const u8 indexInPart = aIndex - partStart;
+
+	CHECK_PEDANTIC(!BitTest64(PLONG64(&myFreeSlots[part]), indexInPart));
+
+	DestructObjectAtIndex(aIndex);
+
 	const u8 previousFreeStatus = _interlockedbittestandset64(PLONG64(&myFreeSlots[part]), indexInPart);
 
 	CHECK_MSG(previousFreeStatus == 0, L"This object was returned multiple times or never allocated");

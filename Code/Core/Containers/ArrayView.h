@@ -59,6 +59,8 @@ public:
 		*this = aCopy;
 	}
 
+	FORCEINLINE ~ArrayView() = default;
+
 	template <typename TAllocator, bool ZeroOnePastEnd>
 	ArrayView(Array<T, TAllocator, ZeroOnePastEnd>&&) = delete;
 	template <typename TAllocator, bool ZeroOnePastEnd>

@@ -19,7 +19,11 @@ struct Project
 	void GenerateBuildProjectFile(StringView aProjectTemplate) const;
 	void GenerateDebugDevelopmentProjectFile(StringView aMainProjectFilePath, StringView aMainProjectGuid, const DocumentTemplates& aTemplates) const;
 	
-	bool ParseHeaders(const DocumentTemplates& aTemplates);
+	bool ParseHeaders();
+	void GenerateFiles(const DocumentTemplates& aTemplates) const;
+
+	bool GatherCogTypes(Map<String, CogType*>& aCogTypes) const;
+	bool ResolveDependencies(const Map<String, CogType*>& aCogTypes);
 
 	/** These gather functions gather all the properties from this and all referenced projects */
 	Array<StringView> GatherLibraryPaths() const;
@@ -38,11 +42,17 @@ struct Project
 	String projectName;
 	String projectGuid;
 
+	String pchHeaderFileName;
+	String pchSourceFileName;
+
 	String generatedCodeDirectory;
 
 	String buildProjectFile;
 	String debugDevelopmentProjectFile;
 	String debugDevelopmentUserProjectFile;
+
+	String typeListRegistratorFile;
+	String typeListInvocatorFile;
 
 	Array<UniquePtr<HeaderParser>> myHeaderParsers;
 
@@ -64,4 +74,5 @@ struct Project
 
 	ProjectType projectType;
 	bool preprocess = false;
+	bool hasGeneratedAnyCode = false;
 };

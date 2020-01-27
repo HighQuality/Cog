@@ -5,7 +5,7 @@
 #include "CogClass.h"
 
 HeaderParser::HeaderParser(const File* aMainFile, String aHeaderIncludePath)
-	: myGeneratedCode(aMainFile->GetFilenameWithoutExtension(), Move(aHeaderIncludePath))
+	: myGeneratedCode(String(aMainFile->GetAbsolutePath()), aMainFile->GetFilenameWithoutExtension(), Move(aHeaderIncludePath))
 {
 	myFile = aMainFile;
 	myFileContents = myFile->ReadString();
@@ -13,7 +13,7 @@ HeaderParser::HeaderParser(const File* aMainFile, String aHeaderIncludePath)
 	myWordReader = GroupingWordReader(myFileContents.View());
 }
 
-GeneratedCode& HeaderParser::Parse()
+void HeaderParser::Parse()
 {
 	bool hasGeneratedHeaderInclude = false;
 
@@ -28,7 +28,7 @@ GeneratedCode& HeaderParser::Parse()
 				if (!hasGeneratedHeaderInclude)
 				{
 					ReportError(L"Missing #include \"%\"", myGeneratedHeaderFileName.View());
-					return myGeneratedCode;
+					return;
 				}
 
 				ParseCogType();
@@ -36,7 +36,7 @@ GeneratedCode& HeaderParser::Parse()
 			else if (currentWord == L"#")
 			{
 				if (!MoveNextExpectWord())
-					return myGeneratedCode;
+					return;
 
 				currentWord = myWordReader.GetCurrentWordOrGroup();
 
@@ -45,7 +45,7 @@ GeneratedCode& HeaderParser::Parse()
 					if (hasGeneratedHeaderInclude)
 					{
 						ReportError(L"The last include must be the generated header file: #include \"%\"", myGeneratedHeaderFileName.View());
-						return myGeneratedCode;
+						return;
 					}
 
 					const bool isOpenedByAngleBracket = IsAtGroup(L"<");
@@ -59,15 +59,13 @@ GeneratedCode& HeaderParser::Parse()
 						{
 							hasGeneratedHeaderInclude = true;
 
-							myGeneratedCode.SetShouldGenerateCode(true);
+							myGeneratedCode.SetHasGeneratedCode(true);
 						}
 					}
 				}
 			}
 		}
 	}
-
-	return myGeneratedCode;
 }
 
 void HeaderParser::ParseCogType()
@@ -105,6 +103,8 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 {
 	if (!MoveNextExpectWord())
 		return;
+
+	const i32 declarationLine = myWordReader.CalculateAndGetCurrentLineIndex();
 
 	const StringView className = myWordReader.GetCurrentWordOrGroup();
 	StringView baseClass;
@@ -160,7 +160,7 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		return;
 	}
 
-	CogClass& cogClass = myGeneratedCode.AddCogClass(String(className), String(baseClass), generatedBodyLineIndex);
+	CogClass& cogClass = myGeneratedCode.AddCogClass(String(className), String(baseClass), declarationLine, generatedBodyLineIndex);
 
 	while (aParameterReader.Next())
 	{

@@ -3,8 +3,8 @@
 #include "String/StringTemplate.h"
 #include "DocumentTemplates.h"
 
-CogClass::CogClass(String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex)
-	: Base(Move(aClassName), Move(aBaseClassName))
+CogClass::CogClass(String aAbsoluteFilePath, i32 aDeclarationLine, String aClassName, String aBaseClassName, i32 aGeneratedBodyLineIndex)
+	: Base(Move(aAbsoluteFilePath), aDeclarationLine, Move(aClassName), Move(aBaseClassName))
 {
 	myGeneratedBodyLineIndex = aGeneratedBodyLineIndex;
 	myChunkTypeName = Format(L"%CogTypeChunk", GetTypeName());
@@ -81,6 +81,8 @@ Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 	generatedLines.Add(Format(L"\tusing Base = %;", baseChunkName));
 
 	generatedLines.Add(Format(L"\tUniquePtr<Object> CreateDefaultObject() const override;"));
+	generatedLines.Add(Format(L"\tvoid InitializeObjectAtIndex(u8 aIndex) override;"));
+	generatedLines.Add(Format(L"\tvoid DestructObjectAtIndex(u8 aIndex) override;"));
 	
 	generatedLines.Add(String(L"private:"));
 	
@@ -91,8 +93,8 @@ Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 
 	for (const CogProperty& prop : myProperties)
 	{
-		generatedLines.Add(Format(L"\tFORCEINLINE const %& Access%(const u8 aIndex) const { return reinterpret_cast<const %*>(&my%Data)[aIndex]; };", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
-		generatedLines.Add(Format(L"\tFORCEINLINE %& Access%(const u8 aIndex) { return reinterpret_cast<%*>(&my%Data)[aIndex]; };", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+		generatedLines.Add(Format(L"\tFORCEINLINE const %& Access%(const u8 aIndex) const { return reinterpret_cast<const AddPointer<%>>(&my%Data)[aIndex]; };", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+		generatedLines.Add(Format(L"\tFORCEINLINE %& Access%(const u8 aIndex) { return reinterpret_cast<AddPointer<%>>(&my%Data)[aIndex]; };", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
 	}
 
 	generatedLines.Add(String(L"};"));
@@ -108,7 +110,44 @@ Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
 	generatedLines.Add(String(L"{"));
 	generatedLines.Add(Format(L"\tif constexpr (!std::is_abstract_v<%>)", GetTypeName()));
 	generatedLines.Add(Format(L"\t\treturn MakeUnique<%>();", GetTypeName()));
-	generatedLines.Add(Format(L"\tFATAL(L\"Can't instantiate object of abstract type\");"));
+	generatedLines.Add(String(L"\tFATAL(L\"Can't instantiate object of abstract type\");"));
+	generatedLines.Add(String(L"}"));
+
+	Map<StringView, ClassPropertyInitializerData> allProperties;
+	GatherPropertyInitializers(allProperties);
+
+	generatedLines.Add(Format(L"void %::InitializeObjectAtIndex(const u8 aIndex)", myChunkTypeName));
+	generatedLines.Add(String(L"{"));
+	generatedLines.Add(Format(L"\tif constexpr (std::is_abstract_v<%>)", GetTypeName()));
+	generatedLines.Add(String(L"\t\treturn;"));
+
+	for (const KeyValuePair<StringView, ClassPropertyInitializerData>& propertyPair : allProperties)
+	{
+		const StringView name = propertyPair.key;
+		const ClassPropertyInitializerData data = propertyPair.value;
+
+		if (data.zeroMemory)
+			generatedLines.Add(Format(L"\tmemset(&static_cast<AddPointer<%>>(&my%Data)[aIndex], 0, sizeof(%));", data.propertyType, name, data.propertyType));
+		
+		generatedLines.Add(Format(L"\tnew (static_cast<void*>(&static_cast<AddPointer<%>>(&my%Data)[aIndex])) %(%);", data.propertyType, name, data.propertyType, data.defaultValue));
+		generatedLines.Add(String(L""));
+	}
+
+	generatedLines.Add(String(L"}"));
+
+	generatedLines.Add(Format(L"void %::DestructObjectAtIndex(const u8 aIndex)", myChunkTypeName));
+	generatedLines.Add(String(L"{"));
+	generatedLines.Add(Format(L"\tif constexpr (std::is_abstract_v<%>)", GetTypeName()));
+	generatedLines.Add(String(L"\t\treturn;"));
+
+	for (const KeyValuePair<StringView, ClassPropertyInitializerData>& propertyPair : allProperties)
+	{
+		const StringView name = propertyPair.key;
+		const ClassPropertyInitializerData data = propertyPair.value;
+
+		generatedLines.Add(Format(L"\tDestructObjectHelper(&static_cast<AddPointer<%>>(&my%Data)[aIndex]);", data.propertyType, name));
+	}
+
 	generatedLines.Add(String(L"}"));
 
 	return generatedLines;
@@ -175,4 +214,21 @@ void CogClass::SetIsFinal(const bool aIsFinal)
 void CogClass::RegisterCogProperty(CogProperty aProperty)
 {
 	myProperties.Add(Move(aProperty));
+}
+
+void CogClass::GatherPropertyInitializers(Map<StringView, ClassPropertyInitializerData>& aPropertyInitializers) const
+{
+	if (const CogClass* baseType = GetBaseType())
+		baseType->GatherPropertyInitializers(aPropertyInitializers);
+
+	for (const CogProperty& prop : myProperties)
+	{
+		if (!prop.defaultValue.View() && !prop.zeroMemory)
+			continue;
+
+		ClassPropertyInitializerData& initializerData = aPropertyInitializers.FindOrAdd(prop.propertyName);
+		initializerData.defaultValue = prop.defaultValue;
+		initializerData.propertyType = prop.propertyType;
+		initializerData.zeroMemory = prop.zeroMemory;
+	}
 }

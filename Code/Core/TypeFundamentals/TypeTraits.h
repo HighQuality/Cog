@@ -28,6 +28,14 @@ template <typename T>
 using RemovePointer = typename RemovePointerImpl<T>::Type;
 
 template <typename T>
+struct AddPointerImpl { using Type = T*; };
+template <typename T>
+struct AddPointerImpl<T*> { using Type = T*; };
+
+template <typename T>
+using AddPointer = typename AddPointerImpl<T>::Type;
+
+template <typename T>
 struct IsConstImpl { static constexpr bool Value = false; };
 template <typename T>
 struct IsConstImpl<const T> { static constexpr bool Value = true; };

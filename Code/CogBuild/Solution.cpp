@@ -234,9 +234,26 @@ bool Solution::GenerateCode()
 
 	for (Project* project : preprocessProjects)
 	{
-		if (!project->ParseHeaders(templates))
+		if (!project->ParseHeaders())
 			return false;
 	}
+
+	Map<String, CogType*> cogTypes;
+
+	for (const Project* project : preprocessProjects)
+	{
+		if (!project->GatherCogTypes(cogTypes))
+			return false;
+	}
+
+	for (Project* project : preprocessProjects)
+	{
+		if (!project->ResolveDependencies(cogTypes))
+			return false;
+	}
+
+	for (const Project* project : preprocessProjects)
+		project->GenerateFiles(templates);
 
 	return true;
 }

@@ -3,6 +3,8 @@
 
 void WriteToFileIfChanged(const StringView aFilePath, const StringView aNewFileContents)
 {
+	CHECK(aFilePath.GetLength() > 0);
+
 	{
 		std::wifstream readStream(aFilePath.ToStdWString(), std::ios::binary);
 

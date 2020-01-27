@@ -5,8 +5,9 @@
 #include "DocumentTemplates.h"
 #include <String/StringTemplate.h>
 
-GeneratedCode::GeneratedCode(const StringView aMainFileName, String aMainHeaderIncludePath)
+GeneratedCode::GeneratedCode(String aMainHeaderFileAbsolutePath, const StringView aMainFileName, String aMainHeaderIncludePath)
 {
+	myMainHeaderFileAbsolutePath = Move(aMainHeaderFileAbsolutePath);
 	myMainHeaderFileName = Format(L"%.h", aMainFileName);
 	myMainHeaderIncludePath = Move(aMainHeaderIncludePath);
 	myGeneratedHeaderFileName = Format(L"%.generated.h", aMainFileName);
@@ -15,7 +16,7 @@ GeneratedCode::GeneratedCode(const StringView aMainFileName, String aMainHeaderI
 	myGeneratedHeaderIdentifier = Format(L"_%_H_", aMainFileName.ToUpper());
 }
 
-void GeneratedCode::WriteFiles(const DocumentTemplates& aTemplates, const StringView aProjectName, const StringView aOutputDirectory)
+void GeneratedCode::WriteFiles(const DocumentTemplates& aTemplates, const StringView aProjectName, const StringView aOutputDirectory) const
 {
 	CreateDirectoryW(aOutputDirectory.GetData(), nullptr);
 
@@ -32,16 +33,16 @@ void GeneratedCode::WriteFiles(const DocumentTemplates& aTemplates, const String
 	GenerateSourceFile(aTemplates, aProjectName, sourceFilePath);
 }
 
-CogClass& GeneratedCode::AddCogClass(String aTypeName, String aBaseTypeName, const i32 aGeneratedBodyLineIndex)
+CogClass& GeneratedCode::AddCogClass(String aTypeName, String aBaseTypeName, const i32 aDeclarationLine, const i32 aGeneratedBodyLineIndex)
 {
-	CogClass& type = *new CogClass(Move(aTypeName), Move(aBaseTypeName), aGeneratedBodyLineIndex);
+	CogClass& type = *new CogClass(String(myMainHeaderFileAbsolutePath), aDeclarationLine, Move(aTypeName), Move(aBaseTypeName), aGeneratedBodyLineIndex);
 	// UniquePtr takes ownership of CogClass allocation
 	myDeclaredCogTypes.Add(UniquePtr<CogType>(&type));
 	myCogClasses.Add(&type);
 	return type;
 }
 
-void GeneratedCode::GenerateHeaderFile(const DocumentTemplates& aTemplates, StringView aHeaderFilePath)
+void GeneratedCode::GenerateHeaderFile(const DocumentTemplates& aTemplates, StringView aHeaderFilePath) const
 {
 	StringTemplate document(String(aTemplates.generatedHeaderTemplate));
 
@@ -70,7 +71,7 @@ void GeneratedCode::GenerateHeaderFile(const DocumentTemplates& aTemplates, Stri
 	WriteToFileIfChanged(aHeaderFilePath, headerFileContents.View());
 }
 
-void GeneratedCode::GenerateSourceFile(const DocumentTemplates& aTemplates, const StringView aProjectName, const StringView aSourceFilePath)
+void GeneratedCode::GenerateSourceFile(const DocumentTemplates& aTemplates, const StringView aProjectName, const StringView aSourceFilePath) const
 {
 	StringTemplate document(String(aTemplates.generatedSourceTemplate));
 

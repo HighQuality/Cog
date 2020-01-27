@@ -16,7 +16,9 @@ Project::Project(Directory* aProjectDirectory)
 	directory = aProjectDirectory;
 	projectName = aProjectDirectory->GetName();
 	generatedCodeDirectory = Format(L"%\\temp\\%\\generated", aProjectDirectory->GetParentDirectory()->GetParentDirectory()->GetAbsolutePath(), projectName);
-	
+	pchHeaderFileName = Format(L"%Pch.h", projectName);
+	pchSourceFileName = Format(L"%Pch.cpp", projectName);
+
 	extraIncludePaths.Add(Format(L"$(SolutionDir)%\\", projectName));
 	extraIncludePaths.Add(Format(L"%\\", generatedCodeDirectory));
 
@@ -190,11 +192,9 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 	{
 		String sourceFileList;
 
-		const String pchFileName = Format(L"%Pch.cpp", projectName);
-
 		for (const File* sourceFile : sourceFiles)
 		{
-			if (sourceFile->GetFilename() == pchFileName.View())
+			if (sourceFile->GetFilename() == pchSourceFileName.View())
 				continue;
 
 			String sourceFilePath(sourceFile->GetRelativePath(*directory));
@@ -225,11 +225,9 @@ void Project::GenerateBuildProjectFile(StringView aProjectTemplate) const
 	{
 		String headerFileList;
 
-		const String pchFileName = Format(L"%Pch.h", projectName);
-
 		for (const File* headerFile : headerFiles)
 		{
-			if (headerFile->GetFilename() == pchFileName.View())
+			if (headerFile->GetFilename() == pchHeaderFileName.View())
 				continue;
 
 			String headerFilePath(headerFile->GetRelativePath(*directory));
@@ -294,18 +292,11 @@ void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectF
 	WriteToFileIfChanged(debugDevelopmentUserProjectFile, aTemplates.nmakeDebugUserFileTemplate);
 }
 
-bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
+bool Project::ParseHeaders()
 {
-	CreateDirectoryW(generatedCodeDirectory.GetData(), nullptr);
-
-	const String pchFileName = Format(L"%Pch.h", projectName);
-
-	Array<CogClass*> cogClasses;
-	Array<String> cogClassHeaderFiles;
-
 	for (const File* file : headerFiles)
 	{
-		if (file->GetName() == pchFileName.View())
+		if (file->GetName() == pchHeaderFileName.View())
 			continue;
 
 		String headerIncludePath = file->GetRelativePath(*directory);
@@ -313,7 +304,7 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 
 		HeaderParser& parser = *myHeaderParsers.Add(MakeUnique<HeaderParser>(file, String(headerIncludePath)));
 
-		GeneratedCode& generatedCode = parser.Parse();
+		parser.Parse();
 
 		if (parser.HasErrors())
 		{
@@ -323,14 +314,48 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 			return false;
 		}
 
-		if (generatedCode.ShouldGenerateCode())
+		if (parser.HasGeneratedCode())
 		{
-			generatedCode.WriteFiles(aTemplates, projectName, generatedCodeDirectory);
+			hasGeneratedAnyCode = true;
+
+			const GeneratedCode& generatedCode = parser.GetGeneratedCode();
 
 			generatedHeaderFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetHeaderFileName()));
 			generatedSourceFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetSourceFileName()));
 
-			cogClassHeaderFiles.Add(String(headerIncludePath));
+			typeListRegistratorFile = Format(L"%/%TypeListRegistrator.generated.cpp", generatedCodeDirectory, projectName);
+			generatedSourceFiles.Add(typeListRegistratorFile);
+
+			if (projectType == ProjectType::Executable)
+			{
+				typeListInvocatorFile = Format(L"%/%TypeListInvocator.generated.cpp", generatedCodeDirectory, projectName);
+				generatedSourceFiles.Add(typeListInvocatorFile);
+			}
+		}
+	}
+
+	return true;
+}
+
+void Project::GenerateFiles(const DocumentTemplates& aTemplates) const
+{
+	if (!hasGeneratedAnyCode)
+		return;
+
+	CreateDirectoryW(generatedCodeDirectory.GetData(), nullptr);
+
+	Array<CogClass*> cogClasses;
+	Array<String> cogClassHeaderFiles;
+
+	for (const HeaderParser* parser : myHeaderParsers)
+	{
+		const GeneratedCode& generatedCode = parser->GetGeneratedCode();
+		
+		if (parser->HasGeneratedCode())
+		{
+			generatedCode.WriteFiles(aTemplates, projectName, generatedCodeDirectory);
+
+			cogClassHeaderFiles.Add(String(generatedCode.GetMainHeaderIncludePath()));
 
 			for (CogClass* cogClass : generatedCode.GetCogClasses())
 				cogClasses.Add(cogClass);
@@ -340,12 +365,12 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 	{
 		StringTemplate typeList(String(aTemplates.typeListTemplate));
 
-		typeList.AddParameter(String(L"PchFileName"), String(pchFileName));
+		typeList.AddParameter(String(L"PchFileName"), String(pchHeaderFileName));
 		typeList.AddParameter(String(L"ProjectName"), String(projectName));
 
 		{
 			String includes;
-			
+
 			for (StringView header : cogClassHeaderFiles)
 			{
 				includes.Append(Format(L"#include \"%\"\n", header).View());
@@ -362,38 +387,35 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 				// Object is registered explicitly in the base TypeList object
 				if (cogClass->GetTypeName() == L"Object")
 					continue;
-				
+
 				if (cogClass->SpecializesBaseClass())
 					typeListRegistrations.Append(Format(L"\tREGISTER_TYPE_SPECIALIZATION(aTypeList, %, %);\n", cogClass->GetBaseTypeName(), cogClass->GetTypeName()).View());
 				else
 					typeListRegistrations.Append(Format(L"\tREGISTER_TYPE(aTypeList, %);\n", cogClass->GetTypeName()).View());
 			}
 
-
 			typeList.AddParameter(String(L"TypeListRegistrations"), Move(typeListRegistrations));
 		}
-		
+
 		const String typeListContent = typeList.Evaluate();
 
-		String generatedTypeListSourceFile = Format(L"%/%TypeListRegistrator.generated.cpp", generatedCodeDirectory, projectName);
-		WriteToFileIfChanged(generatedTypeListSourceFile.View(), typeListContent);
-		generatedSourceFiles.Add(generatedTypeListSourceFile);
+		WriteToFileIfChanged(typeListRegistratorFile.View(), typeListContent);
 	}
 
 	if (projectType == ProjectType::Executable)
 	{
 		StringTemplate typeListInvocator(String(aTemplates.typeListInvocatorTemplate));
 
-		typeListInvocator.AddParameter(String(L"PchFileName"), String(pchFileName));
+		typeListInvocator.AddParameter(String(L"PchFileName"), String(pchHeaderFileName));
 
 		{
 			String declarations;
 			String invocations;
 
-			Array<Project*> referencedProjects = GatherProjectReferences();
+			Array<const Project*> referencedProjects = Array<const Project*>(GatherProjectReferences());
 			referencedProjects.Add(this);
 
-			for (Project* project : referencedProjects)
+			for (const Project* project : referencedProjects)
 			{
 				if (!project->preprocess)
 					continue;
@@ -408,11 +430,43 @@ bool Project::ParseHeaders(const DocumentTemplates& aTemplates)
 
 		const String typeListInvocatorContent = typeListInvocator.Evaluate();
 
-		String typeListInvocatorFile = Format(L"%/%TypeListInvocator.generated.cpp", generatedCodeDirectory, projectName);
 		WriteToFileIfChanged(typeListInvocatorFile.View(), typeListInvocatorContent);
-		generatedSourceFiles.Add(typeListInvocatorFile);
+	}
+}
+
+bool Project::GatherCogTypes(Map<String, CogType*>& aCogTypes) const
+{
+	for (const HeaderParser* parser : myHeaderParsers)
+	{
+		for (CogType* cogType : parser->GetGeneratedCode().GetCogTypes())
+		{
+			CogType*& typeRegistration = aCogTypes.FindOrAdd(cogType->GetTypeName());
+
+			if (typeRegistration)
+			{
+				const String theirLocation = typeRegistration->GetDeclarationLocation();
+				const String ourLocation = cogType->GetDeclarationLocation();
+				FATAL(L"There exists multiple COGTYPEs with the name %:\n%: error: First declaration\n%: error: Second declaration", typeRegistration->GetTypeName(), theirLocation, ourLocation);
+				return false;
+			}
+
+			typeRegistration = cogType;
+		}
 	}
 
+	return true;
+}
+
+bool Project::ResolveDependencies(const Map<String, CogType*>& aCogTypes)
+{
+	for (const HeaderParser* parser : myHeaderParsers)
+	{
+		for (CogType* cogType : parser->GetGeneratedCode().GetCogTypes())
+		{
+			if (!cogType->ResolveDependencies(aCogTypes))
+				return false;
+		}
+	}
 	return true;
 }
 
