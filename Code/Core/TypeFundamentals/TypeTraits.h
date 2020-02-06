@@ -36,6 +36,16 @@ template <typename T>
 using AddPointer = typename AddPointerImpl<T>::Type;
 
 template <typename T>
+using ReferenceOf = T&;
+template <typename T>
+using ConstReferenceOf = const T&;
+
+template <typename T>
+using PointerOf = T*;
+template <typename T>
+using ConstPointerOf = const T*;
+
+template <typename T>
 struct IsConstImpl { static constexpr bool Value = false; };
 template <typename T>
 struct IsConstImpl<const T> { static constexpr bool Value = true; };

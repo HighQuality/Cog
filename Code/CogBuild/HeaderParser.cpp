@@ -94,7 +94,7 @@ void HeaderParser::ParseCogType()
 	}
 	else
 	{
-		ReportError(L"Expected \"struct\" or \"class\", got %", classType);
+		ReportError(L"Expected \"struct\", \"class\" or \"enum\", got %", classType);
 		return;
 	}
 }

@@ -1,5 +1,21 @@
 #pragma once
 
+#if _WIN32 || _WIN64
+#if _WIN64
+#define ENV64
+#else
+#define ENV32
+#endif
+#endif
+
+#if __GNUC__
+#if __x86_64__ || __ppc64__
+#define ENV64
+#else
+#define ENV32
+#endif
+#endif
+
 #define _CRT_SECURE_NO_WARNINGS
 
 #define STRINGIFY_INNER(x) #x
@@ -70,6 +86,7 @@
 #include <atomic>
 #include <utility>
 #include <array>
+#include <type_traits>
 
 #include <Windows.h>
 
@@ -87,6 +104,7 @@
 
 #include <External/CityHash/city.h>
 
+#include "Utilities/Overloaded.h"
 #include "Utilities/Defer.h"
 #include "Utilities/BringIntoScope.h"
 

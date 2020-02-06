@@ -2,6 +2,7 @@
 #include <TypeFundamentals/TypeID.h>
 #include <Threading/ThreadID.h>
 #include <Time/Stopwatch.h>
+#include <Threading/ThreadPool/ThreadPool.h>
 #include "Threading/Fibers/Await.h"
 #include "Pointer.h"
 #include "QueuedProgramWork.h"
@@ -11,7 +12,7 @@ class Object;
 class ThreadPool;
 class Fiber;
 
-COGTYPE(SetDebugFlag)
+COGTYPE()
 class Program : public Object
 {
 	GENERATED_BODY;
@@ -159,7 +160,7 @@ private:
 	COGPROPERTY(bool IsMainRunning = true);
 	
 	COGPROPERTY(Stopwatch Watch, DirectAccess);
-	COGPROPERTY(i32 Frames);
+	COGPROPERTY(i32 FramesThisSecond);
 	COGPROPERTY(i32 ElapsedSeconds);
 
 	COGPROPERTY(const ThreadID* MainThreadID);

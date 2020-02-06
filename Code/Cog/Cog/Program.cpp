@@ -1,6 +1,4 @@
 #include "CogPch.h"
-#include <Time/Stopwatch.h>
-#include <Threading/ThreadPool/ThreadPool.h>
 #include "Program.h"
 #include "Threading/Fibers/Fiber.h"
 #include "Threading/Fibers/Awaitable.h"
@@ -12,7 +10,7 @@ static std::atomic<i32> gNextFiberIndex = 0;
 Program::Program()
 {
 	ThreadID::SetName(String(L"Main Thread"));
-	SetMainThread(&ThreadID::Get());
+	SetMainThreadID(&ThreadID::Get());
 
 	CogTLS::MarkThreadAsManaged();
 
@@ -167,7 +165,7 @@ void Program::FiberMain()
 		{
 			if (GetHighPrioWorkQueue().GetLength() > 0)
 			{
-				QueuedWork work = HighPrioWorkQueue().RemoveAt(0);
+				QueuedProgramWork work = HighPrioWorkQueue().RemoveAt(0);
 				lck.unlock();
 
 				work.function(work.argument);
@@ -191,7 +189,7 @@ void Program::FiberMain()
 
 			if (GetWorkQueue().GetLength() > 0)
 			{
-				QueuedWork work = WorkQueue().RemoveAt(0);
+				QueuedProgramWork work = WorkQueue().RemoveAt(0);
 				lck.unlock();
 
 				work.function(work.argument);
@@ -292,7 +290,7 @@ void Program::QueueFiber(Fiber * aFiber)
 	QueuedFibers().Add(aFiber);
 	lck.unlock();
 
-	myWorkNotify.notify_one();
+	WorkNotify().notify_one();
 }
 
 void Program::QueueBackgroundWork(void(*aFunction)(void*), void* aArgument)

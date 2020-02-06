@@ -45,6 +45,7 @@ struct Project
 	String pchHeaderFileName;
 	String pchSourceFileName;
 
+	String tempProjectDirectory;
 	String generatedCodeDirectory;
 
 	String buildProjectFile;

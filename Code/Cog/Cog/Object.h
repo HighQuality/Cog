@@ -44,8 +44,11 @@ protected:
 	// Unused memory, feel free to use but I suspect they might not have any use as it's per pointer storage instead of per instance
 	u8 _padding2;
 	u8 _padding3;
+
+#ifdef ENV64
 	u8 _padding4;
 	u8 _padding5;
 	u8 _padding6;
 	u8 _padding7;
+#endif
 };

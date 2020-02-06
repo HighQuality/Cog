@@ -32,7 +32,7 @@ UniquePtr<CogTypeChunk> CreateObjectChunk()
 	do { \
 	CHECK_BASE_DECLARED(Specialization); \
 	static_assert(IsDerivedFrom<Specialization, BaseType>, #Specialization " does not derive from " #BaseType); \
-	TypeListObject->Internal_AddSpecialization(L"" #BaseType, TypeID<Object>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateObjectChunk<TType, JOIN(TType, CogTypeChunk)>, nullptr); \
+	TypeListObject->Internal_AddSpecialization(L"" #BaseType, TypeID<Object>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateObjectChunk<Specialization, JOIN(Specialization, CogTypeChunk)>, nullptr); \
 	} while (false)
 
 class TypeList

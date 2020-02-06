@@ -77,7 +77,12 @@ bool GroupingWordReader::Next()
 
 	CHECK(currentGroup != GroupingWordReaderGroup::None);
 
-	myCurrentGroupFirstContentLineIndex = CalculateAndGetCurrentLineIndex();
+	{
+		const i32 readHeader = GetReadIndex();
+		NextWord();
+		myCurrentGroupFirstContentLineIndex = CalculateAndGetCurrentLineIndex();
+		SetReadIndex(readHeader);
+	}
 
 	const bool exclusiveMode = IsGroupExclusive(currentGroup);
 

@@ -15,7 +15,8 @@ Project::Project(Directory* aProjectDirectory)
 
 	directory = aProjectDirectory;
 	projectName = aProjectDirectory->GetName();
-	generatedCodeDirectory = Format(L"%\\temp\\%\\generated", aProjectDirectory->GetParentDirectory()->GetParentDirectory()->GetAbsolutePath(), projectName);
+	tempProjectDirectory = Format(L"%\\temp\\%", aProjectDirectory->GetParentDirectory()->GetParentDirectory()->GetAbsolutePath(), projectName);
+	generatedCodeDirectory = Format(L"%\\generated", tempProjectDirectory);
 	pchHeaderFileName = Format(L"%Pch.h", projectName);
 	pchSourceFileName = Format(L"%Pch.cpp", projectName);
 
@@ -316,20 +317,23 @@ bool Project::ParseHeaders()
 
 		if (parser.HasGeneratedCode())
 		{
-			hasGeneratedAnyCode = true;
-
 			const GeneratedCode& generatedCode = parser.GetGeneratedCode();
 
 			generatedHeaderFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetHeaderFileName()));
 			generatedSourceFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetSourceFileName()));
 
-			typeListRegistratorFile = Format(L"%/%TypeListRegistrator.generated.cpp", generatedCodeDirectory, projectName);
-			generatedSourceFiles.Add(typeListRegistratorFile);
-
-			if (projectType == ProjectType::Executable)
+			if (!hasGeneratedAnyCode)
 			{
-				typeListInvocatorFile = Format(L"%/%TypeListInvocator.generated.cpp", generatedCodeDirectory, projectName);
-				generatedSourceFiles.Add(typeListInvocatorFile);
+				hasGeneratedAnyCode = true;
+
+				typeListRegistratorFile = Format(L"%/%TypeListRegistrator.generated.cpp", generatedCodeDirectory, projectName);
+				generatedSourceFiles.Add(typeListRegistratorFile);
+
+				if (projectType == ProjectType::Executable)
+				{
+					typeListInvocatorFile = Format(L"%/%TypeListInvocator.generated.cpp", generatedCodeDirectory, projectName);
+					generatedSourceFiles.Add(typeListInvocatorFile);
+				}
 			}
 		}
 	}
@@ -342,6 +346,7 @@ void Project::GenerateFiles(const DocumentTemplates& aTemplates) const
 	if (!hasGeneratedAnyCode)
 		return;
 
+	CreateDirectoryW(tempProjectDirectory.GetData(), nullptr);
 	CreateDirectoryW(generatedCodeDirectory.GetData(), nullptr);
 
 	Array<CogClass*> cogClasses;

@@ -45,20 +45,21 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 
 		// Only generate the shorthand special name if we haven't specified DirectAccess in order to avoid a naming conflict
 		if (!hasSpecialName || !prop.directAccess)
-			generatedLines.Add(Format(L"FORCEINLINE const %& %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, getterName, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, getterName, prop.propertyName));
 
 		generatedLines.Add(String(L"private:"));
 
 		if (prop.directAccess)
 		{
-			generatedLines.Add(Format(L"FORCEINLINE %& Set%(% aNewValue) { auto& value = GetChunk().Access%(myChunkIndex); value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+			// This is mainly a template so we can SFINAE it out in case of it not being copy-constructible
+			generatedLines.Add(Format(L"template<typename TCopyType, typename = EnableIf<std::is_copy_constructible_v<%>>> FORCEINLINE ReferenceOf<%> Set%(TCopyType aNewValue) { auto& value = GetChunk().Access%(myChunkIndex); value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyType, prop.propertyName, prop.propertyName));
 			
-			generatedLines.Add(Format(L"FORCEINLINE const %& %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
-			generatedLines.Add(Format(L"FORCEINLINE %& %() { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE ReferenceOf<%> %() { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
 		}
 		else
 		{
-			generatedLines.Add(Format(L"FORCEINLINE const %& Set%(% aNewValue) { auto& value = GetChunk().Access%(myChunkIndex); value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> Set%(% aNewValue) { auto& value = GetChunk().Access%(myChunkIndex); value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
 		}
 	}
 	
@@ -84,17 +85,17 @@ Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 	generatedLines.Add(Format(L"\tvoid InitializeObjectAtIndex(u8 aIndex) override;"));
 	generatedLines.Add(Format(L"\tvoid DestructObjectAtIndex(u8 aIndex) override;"));
 	
-	generatedLines.Add(String(L"private:"));
+	generatedLines.Add(String(L"protected:"));
 	
 	for (const CogProperty& prop : myProperties)
-		generatedLines.Add(Format(L"\tstd::aligned_storage_t<sizeof(%[256])> my%Data;", prop.propertyType, prop.propertyName));
+		generatedLines.Add(Format(L"\tManualInitializationObject<%> my%Data[256];", prop.propertyType, prop.propertyName));
 
 	generatedLines.Add(String(L"public:"));
 
 	for (const CogProperty& prop : myProperties)
 	{
-		generatedLines.Add(Format(L"\tFORCEINLINE const %& Access%(const u8 aIndex) const { return reinterpret_cast<const AddPointer<%>>(&my%Data)[aIndex]; };", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
-		generatedLines.Add(Format(L"\tFORCEINLINE %& Access%(const u8 aIndex) { return reinterpret_cast<AddPointer<%>>(&my%Data)[aIndex]; };", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+		generatedLines.Add(Format(L"\tFORCEINLINE ConstReferenceOf<%> Access%(const u8 aIndex) const { return my%Data[aIndex].Get(); };", prop.propertyType, prop.propertyName, prop.propertyName));
+		generatedLines.Add(Format(L"\tFORCEINLINE ReferenceOf<%> Access%(const u8 aIndex) { return my%Data[aIndex].Get(); };", prop.propertyType, prop.propertyName, prop.propertyName));
 	}
 
 	generatedLines.Add(String(L"};"));
@@ -127,9 +128,10 @@ Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
 		const ClassPropertyInitializerData data = propertyPair.value;
 
 		if (data.zeroMemory)
-			generatedLines.Add(Format(L"\tmemset(&static_cast<AddPointer<%>>(&my%Data)[aIndex], 0, sizeof(%));", data.propertyType, name, data.propertyType));
+			generatedLines.Add(Format(L"\tmemset(&my%Data[aIndex].Get(), 0, sizeof(%));", name, data.propertyType));
 		
-		generatedLines.Add(Format(L"\tnew (static_cast<void*>(&static_cast<AddPointer<%>>(&my%Data)[aIndex])) %(%);", data.propertyType, name, data.propertyType, data.defaultValue));
+
+		generatedLines.Add(Format(L"\tmy%Data[aIndex].Construct(%);", name, data.defaultValue));
 		generatedLines.Add(String(L""));
 	}
 
@@ -145,7 +147,7 @@ Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
 		const StringView name = propertyPair.key;
 		const ClassPropertyInitializerData data = propertyPair.value;
 
-		generatedLines.Add(Format(L"\tDestructObjectHelper(&static_cast<AddPointer<%>>(&my%Data)[aIndex]);", data.propertyType, name));
+		generatedLines.Add(Format(L"\tmy%Data[aIndex].Destruct();", name));
 	}
 
 	generatedLines.Add(String(L"}"));

@@ -13,6 +13,8 @@
 
 bool IsInGameThread();
 
+#include <Memory/ManualInitializationObject.h>
+
 #include <Cog/Casts.h>
 #include <Cog/Class.h>
 #include <Cog/Pointer.h>
