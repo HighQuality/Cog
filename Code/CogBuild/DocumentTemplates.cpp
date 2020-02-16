@@ -24,6 +24,8 @@ void DocumentTemplates::ReadFromDirectory(Directory& aDirectory)
 	typeListTemplate = ReadStringFromFileInDirectory(L"TypeListTemplate.txt", aDirectory);
 	typeListInvocatorTemplate = ReadStringFromFileInDirectory(L"TypeListInvocatorTemplate.txt", aDirectory);
 
+	executableMainTemplate = ReadStringFromFileInDirectory(L"ExecutableMainTemplate.txt", aDirectory);
+
 	isLoaded = true;
 }
 

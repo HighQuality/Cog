@@ -35,7 +35,7 @@ public:
 				Resource& genericResource = **alreadyLoadedResource;
 				lck.unlock();
 				
-				TResourceType& resource = CastChecked<TResourceType>(genericResource);
+				TResourceType& resource = CheckedCast<TResourceType>(genericResource);
 				aFunctionCallback(resource);
 				return;
 			}
@@ -60,7 +60,7 @@ public:
 				}
 			}
 
-			TResourceType& resource = GetCogGame().template CreateObject<TResourceType>();
+			TResourceType& resource = GetProgram().template CreateObject<TResourceType>();
 			loadedResources.Add(resourcePath, resource);
 			resource.RegisterCallback(callback);
 			resource.BeginLoad(resourcePath);
@@ -71,8 +71,6 @@ public:
 
 private:
 	static bool CheckResourcePtrValid(const Ptr<Resource>& ResourcePtr);
-
-	static CogGame& GetCogGame();
 
 	COGPROPERTY(EventList<Function<void()>> ScheduledLoads, DirectAccess);
 	COGPROPERTY(Map<String, Ptr<Resource>> LoadedResources, DirectAccess);

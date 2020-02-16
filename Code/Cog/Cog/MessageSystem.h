@@ -1,24 +1,26 @@
 #pragma once
 #include <Containers/EventList.h>
+#include "ScheduledMessage.h"
+#include "MessageSystem.generated.h"
 
 class Object;
 
-class MessageSystem
+COGTYPE()
+class MessageSystem : public Object
 {
+	GENERATED_BODY;
+
 	struct Message;
 
 public:
-	MessageSystem();
-	~MessageSystem();
-
 	template <typename T>
 	void SendMessage(const Object& aTarget, T aMessageData)
 	{
-		Message msg;
+		ScheduledMessage msg;
 		msg.target = &aTarget;
 		msg.message = LinearAllocate(aMessageData);
 		msg.destructMessage = [](void* aData) { static_cast<T*>(aData)->~T(); };
-		msg.messageTypeId = &TypeID<Message>::Resolve<T>();
+		msg.messageTypeId = &TypeID<ScheduledMessage>::Resolve<T>();
 
 		SubmitMessage(Move(msg));
 	}
@@ -26,17 +28,8 @@ public:
 	bool PostMessages();
 
 private:
-	struct Message
-	{
-		const Object* target;
-		void* message;
-		void(*destructMessage)(void*);
-		const TypeID<Message>* messageTypeId;
-	};
+	void SubmitMessage(ScheduledMessage aMessage);
 
-	void SubmitMessage(Message aMessage);
-
-	EventList<Message> myMessages;
-	Map<const Object*, Array<Message>> myCurrentMessages;
+	COGPROPERTY(EventList<ScheduledMessage> Messages, DirectAccess);
+	COGPROPERTY(Map<const Object*, Array<ScheduledMessage>> CurrentMessages, DirectAccess);
 };
-

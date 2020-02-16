@@ -1,5 +1,6 @@
 #pragma once
 #include "HeaderParser.h"
+#include "UnitTestClass.h"
 
 class Directory;
 class File;
@@ -45,6 +46,8 @@ struct Project
 	String pchHeaderFileName;
 	String pchSourceFileName;
 
+	String mainFilePath;
+
 	String tempProjectDirectory;
 	String generatedCodeDirectory;
 
@@ -67,13 +70,15 @@ struct Project
 
 	Array<const File*> headerFiles;
 	Array<const File*> sourceFiles;
+	Array<const File*> natvisFiles;
 
 	Array<String> generatedHeaderFiles;
 	Array<String> generatedSourceFiles;
+
+	Array<UnitTestClass> unitTests;
 
 	Directory* directory;
 
 	ProjectType projectType;
 	bool preprocess = false;
-	bool hasGeneratedAnyCode = false;
 };

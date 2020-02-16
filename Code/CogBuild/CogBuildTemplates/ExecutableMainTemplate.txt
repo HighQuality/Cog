@@ -1,0 +1,156 @@
+#include "${PchFileName}"
+#include <Cog/Program.h>
+#include <Cog/ObjectPool.h>
+
+constexpr bool HasProgramSpecialization = ${HasProgramSpecialization};
+constexpr i32 NumUnitTests = ${NumUnitTests};
+constexpr bool HasUnitTests = NumUnitTests > 0;
+
+void RunUnitTests(i32 aStart, i32 aEnd);
+
+int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
+{
+	if constexpr (HasUnitTests)
+	{
+		if (!HasProgramSpecialization || argc > 1)
+		{
+			if (!HasProgramSpecialization || StringView(argv[1]) == StringView(L"-rununittests"))
+			{
+				struct DebugTestRange
+				{
+					i32 start;
+					i32 end;
+				};
+
+				Array<DebugTestRange> ranges;
+
+				const auto runSection = [&ranges](const wchar_t* aExecutablePath, const i32 aStart, const i32 aEnd)
+				{
+					STARTUPINFO si;
+					PROCESS_INFORMATION pi;
+					si.cb = sizeof(si);
+
+					const String commandLine = Format(L"\"%\" -rununittests % %", aExecutablePath, aStart, aEnd);
+
+					CHECK(
+						CreateProcess(nullptr,
+							commandLine.GetData(),
+							nullptr,
+							nullptr,
+							false,
+							CREATE_NO_WINDOW,
+							nullptr,
+							nullptr,
+							&si,
+							&pi
+						)
+					);
+
+					WaitForSingleObject(pi.hProcess, INFINITE);
+
+					DWORD exitCode;
+					CHECK(
+						GetExitCodeProcess(pi.hProcess, &exitCode)
+					);
+					CloseHandle(pi.hProcess);
+					CloseHandle(pi.hThread);
+
+					if (exitCode != 0)
+					{
+						DebugTestRange range;
+						range.start = aStart;
+						range.end = aEnd;
+						ranges.Add(range);
+					}
+				};
+
+				DebugTestRange initialRange;
+				if (argc == 4)
+				{
+					initialRange.start = std::stoi(argv[1]);
+					initialRange.end = std::stoi(argv[2]);
+				}
+				else
+				{
+					initialRange.start = 0;
+					initialRange.end = NumUnitTests;
+				}
+				ranges.Add(initialRange);
+
+				i32 failingTest = -1;
+				i32 failedTests = 0;
+
+				while (ranges.GetLength() > 0)
+				{
+					const i32 start = ranges[0].start;
+					const i32 end = ranges[0].end;
+					ranges.RemoveAt(0);
+
+					if (end + 1 == start)
+					{
+						if (failingTest == -1)
+							failingTest = start;
+						StringView failingTestDescription(L"Unknown");
+						${FailingTestFindSwitch}
+						Println(L"% test failed", failingTestDescription);
+						++failedTests;
+					}
+					else
+					{
+						const i32 firstStart = start;
+						const i32 firstEnd = start + (end - start) / 2;
+						const i32 secondStart = firstEnd + 1;
+						const i32 secondEnd = end;
+
+						if (firstStart < firstEnd)
+							runSection(argv[0], firstStart, firstEnd);
+
+						if (secondStart < secondEnd)
+							runSection(argv[0], secondStart, secondEnd);
+					}
+				}
+
+				if (initialRange.start == 0 && initialRange.end == NumUnitTests)
+				{
+					if (failedTests > 0)
+						Println(L"% unit tests failed", failedTests);
+					Println(L"% unit tests succeeded", NumUnitTests - failedTests);
+				}
+
+				if (failingTest >= 0)
+					RunUnitTests(failingTest, failingTest + 1);
+
+				return 0;
+			}
+		}
+	}
+
+	if constexpr (HasProgramSpecialization)
+	{
+		ObjectPool programPool;
+		Ptr<Program> program = CheckedCast<Program>(*programPool.CreateObjectByType(TypeID<Object>::Resolve<Program>(), nullptr));
+		program->Run();
+		program->Destroy();
+		program->ReturnToAllocator();
+	}
+	else
+	{
+		Println(L"No program specialization found");
+	}
+
+	return 0;
+}
+
+${UnitTestDefinitions}
+
+#if ${NumUnitTests} > 0
+void RunUnitTests(const i32 aStart, const i32 aEnd)
+{
+	ArrayView<void(*)(i32)> tests = {
+		${UnitTestFunctionList}
+	};
+
+	for (i32 i = aStart; i < aEnd; ++i)
+		tests[i](i);
+}
+#endif

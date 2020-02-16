@@ -1,9 +1,7 @@
 #include "ClientApplicationPch.h"
 #include "ClientGame.h"
-
-#include <Threading/Fibers/Await.h>
-
-#include "Program.h"
+#include <Cog/Threading/Fibers/Await.h>
+#include <Cog/Program.h>
 
 #include "Window.h"
 #include "RenderEngine.h"
@@ -16,42 +14,49 @@
 #include "RenderTarget.h"
 #include "GpuCommand.h"
 
-ClientGame::ClientGame()
-{
-	myNextFramesGpuCommands = MakeUnique<EventList<GpuCommand>>();
-	myCurrentlyExecutingGpuCommands = MakeUnique<Array<GpuCommand>>();
-
-	myWindow = MakeUnique<Window>();
-}
-
-ClientGame::~ClientGame()
-{
-	myCamera->Destroy();
-}
-
 bool ClientGame::ShouldKeepRunning() const
 {
-	return myWindow && myWindow->IsOpen();
+	return GetWindow() && GetWindow()->IsOpen();
 }
 
-void ClientGame::Run()
+void ClientGame::Created()
 {
-	myWindow->Open();
+	{
+		std::mutex mtx;
+
+		scoped_lock(mtx)
+			Println(L"locked");
+
+		Println(L"unlocked");
+		
+		scoped_lock(mtx)
+			Println(L"locked");
+
+		Println(L"unlocked");
+	}
+
+	Base::Created();
+
+	SetNextFramesGpuCommands(MakeUnique<EventList<GpuCommand>>());
+	SetCurrentlyExecutingGpuCommands(MakeUnique<Array<GpuCommand>>());
+	
+	Window& window = *SetWindow(MakeUnique<Window>());
+	window.Open();
 
 	RenderingMode renderingMode;
-	renderingMode.width = myWindow->GetWidth();
-	renderingMode.height = myWindow->GetHeight();
+	renderingMode.width = window.GetWidth();
+	renderingMode.height = window.GetHeight();
 	renderingMode.fullscreen = false;
 	renderingMode.vsync = true;
 
-	myRenderer = MakeUnique<RenderEngine>(myWindow->GetHandle(), renderingMode);
+	RenderEngine& renderer = *SetRenderer(MakeUnique<RenderEngine>(GetWindow()->GetHandle(), renderingMode));
 
-	myCamera = &CreateCamera();
+	SetCamera(NewChild<Camera>());
 
-	myWindow->SetVisible(true);
-	myWindow->RequestFocus();
+	window.SetVisible(true);
+	window.RequestFocus();
 
-	VertexBuffer<StandardVertex> vb(*myRenderer, {
+	VertexBuffer<StandardVertex> vb(renderer, {
 		{ { -1.f, 1.f, 0.5f, 1.f }, LinearColor::White, {0.f, 0.f} },
 		{ { 1.f, 1.f, 0.5f, 1.f }, LinearColor::White, {1.f, 0.f} },
 		{ { 1.f, -1.f, 0.5f, 1.f }, LinearColor::White, {1.f, 1.f} },
@@ -68,17 +73,22 @@ void ClientGame::Run()
 	layout.Add("INSTANCE_COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	layout.Add("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 
-	VertexShader vs(*myRenderer, L"../assets/shaders/default.fx", layout);
-	PixelShader ps(*myRenderer, L"../assets/shaders/default.fx");
+	VertexShader vs(renderer, L"../assets/shaders/default.fx", layout);
+	PixelShader ps(renderer, L"../assets/shaders/default.fx");
 
 	vs.Bind();
 	ps.Bind();
 
-	Texture texture(*myRenderer, L"../assets/textures/logo.png");
+	Texture texture(renderer, L"../assets/textures/logo.png");
 
 	texture.BindToPS(0);
+}
 
-	Base::Run();
+void ClientGame::Destroyed()
+{
+	GetCamera()->Destroy();
+
+	Base::Destroyed();
 }
 
 void ClientGame::SynchronizedTick(const Time& aDeltaTime)
@@ -86,28 +96,43 @@ void ClientGame::SynchronizedTick(const Time& aDeltaTime)
 	ProcessInput();
 
 	// Gather the previous frame's GPU commands into a list for us to execute this frame
-	myCurrentlyExecutingGpuCommands->Empty();
-	myNextFramesGpuCommands->GatherInto(*myCurrentlyExecutingGpuCommands);
+	GetCurrentlyExecutingGpuCommands()->Empty();
+	GetNextFramesGpuCommands()->GatherInto(*GetCurrentlyExecutingGpuCommands());
 
 	Base::SynchronizedTick(aDeltaTime);
+
+	RenderEngine* renderer = GetRenderer();
+
+	if (ENSURE(renderer))
+	{
+		renderer->ClearBackbuffer();
+
+		renderer->Draw();
+
+		renderer->Present();
+	}
 }
 
 void ClientGame::ProcessInput()
 {
-	myWindow->ProcessMessages();
+	Window* window = GetWindow();
+	if (!ENSURE(window))
+		return;
+
+	window->ProcessMessages();
 
 	WindowEvent event;
 
-	while (myWindow->PollMessage(event))
+	while (window->PollMessage(event))
 	{
 		switch (event.type)
 		{
 		case WindowEventType::Close:
-			myWindow->Close();
+			window->Close();
 			break;
 
 		case WindowEventType::Resize:
-			myRenderer->Resize(event.data.resize.newWidth, event.data.resize.newHeight);
+			GetRenderer()->Resize(event.data.resize.newWidth, event.data.resize.newHeight);
 			break;
 
 		default:
@@ -116,35 +141,6 @@ void ClientGame::ProcessInput()
 	}
 }
 
-void ClientGame::GpuExec()
-{
-	// Array<GpuCommand>& gpuCommands = *myCurrentlyExecutingGpuCommands;
-
-	myRenderer->ClearBackbuffer();
-	
-	myRenderer->Draw();
-	
-	myRenderer->Present();
-}
-
 void ClientGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
 {
-}
-
-Object& ClientGame::CreateCamera()
-{
-	Object& camera = NewObject<Object>();
-	// RenderTarget& renderTarget = camera.CreateChild<RenderTarget>();
-	// 
-	// myRenderer->OnBackbufferRecreated.Subscribe(renderTarget, &RenderTarget::SetRenderTexture);
-	// renderTarget.SetRenderTexture(myRenderer->GetBackbuffer());
-
-	return camera;
-}
-
-void ClientGame::DispatchTick()
-{
-	Base::DispatchTick();
-	
-	Program::Get().QueueHighPrioWork<ClientGame>([](ClientGame* This) { This->GpuExec(); }, this);
 }

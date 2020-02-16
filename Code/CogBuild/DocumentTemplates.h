@@ -20,6 +20,8 @@ struct DocumentTemplates
 	String typeListTemplate;
 	String typeListInvocatorTemplate;
 
+	String executableMainTemplate;
+
 	bool isLoaded = false;
 };
 

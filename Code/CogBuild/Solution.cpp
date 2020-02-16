@@ -213,6 +213,17 @@ void Solution::GenerateDevelopmentMainProjectFile(const StringView aBuildToolPat
 		documentTemplate.AddParameter(String(L"HeaderFiles"), Move(headerFileList));
 	}
 
+	Array<const File*> natvisFiles;
+	for (const Project* project : projects)
+		natvisFiles.Append(project->natvisFiles);
+
+	String natvisFileList;
+	for (const File* file : natvisFiles)
+	{
+		natvisFileList.Append(Format(L"\n<Natvis Include=\"%\" />", file->GetAbsolutePath().View()).View());
+	}
+	documentTemplate.AddParameter(String(L"NatvisFiles"), Move(natvisFileList));
+
 	const String output = documentTemplate.Evaluate();
 
 	WriteToFileIfChanged(developmentMainProjectFile, output.View());

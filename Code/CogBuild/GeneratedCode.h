@@ -15,15 +15,15 @@ public:
 
 	CogClass& AddCogClass(String aTypeName, String aBaseTypeName, i32 aDeclarationLine, i32 aGeneratedBodyLineIndex);
 
-	void SetHasGeneratedCode(const bool aHasGeneratedCode) { myHasGeneratedCode = true; }
-	bool HasGeneratedCode() const { return myHasGeneratedCode; }
+	FORCEINLINE void SetHasGeneratedCode(const bool aHasGeneratedCode) { myHasGeneratedCode = true; }
+	FORCEINLINE bool HasGeneratedCode() const { return myHasGeneratedCode; }
 
-	StringView GetHeaderFileName() const { return myGeneratedHeaderFileName; }
-	StringView GetSourceFileName() const { return myGeneratedSourceFileName; }
-	StringView GetMainHeaderIncludePath() const { return myMainHeaderIncludePath; }
+	FORCEINLINE StringView GetHeaderFileName() const { return myGeneratedHeaderFileName; }
+	FORCEINLINE StringView GetSourceFileName() const { return myGeneratedSourceFileName; }
+	FORCEINLINE StringView GetMainHeaderIncludePath() const { return myMainHeaderIncludePath; }
 
-	ArrayView<UniquePtr<CogType>> GetCogTypes() const { return myDeclaredCogTypes; }
-	ArrayView<CogClass*> GetCogClasses() const { return myCogClasses; }
+	FORCEINLINE ArrayView<UniquePtr<CogType>> GetCogTypes() const { return myDeclaredCogTypes; }
+	FORCEINLINE ArrayView<CogClass*> GetCogClasses() const { return myCogClasses; }
 
 private:
 	void GenerateHeaderFile(const DocumentTemplates& aTemplates, StringView aHeaderFilePath) const;

@@ -8,7 +8,7 @@ static thread_local FiberResumeData ourFiberResumeData;
 static thread_local bool ourProhibitAwaits = true;
 static thread_local bool ourIsInManagedThread = false;
 
-namespace UtilitiesTLS
+namespace CogTLS
 {
 	NOINLINE void SetThisThreadsStartingFiber(Fiber* aNewFiber)
 	{

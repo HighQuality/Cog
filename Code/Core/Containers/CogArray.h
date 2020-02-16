@@ -337,6 +337,15 @@ public:
 		this->myData[this->myLength].~T();
 		return val;
 	}
+
+	FORCEINLINE bool TryPop()
+	{
+		if (this->GetLength() == 0)
+			return false;
+
+		Pop();
+		return true;
+	}
 	
 	FORCEINLINE bool TryPop(T& aElement)
 	{

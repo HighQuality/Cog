@@ -5,12 +5,10 @@
 template <typename T>
 class Ptr final
 {
-	static_assert(sizeof(T) == sizeof(Object), "Subclass of Object may not declare member variables");
-	
 public:
 	FORCEINLINE Ptr()
 	{
-		memset(&myObject, 0, sizeof Object);
+		Read()->myChunk = nullptr;
 	}
 	
 	FORCEINLINE Ptr(nullptr_t)
@@ -29,7 +27,7 @@ public:
 
 	template <typename TOther, typename = EnableIf<IsDerivedFrom<TOther, T>>>
 	FORCEINLINE Ptr(TOther& aReference)
-		: Ptr(static_cast<T&>(aReference))
+		: Ptr(&static_cast<T&>(aReference))
 	{
 	}
 
@@ -75,12 +73,13 @@ public:
 
 	FORCEINLINE bool IsValid() const
 	{
-		return myObject.myChunk && myObject.IsValid();
+		const Object* object = Read();
+		return object->myChunk && object->IsValid();
 	}
 	
 	FORCEINLINE T* Get() const
 	{
-		return IsValid() ? static_cast<T*>(&myObject) : nullptr;
+		return IsValid() ? reinterpret_cast<T*>(Read()) : nullptr;
 	}
 
 	FORCEINLINE operator T*() const
@@ -96,12 +95,12 @@ public:
 	}
 
 private:
+	FORCEINLINE Object* Read() const { return reinterpret_cast<Object*>(&myObject); }
+
+	friend class CogTypeChunk;
+
 	template <typename TOther>
 	friend class Ptr;
 
-	// Wrapped in union in order to avoid construction of Object
-	union
-	{
-		mutable Object myObject;
-	};
+	alignas(Object) mutable char myObject[sizeof Object];
 };

@@ -1,9 +1,12 @@
 #include "CogPch.h"
 #include "CogTypeChunk.h"
+#include "Program.h"
 #include "Pointer.h"
 
 CogTypeChunk::CogTypeChunk()
 {
+	memset(myProgram, 0, sizeof myProgram);
+
 	// All slots are free by default
 	myFreeSlots[0] = MaxOf<u64>;
 	myFreeSlots[1] = MaxOf<u64>;
@@ -15,6 +18,16 @@ CogTypeChunk::CogTypeChunk()
 
 CogTypeChunk::~CogTypeChunk()
 {
+}
+
+void CogTypeChunk::SetProgram(Program& aProgram)
+{
+	new (static_cast<void*>(myProgram)) Ptr<Program>(aProgram);
+}
+
+Program& CogTypeChunk::GetProgram() const
+{
+	return *reinterpret_cast<const Ptr<Program>*>(myProgram)->Get();
 }
 
 void CogTypeChunk::Initialize()
@@ -76,7 +89,7 @@ void CogTypeChunk::SendMessageById(const Message& aMessage, const TypeID<Message
 	}
 }
 
-Ptr<Object> CogTypeChunk::Allocate()
+Ptr<Object> CogTypeChunk::Allocate(const Ptr<Object>& aOwner, const bool aIsRootInstance)
 {
 	u8 allocatedIndex;
 
@@ -84,16 +97,33 @@ Ptr<Object> CogTypeChunk::Allocate()
 	{
 		// This looks like it creates a pointer to the default object but in reality it uses it to construct an internal "pointer object"
 		Ptr<Object> obj(myDefaultObject);
-		obj->myChunk = this;
-		obj->myChunkIndex = allocatedIndex;
-		obj->myGeneration = ++myGeneration[allocatedIndex];
+		
+		Object* rawObject = obj.Read();
+		rawObject->myChunk = this;
+		rawObject->myChunkIndex = allocatedIndex;
+		rawObject->myGeneration = ++(myGeneration[allocatedIndex]);
 
+		if (aIsRootInstance)
+			SetProgram(CheckedCast<Program>(*rawObject));
+
+		rawObject->SetOwner(aOwner);
+		
 		InitializeObjectAtIndex(allocatedIndex);
+
+		// TODO: This should probably be called from the generated function InitializeObjectAtIndex in order to avoid virtual function call
+		rawObject->myBaseCalled = 0;
+		rawObject->Created();
+		CHECK_MSG(rawObject->myBaseCalled == 1, L"Object subclass did not call Base::Created() all the way down to Object");
 
 		return obj;
 	}
 
 	return nullptr;
+}
+
+void CogTypeChunk::SetOwner(const u8 aIndex, const Ptr<Object>& aNewOwner)
+{
+	reinterpret_cast<Ptr<Object>&>(myOwners[aIndex].Get()) = aNewOwner;
 }
 
 UniquePtr<Object> CogTypeChunk::CreateDefaultObject() const

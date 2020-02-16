@@ -30,7 +30,7 @@ public:
 	template <typename TOtherType, EnableIf<IsDerivedFrom<TOtherType, T>, int> = 0>
 	Class& operator=(const Class<TOtherType>& aCopy);
 
-	operator const TypeID<Object>&() const
+	const TypeID<Object>& GetTypeID() const
 	{
 		return *myType;
 	}

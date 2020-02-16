@@ -2,32 +2,23 @@
 #include "MessageSystem.h"
 #include "Program.h"
 
-
-MessageSystem::MessageSystem()
-{
-}
-
-
-MessageSystem::~MessageSystem()
-{
-}
-
 bool MessageSystem::PostMessages()
 {
 	// Program& program = *gProgram;
 
-	Array<Message> messages = myMessages.Gather();
+	Array<ScheduledMessage> messages = Messages().Gather();
 
-	myCurrentMessages.Clear();
+	Map<const Object*, Array<ScheduledMessage>>& currentMessages = CurrentMessages();
+	currentMessages.Clear();
 
-	for (Message& aMessage : messages)
-		myCurrentMessages.FindOrAdd(aMessage.target).Add(Move(aMessage));
+	for (ScheduledMessage& aMessage : messages)
+		currentMessages.FindOrAdd(aMessage.target).Add(Move(aMessage));
 
-	// for (KeyValuePair<const Object*, Array<Message>>& pairs : myCurrentMessages)
+	// for (KeyValuePair<const Object*, Array<ScheduledMessage>>& pairs : myCurrentMessages)
 	// {
-	// 	program.QueueWork<Array<Message>>([](Array<Message>* aMessageList)
+	// 	program.QueueWork<Array<ScheduledMessage>>([](Array<ScheduledMessage>* aMessageList)
 	// 	{
-	// 		for (Message& message : *aMessageList)
+	// 		for (ScheduledMessage& message : *aMessageList)
 	// 		{
 	// 			message.target->ReceiveRawMessage(message.message, message.messageTypeId);
 	// 			message.destructMessage(message.message);
@@ -38,9 +29,9 @@ bool MessageSystem::PostMessages()
 	return false;
 }
 
-void MessageSystem::SubmitMessage(Message aMessage)
+void MessageSystem::SubmitMessage(ScheduledMessage aMessage)
 {
 	// Needed to avoid locking in PostMessages and here
-	CHECK(gProgram->IsInManagedThread());
-	myMessages.Submit(Move(aMessage));
+	CHECK(GetProgram().IsInManagedThread());
+	Messages().Submit(Move(aMessage));
 }

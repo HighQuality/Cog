@@ -22,15 +22,22 @@ UniquePtr<CogTypeChunk> CreateObjectChunk()
 	static_assert(IsDerivedFrom<TType, TType::Base>, #TType "::Base is not in inheritance chain."); \
 	} while (false)
 
+#define CHECK_SIZE(TType) \
+	do { \
+	static_assert(sizeof(TType) == sizeof(Object) || sizeof(TType) == sizeof(TType::Base), "Type " #TType " may not contain member variables "); \
+	} while (false)
+
 #define REGISTER_TYPE(TypeListObject, TType) \
 	do { \
 	CHECK_BASE_DECLARED(TType); \
+	CHECK_SIZE(TType); \
 	TypeListObject->Internal_AddType(TypeID<Object>::Resolve<TType>().GetUnderlyingInteger(), L"" #TType, &CreateObjectChunk<TType, JOIN(TType, CogTypeChunk)>, nullptr); \
 	} while (false)
 
 #define REGISTER_TYPE_SPECIALIZATION(TypeListObject, BaseType, Specialization) \
 	do { \
 	CHECK_BASE_DECLARED(Specialization); \
+	CHECK_SIZE(Specialization); \
 	static_assert(IsDerivedFrom<Specialization, BaseType>, #Specialization " does not derive from " #BaseType); \
 	TypeListObject->Internal_AddSpecialization(L"" #BaseType, TypeID<Object>::Resolve<Specialization>().GetUnderlyingInteger(), L"" #Specialization, &CreateObjectChunk<Specialization, JOIN(Specialization, CogTypeChunk)>, nullptr); \
 	} while (false)

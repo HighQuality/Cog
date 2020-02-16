@@ -10,10 +10,10 @@ class Ptr;
 class ObjectPool
 {
 public:
-	Ptr<Object> CreateObjectByType(const TypeID<Object>& aType);
-
+	Ptr<Object> CreateObjectByType(const TypeID<Object>& aType, const Ptr<Object>& aOwner);
+	
 private:
-	CogTypeChunk& FindOrCreateObjectChunk(const TypeID<Object>& aObjectType, UniquePtr<CogTypeChunk>(*aChunkCreator)(const TypeID<Object>&));
+	CogTypeChunk& FindOrCreateObjectChunk(bool& aCreated, const TypeID<Object>& aObjectType, const Ptr<Object>& aOwner, UniquePtr<CogTypeChunk>(*aChunkCreator)(const TypeID<Object>&));
 
 	Array<UniquePtr<CogTypeChunk>> myObjectChunks;
 };

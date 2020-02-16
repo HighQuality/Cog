@@ -4,8 +4,9 @@
 #include <Time/Stopwatch.h>
 #include <Threading/ThreadPool/ThreadPool.h>
 #include "Threading/Fibers/Await.h"
-#include "Pointer.h"
 #include "QueuedProgramWork.h"
+#include "MessageSystem.h"
+#include "ObjectPool.h"
 #include "Program.generated.h"
 
 class Object;
@@ -18,15 +19,10 @@ class Program : public Object
 	GENERATED_BODY;
 	
 public:
-	Program();
-	virtual ~Program();
+	void Step(bool aPrintDebugInfo);
+	void Run();
 
-	void Run(bool aPrintDebugInfo);
-
-	static Program& Create();
-	static void Destroy();
-
-	static Program& Get();
+	static Program& Get() { TODO; }
 
 	bool IsInMainThread() const;
 	bool IsInManagedThread() const;
@@ -130,10 +126,26 @@ public:
 
 	Fiber* GetUnusedFiber();
 
+	Ptr<Object> NewObjectByType(const TypeID<Object>& aObject, Object& aParent);
+
+protected:
+	void Created() override;
+	void Destroyed() override;
+
+	virtual bool ShouldKeepRunning() const = 0;
+	virtual void SynchronizedTick(const Time& aDeltaTime);
+
 private:
 	void WorkerThread(i32 aThreadIndex);
 
 	void FiberMain();
+
+	friend Object;
+
+	void ScheduleDestruction(Object& aObject);
+	void TickDestroys();
+
+	COGPROPERTY(ObjectPool ObjectInstancePool, DirectAccess);
 
 	COGPROPERTY(UniquePtr<ThreadPool> BackgroundWorkThreadPool, DirectAccess);
 
@@ -164,11 +176,9 @@ private:
 	COGPROPERTY(i32 ElapsedSeconds);
 
 	COGPROPERTY(const ThreadID* MainThreadID);
+
+	COGPROPERTY(Ptr<MessageSystem> MessageSystem);
+
+	COGPROPERTY(std::mutex DestroyMutex, DirectAccess);
+	COGPROPERTY(Array<Array<Object*>> ScheduledDestroys, DirectAccess);
 };
-
-extern Program* gProgram;
-
-FORCEINLINE Program& Program::Get()
-{
-	return *gProgram;
-}

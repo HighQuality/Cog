@@ -3,8 +3,8 @@
 
 void RenderTarget::SetRenderTexture(const std::shared_ptr<RenderTexture>& aNewRenderTexture)
 {
-	myWidth = aNewRenderTexture->GetWidth();
-	myHeight = aNewRenderTexture->GetHeight();
+	SetWidth(aNewRenderTexture->GetWidth());
+	SetHeight(aNewRenderTexture->GetHeight());
 
-	mySize = Vec2(static_cast<f32>(myWidth), static_cast<f32>(myHeight));
+	SetSize(Vec2(static_cast<f32>(GetWidth()), static_cast<f32>(GetHeight())));
 }

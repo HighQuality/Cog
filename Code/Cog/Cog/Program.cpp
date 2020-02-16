@@ -3,12 +3,17 @@
 #include "Threading/Fibers/Fiber.h"
 #include "Threading/Fibers/Awaitable.h"
 
-Program* gProgram = nullptr;
-
 static std::atomic<i32> gNextFiberIndex = 0;
 
-Program::Program()
+void Program::Created()
 {
+	Base::Created();
+
+	// Destroyed objects are scheduled for the entirety of the current and next frame before being destroyed
+	ScheduledDestroys().Resize(2);
+
+	SetMessageSystem(NewChild<MessageSystem>());
+
 	ThreadID::SetName(String(L"Main Thread"));
 	SetMainThreadID(&ThreadID::Get());
 
@@ -36,9 +41,12 @@ Program::Program()
 		WakeMainNotify().wait(lck);
 }
 
-Program::~Program()
+void Program::Destroyed()
 {
-	Println(L"Program shutting down...");
+ 	Println(L"Program shutting down...");
+
+	for (i32 i = 0; i < ScheduledDestroys().GetLength(); ++i)
+		TickDestroys();
 
 	BackgroundWorkThreadPool().Clear();
 
@@ -68,9 +76,48 @@ Program::~Program()
 
 	while (QueuedFibers().TryPop(fiber))
 		delete fiber;
+
+	Base::Destroyed();
 }
 
-void Program::Run(const bool aPrintDebugInfo)
+void Program::Run()
+{
+	Stopwatch watch;
+	bool isFirstFrame = true;
+
+	while (ShouldKeepRunning())
+	{
+		Time deltaTime;
+
+		if (isFirstFrame)
+		{
+			deltaTime = Time::Seconds(1.f / 60.f);
+			isFirstFrame = false;
+		}
+		else
+		{
+			deltaTime = watch.GetElapsedTime();
+		}
+
+		watch.Restart();
+
+		SynchronizedTick(deltaTime);
+
+		// Execute this frame's work
+		Step(false);
+
+		while (GetMessageSystem()->PostMessages())
+			Step(false);
+
+		TickDestroys();
+	}
+}
+
+void Program::SynchronizedTick(const Time& aDeltaTime)
+{
+}
+
+void Program::Step(const bool aPrintDebugInfo)
 {
 	std::unique_lock<std::mutex> workMutexLck(WorkMutex(), std::defer_lock);
 
@@ -138,21 +185,6 @@ void Program::Run(const bool aPrintDebugInfo)
 	if (aPrintDebugInfo)
 		Println(L"Program finished with % fibers allocated", gNextFiberIndex.load());
 }
-
-Program& Program::Create()
-{
-	CHECK(gProgram == nullptr);
-	gProgram = new Program();
-	return *gProgram;
-}
-
-void Program::Destroy()
-{
-	CHECK(gProgram != nullptr);
-	delete gProgram;
-	gProgram = nullptr;
-}
-
 
 void Program::FiberMain()
 {
@@ -325,4 +357,47 @@ Fiber* Program::GetUnusedFiber()
 		}, this);
 
 	return newFiber;
+}
+
+Ptr<Object> Program::NewObjectByType(const TypeID<Object>& aObject, Object& aParent)
+{
+	ObjectPool& objectPool = ObjectInstancePool();
+	return objectPool.CreateObjectByType(aObject, aParent);
+}
+
+void Program::TickDestroys()
+{
+	Array<Object*> destroyNow;
+
+	{
+		std::unique_lock<std::mutex> lck(DestroyMutex());
+
+		Array<Array<Object*>>& scheduledDestroys = ScheduledDestroys();
+
+		if (scheduledDestroys.GetLength() == 0)
+			return;
+
+		destroyNow = Move(scheduledDestroys[0]);
+
+		for (i32 i = 1; i < scheduledDestroys.GetLength(); ++i)
+		{
+			scheduledDestroys[i - 1] = Move(scheduledDestroys[i]);
+		}
+	}
+
+	for (Object* obj : destroyNow)
+		obj->ReturnToAllocator();
+
+	destroyNow.Empty();
+
+	{
+		std::unique_lock<std::mutex> lck(DestroyMutex());
+		ScheduledDestroys().Last() = Move(destroyNow);
+	}
+}
+
+void Program::ScheduleDestruction(Object& aObject)
+{
+	std::unique_lock<std::mutex> lck(DestroyMutex());
+	ScheduledDestroys().Last().Add(&aObject);
 }

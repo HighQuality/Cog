@@ -141,6 +141,7 @@
     <ClInclude Include="HeaderParser.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="Solution.h" />
+    <ClInclude Include="UnitTestClass.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Core/Core.vcxproj">

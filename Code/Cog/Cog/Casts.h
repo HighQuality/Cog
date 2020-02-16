@@ -25,7 +25,7 @@ FORCEINLINE const TTo* Cast(const TFrom& aFrom)
 }
 
 template <typename TTo, typename TFrom>
-FORCEINLINE TTo& CastChecked(TFrom& aFrom)
+FORCEINLINE TTo& CheckedCast(TFrom& aFrom)
 {
 	TTo* castedObject = Cast<TTo>(&aFrom);
 	CHECK(castedObject);
@@ -33,7 +33,7 @@ FORCEINLINE TTo& CastChecked(TFrom& aFrom)
 }
 
 template <typename TTo, typename TFrom>
-FORCEINLINE const TTo& CastChecked(const TFrom& aFrom)
+FORCEINLINE const TTo& CheckedCast(const TFrom& aFrom)
 {
-	return CastChecked<const TTo>(const_cast<TFrom&>(aFrom));
+	return CheckedCast<const TTo>(const_cast<TFrom&>(aFrom));
 }

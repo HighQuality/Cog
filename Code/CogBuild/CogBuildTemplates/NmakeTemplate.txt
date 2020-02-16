@@ -68,6 +68,8 @@ ${SourceFiles}
   <ItemGroup>
 ${HeaderFiles}
   </ItemGroup>
+  <ItemGroup>${NatvisFiles}
+  </ItemGroup>
 ${ProjectReferences}  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -19,7 +19,7 @@ Project::Project(Directory* aProjectDirectory)
 	generatedCodeDirectory = Format(L"%\\generated", tempProjectDirectory);
 	pchHeaderFileName = Format(L"%Pch.h", projectName);
 	pchSourceFileName = Format(L"%Pch.cpp", projectName);
-
+	
 	extraIncludePaths.Add(Format(L"$(SolutionDir)%\\", projectName));
 	extraIncludePaths.Add(Format(L"%\\", generatedCodeDirectory));
 
@@ -74,11 +74,26 @@ Project::Project(Directory* aProjectDirectory)
 
 		const std::string typeName = document["type"].get<std::string>();
 
+		if (preprocess)
+		{
+			typeListRegistratorFile = Format(L"%/%TypeListRegistrator.generated.cpp", generatedCodeDirectory, projectName);
+			generatedSourceFiles.Add(typeListRegistratorFile);
+		}
+
 		if (typeName == "executable")
 		{
 			projectType = ProjectType::Executable;
 			debugDevelopmentProjectFile = Format(L"%/Debug%.vcxproj", aProjectDirectory->GetAbsolutePath(), projectName);
 			debugDevelopmentUserProjectFile = Format(L"%/Debug%.vcxproj.user", aProjectDirectory->GetAbsolutePath(), projectName);
+			
+			mainFilePath = Format(L"%/%Main_generated.cpp", generatedCodeDirectory, projectName);
+			generatedSourceFiles.Add(mainFilePath);
+
+			if (preprocess)
+			{
+				typeListInvocatorFile = Format(L"%/%TypeListInvocator.generated.cpp", generatedCodeDirectory, projectName);
+				generatedSourceFiles.Add(typeListInvocatorFile);
+			}
 		}
 		else if (typeName == "library")
 			projectType = ProjectType::Library;
@@ -91,6 +106,8 @@ Project::Project(Directory* aProjectDirectory)
 					headerFiles.Add(&aFile);
 				else if (aFile.GetExtension() == L".c" || aFile.GetExtension() == L".cpp" || aFile.GetExtension() == L".cc")
 					sourceFiles.Add(&aFile);
+				else if (aFile.GetExtension() == L".natvis")
+					natvisFiles.Add(&aFile);
 			}, true);
 	}
 	else
@@ -286,6 +303,13 @@ void Project::GenerateDebugDevelopmentProjectFile(const StringView aMainProjectF
     </ProjectReference>\n\
   </ItemGroup>\n", aMainProjectFilePath, aMainProjectGuid));
 
+	String natvisFileList;
+	for (const File* file : natvisFiles)
+	{
+		natvisFileList.Append(Format(L"\n<Natvis Include=\"%\" />", file->GetAbsolutePath().View()).View());
+	}
+	documentTemplate.AddParameter(String(L"NatvisFiles"), Move(natvisFileList));
+
 	const String output = documentTemplate.Evaluate();
 
 	WriteToFileIfChanged(debugDevelopmentProjectFile, output.View());
@@ -321,20 +345,6 @@ bool Project::ParseHeaders()
 
 			generatedHeaderFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetHeaderFileName()));
 			generatedSourceFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetSourceFileName()));
-
-			if (!hasGeneratedAnyCode)
-			{
-				hasGeneratedAnyCode = true;
-
-				typeListRegistratorFile = Format(L"%/%TypeListRegistrator.generated.cpp", generatedCodeDirectory, projectName);
-				generatedSourceFiles.Add(typeListRegistratorFile);
-
-				if (projectType == ProjectType::Executable)
-				{
-					typeListInvocatorFile = Format(L"%/%TypeListInvocator.generated.cpp", generatedCodeDirectory, projectName);
-					generatedSourceFiles.Add(typeListInvocatorFile);
-				}
-			}
 		}
 	}
 
@@ -343,9 +353,6 @@ bool Project::ParseHeaders()
 
 void Project::GenerateFiles(const DocumentTemplates& aTemplates) const
 {
-	if (!hasGeneratedAnyCode)
-		return;
-
 	CreateDirectoryW(tempProjectDirectory.GetData(), nullptr);
 	CreateDirectoryW(generatedCodeDirectory.GetData(), nullptr);
 
@@ -436,6 +443,105 @@ void Project::GenerateFiles(const DocumentTemplates& aTemplates) const
 		const String typeListInvocatorContent = typeListInvocator.Evaluate();
 
 		WriteToFileIfChanged(typeListInvocatorFile.View(), typeListInvocatorContent);
+
+		StringTemplate mainFile(String(aTemplates.executableMainTemplate));
+		mainFile.AddParameter(String(L"PchFileName"), String(pchHeaderFileName));
+
+		{
+			bool hasProgramSpecialization = false;
+			
+			// TODO: Refactor this
+			for (Project* project : GatherProjectReferences())
+			{
+				for (HeaderParser* parser : project->myHeaderParsers)
+				{
+					for (CogClass* cogClass : parser->GetGeneratedCode().GetCogClasses())
+					{
+						if (cogClass->SpecializesBaseClass() && cogClass->GetBaseTypeName() == L"Program")
+						{
+							hasProgramSpecialization = true;
+							break;
+						}
+					}
+
+					if (hasProgramSpecialization)
+						break;
+				}
+
+				if (hasProgramSpecialization)
+					break;
+			}
+
+			mainFile.AddParameter(String(L"HasProgramSpecialization"), String(hasProgramSpecialization ? L"true" : L"false"));
+		}
+
+		mainFile.AddParameter(String(L"NumUnitTests"), Format(L"", unitTests.GetLength()));
+		
+		{
+			i32 currentTestIndex = 0;
+
+			String unitTestDefinitions;
+			String unitTestFunctionList;
+			String failingTestFindSwitch;
+			failingTestFindSwitch.Append(L"switch(start)\n{\n");
+
+			for (const UnitTestClass& testClass : unitTests)
+			{
+				unitTestFunctionList.Append(L"&DoUnitTest_");
+				unitTestFunctionList.Append(testClass.className);
+				unitTestFunctionList.Add(L',');
+
+				unitTestDefinitions.Append(L"static void DoUnitTest_");
+				unitTestDefinitions.Append(testClass.className);
+				unitTestDefinitions.Append(L"(const i32 aIndex)\n{\n");
+
+				unitTestDefinitions.Append(L"\tstatic ");
+				unitTestDefinitions.Append(testClass.className);
+				unitTestDefinitions.Append(L" obj;\n");
+
+				unitTestDefinitions.Append(L"\tswitch(aIndex)\n{");
+				unitTestDefinitions.Append(L"\t{\n");
+				
+				for (const UnitTest& unitTest : testClass.tests)
+				{
+					const i32 assignedIndex = currentTestIndex++;
+					const String assignedIndexStr = Format(L"", assignedIndex);
+
+					unitTestDefinitions.Append(L"\t\tcase ");
+					unitTestDefinitions.Append(assignedIndexStr);
+					unitTestDefinitions.Append(L": obj.");
+					unitTestDefinitions.Append(unitTest.functionName);
+					unitTestDefinitions.Append(L"(); break;\n");
+
+					failingTestFindSwitch.Append(L"case ");
+					failingTestFindSwitch.Append(assignedIndexStr);
+					failingTestFindSwitch.Append(L": failingTestDescription = L\"");
+					failingTestFindSwitch.Append(unitTest.functionLocation);
+					failingTestFindSwitch.Append(L": error: Test \\\"");
+					failingTestFindSwitch.Append(testClass.className);
+					failingTestFindSwitch.Append(L"::");
+					failingTestFindSwitch.Append(unitTest.functionName);
+					failingTestFindSwitch.Append(L"\\\" failed.\"; break;\n");
+				}
+
+				unitTestDefinitions.Append(L"\t\tdefault: FATAL(L\"Unit Test out of range\"); break;");
+				unitTestDefinitions.Append(L"\t}");
+
+				unitTestDefinitions.Add(L'}');
+			}
+
+			// Pop the last ',' if we've added anything to this
+			unitTestFunctionList.TryPop();
+
+			failingTestFindSwitch.Append(L"}");
+
+			mainFile.AddParameter(String(L"UnitTestDefinitions"), Move(unitTestDefinitions));
+			mainFile.AddParameter(String(L"UnitTestFunctionList"), Move(unitTestFunctionList));
+			mainFile.AddParameter(String(L"FailingTestFindSwitch"), Move(failingTestFindSwitch));
+		}
+
+		const String mainFileContent = mainFile.Evaluate();
+		WriteToFileIfChanged(mainFilePath.View(), mainFileContent);
 	}
 }
 
@@ -472,6 +578,7 @@ bool Project::ResolveDependencies(const Map<String, CogType*>& aCogTypes)
 				return false;
 		}
 	}
+
 	return true;
 }
 

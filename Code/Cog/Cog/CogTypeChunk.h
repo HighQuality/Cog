@@ -5,6 +5,7 @@ class Ptr;
 
 class Message;
 class CogTypeChunk;
+class Program;
 
 struct EventDispatcherInfo
 {
@@ -18,8 +19,10 @@ class CogTypeChunk
 public:
 	CogTypeChunk();
 	virtual ~CogTypeChunk();
-	
+
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(CogTypeChunk);
+
+	Program& GetProgram() const;
 
 	virtual void Initialize();
 
@@ -47,11 +50,17 @@ public:
 
 	void SendMessageById(const Message& aMessage, TypeID<Message>::CounterType aIndex, u8 aReceiver);
 
-	Ptr<Object> Allocate();
-	
+	Ptr<Object> Allocate(const Ptr<Object>& aOwner, bool aIsRootInstance);
+
+	void SetOwner(u8 aIndex, const Ptr<Object>& aNewOwner);
+	FORCEINLINE const Ptr<Object>& GetOwner(const u8 aIndex) const { reinterpret_cast<const Ptr<Object>&>(myOwners[aIndex].Get()); }
+
 protected:
 	template <typename T>
 	friend class Ptr;
+
+	friend class ObjectPool;
+	void SetProgram(Program& aProgram);
 
 	virtual UniquePtr<Object> CreateDefaultObject() const;
 	virtual void InitializeObjectAtIndex(u8 aIndex);
@@ -75,19 +84,29 @@ private:
 	
 	void ReturnByIndex(u8 aIndex);
 
+#ifdef ENV64
+	static constexpr i32 PtrSize = 24;
+#elif defined(ENV32)
+	constexpr i32 PtrSize = 20;
+#else
+#error "Unknown environment""
+#endif
+
 	UniquePtr<Object> myDefaultObject;
+	char myProgram[PtrSize];
 	
 	volatile u64 myFreeSlots[4];
+
+	ManualInitializationObject<char[PtrSize]> myOwners[256];
 	bool myIsPendingDestroy[256];
 	u8 myGeneration[256];
 };
 
 class ObjectReturner
 {
+public:
 	FORCEINLINE ObjectReturner(CogTypeChunk& aChunk, const u8 aIndex)
 	{
 		aChunk.ReturnByIndex(aIndex);
 	}
-
-	friend class Object;
 };

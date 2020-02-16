@@ -5,6 +5,9 @@ struct Defer
 {
 	Defer(T f) : f(f) {}
 	~Defer() { f(); }
+	
+	explicit operator bool() const { return true; }
+	
 	T f;
 };
 
@@ -14,9 +17,6 @@ Defer<T> MakeDefer(T f)
 	return Defer<T>(f);
 };
 
-#define __defer( line ) defer_ ## line
-#define _defer( line ) __defer( line )
-
 struct DeferDummy { };
 template<typename T>
 Defer<T> operator+(DeferDummy, T&& f)
@@ -24,4 +24,8 @@ Defer<T> operator+(DeferDummy, T&& f)
 	return MakeDefer<T>(std::forward<T>(f));
 }
 
-#define defer auto _defer( __LINE__ ) = DeferDummy( ) + [ & ]( )
+#define defer auto JOIN(__defer_, __LINE__ ) = DeferDummy( ) + [ & ]( )
+
+#define scoped_lock(mutex) \
+	mutex.lock(); \
+	if (defer { mutex.unlock(); })

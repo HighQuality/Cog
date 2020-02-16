@@ -13,18 +13,14 @@ public:
 
 	void Submit(DrawCall aDrawCall)
 	{
-		myDrawCallList.Submit(Move(aDrawCall));
+		DrawCallList().Submit(Move(aDrawCall));
 	}
 
-	FORCEINLINE i32 GetWidth() const { return myWidth; }
-	FORCEINLINE i32 GetHeight() const { return myHeight; }
-	FORCEINLINE Vec2 GetSize() const { return mySize; }
-
 private:
-	EventList<DrawCall> myDrawCallList;
+	COGPROPERTY(EventList<DrawCall> DrawCallList, DirectAccess);
 
-	std::shared_ptr<RenderTexture> myRenderTexture;
-	Vec2 mySize;
-	i32 myWidth = 0;
-	i32 myHeight = 0;
+	COGPROPERTY(Ptr<RenderTexture> RenderTexture);
+	COGPROPERTY(Vec2 Size, PublicRead);
+	COGPROPERTY(i32 Width = 0, PublicRead);
+	COGPROPERTY(i32 Height = 0, PublicRead);
 };

@@ -19,15 +19,3 @@ bool IsInGameThread();
 #include <Cog/Class.h>
 #include <Cog/Pointer.h>
 #include <Cog/FrameData.h>
-
-class TypeList;
-
-void RunGame();
-
-Ptr<Object> NewObjectByType(const TypeID<Object>& aTypeID);
-
-template <typename T>
-Ptr<T> NewObject(const Class<T>& aType = Class<T>())
-{
-	return NewObjectByType(aType).Get();
-}
