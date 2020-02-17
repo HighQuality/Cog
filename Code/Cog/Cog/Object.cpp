@@ -4,26 +4,20 @@
 #include "Program.h"
 #include "CogTypeChunk.h"
 
-Object::Object() = default;
-
-Object::~Object() = default;
-
 bool Object::Destroy()
 {
 	if (IsPendingDestroy())
 		return false;
 
 	myChunk->MarkPendingDestroy(myChunkIndex);
-
-	if (&GetProgram() != this)
-		GetProgram().ScheduleDestruction(*this);
+	GetProgram().ScheduleDestruction(*this);
 	
 	return true;
 }
 
-Ptr<Object> Object::NewChildByType(const TypeID<Object>& aType)
+Ptr<Object> Object::NewChildByType(const TypeID<CogTypeBase>& aType)
 {
-	return GetProgram().NewObjectByType(aType, *this);
+	return GetProgram().NewObjectByType(aType, this);
 }
 
 void Object::Created()

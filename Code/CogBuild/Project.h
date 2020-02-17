@@ -25,6 +25,7 @@ struct Project
 
 	bool GatherCogTypes(Map<String, CogType*>& aCogTypes) const;
 	bool ResolveDependencies(const Map<String, CogType*>& aCogTypes);
+	void PostResolveDependencies();
 
 	/** These gather functions gather all the properties from this and all referenced projects */
 	Array<StringView> GatherLibraryPaths() const;

@@ -1,4 +1,5 @@
 #pragma once
+#include "Singleton.h"
 #include <TypeFundamentals/TypeID.h>
 #include <Threading/ThreadID.h>
 #include <Time/Stopwatch.h>
@@ -14,10 +15,14 @@ class ThreadPool;
 class Fiber;
 
 COGTYPE()
-class Program : public Object
+class Program : public Singleton
 {
 	GENERATED_BODY;
-	
+
+protected:
+	bool Starting() override;
+	void ShuttingDown() override;
+
 public:
 	void Step(bool aPrintDebugInfo);
 	void Run();
@@ -32,9 +37,8 @@ public:
 	template <typename TExtraData>
 	void QueueHighPrioWork(void(*aFunction)(TExtraData*), TExtraData* aArgument)
 	{
-		std::unique_lock<std::mutex> lck(WorkMutex());
-		HighPrioWorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
-		lck.unlock();
+		scoped_lock (WorkMutex())
+			HighPrioWorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
 
 		WorkNotify().notify_one();
 	}
@@ -42,9 +46,8 @@ public:
 	template <typename TExtraData>
 	void QueueWork(void(*aFunction)(TExtraData*), TExtraData* aArgument)
 	{
-		std::unique_lock<std::mutex> lck(WorkMutex());
-		WorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
-		lck.unlock();
+		scoped_lock (WorkMutex())
+			WorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
 
 		WorkNotify().notify_one();
 	}
@@ -126,12 +129,15 @@ public:
 
 	Fiber* GetUnusedFiber();
 
-	Ptr<Object> NewObjectByType(const TypeID<Object>& aObject, Object& aParent);
+	template <typename T>
+	Ptr<T> NewObject(Object* aParent, const Class<T>& aClass = Class<T>())
+	{
+		return reinterpret_cast<T*>(NewObjectByType(aClass.GetTypeID(), aParent).Get());
+	}
+
+	Ptr<Object> NewObjectByType(const TypeID<CogTypeBase>& aObject, Object* aParent);
 
 protected:
-	void Created() override;
-	void Destroyed() override;
-
 	virtual bool ShouldKeepRunning() const = 0;
 	virtual void SynchronizedTick(const Time& aDeltaTime);
 

@@ -1,6 +1,7 @@
 #pragma once
 
 class CogTypeChunk;
+class Singleton;
 
 class TypeData
 {
@@ -15,8 +16,10 @@ public:
 	void SetSpecialization(TypeData& aSpecialization) { mySpecialization = &aSpecialization; }
 
 	void SetFactoryAllocator(UniquePtr<CogTypeChunk>(*aFactoryAllocator)()) { myFactoryAllocator = aFactoryAllocator; }
+	void SetSingletonAllocator(UniquePtr<Singleton>(*aSingletonAllocator)()) { mySingletonAllocator = aSingletonAllocator; }
 
-	UniquePtr<CogTypeChunk> AllocateFactory() const { return myFactoryAllocator(); }
+	UniquePtr<CogTypeChunk> AllocateFactory() const { CHECK(!IsSingleton()); return myFactoryAllocator(); }
+	UniquePtr<Singleton> AllocateSingleton() const { CHECK(IsSingleton()); return mySingletonAllocator(); }
 
 	bool operator==(const TypeData& aRight) const
 	{
@@ -34,6 +37,8 @@ public:
 		CHECK(myOutermostSpecialization);
 		return *myOutermostSpecialization;
 	}
+
+	FORCEINLINE bool IsSingleton() const { return mySingletonAllocator != nullptr; }
 
 private:
 	bool HasOutermostSpecialization() const { return myOutermostSpecialization != nullptr; }
@@ -59,4 +64,5 @@ private:
 	StringView myName; 
 	StringView mySpecializationOf;
 	UniquePtr<CogTypeChunk>(*myFactoryAllocator)() = nullptr;
+	UniquePtr<Singleton>(*mySingletonAllocator)() = nullptr;
 };

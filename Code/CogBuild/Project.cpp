@@ -582,6 +582,15 @@ bool Project::ResolveDependencies(const Map<String, CogType*>& aCogTypes)
 	return true;
 }
 
+void Project::PostResolveDependencies()
+{
+	for (const HeaderParser* parser : myHeaderParsers)
+	{
+		for (CogType* cogType : parser->GetGeneratedCode().GetCogTypes())
+			cogType->PostResolveDependencies();
+	}
+}
+
 void Project::GatherLibraryPathsMap(Map<StringView, u8>& aLibraryPaths) const
 {
 	for (const String& libraryPath : extraLibraryPaths)

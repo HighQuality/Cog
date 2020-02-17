@@ -5,8 +5,6 @@
 
 CogTypeChunk::CogTypeChunk()
 {
-	memset(myProgram, 0, sizeof myProgram);
-
 	// All slots are free by default
 	myFreeSlots[0] = MaxOf<u64>;
 	myFreeSlots[1] = MaxOf<u64>;
@@ -22,12 +20,7 @@ CogTypeChunk::~CogTypeChunk()
 
 void CogTypeChunk::SetProgram(Program& aProgram)
 {
-	new (static_cast<void*>(myProgram)) Ptr<Program>(aProgram);
-}
-
-Program& CogTypeChunk::GetProgram() const
-{
-	return *reinterpret_cast<const Ptr<Program>*>(myProgram)->Get();
+	myProgram = &aProgram;
 }
 
 void CogTypeChunk::Initialize()

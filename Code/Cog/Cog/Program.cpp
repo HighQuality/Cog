@@ -5,14 +5,17 @@
 
 static std::atomic<i32> gNextFiberIndex = 0;
 
-void Program::Created()
+bool Program::Starting()
 {
-	Base::Created();
+	if (!Base::Starting())
+		return false;
+
+	ObjectInstancePool().SetProgram(*this);
 
 	// Destroyed objects are scheduled for the entirety of the current and next frame before being destroyed
 	ScheduledDestroys().Resize(2);
 
-	SetMessageSystem(NewChild<MessageSystem>());
+	SetMessageSystem(NewObject<MessageSystem>(nullptr));
 
 	ThreadID::SetName(String(L"Main Thread"));
 	SetMainThreadID(&ThreadID::Get());
@@ -39,9 +42,11 @@ void Program::Created()
 
 	while (!IsMainRunning())
 		WakeMainNotify().wait(lck);
+
+	return true;
 }
 
-void Program::Destroyed()
+void Program::ShuttingDown()
 {
  	Println(L"Program shutting down...");
 
@@ -77,7 +82,7 @@ void Program::Destroyed()
 	while (QueuedFibers().TryPop(fiber))
 		delete fiber;
 
-	Base::Destroyed();
+	Base::ShuttingDown();
 }
 
 void Program::Run()
@@ -359,7 +364,7 @@ Fiber* Program::GetUnusedFiber()
 	return newFiber;
 }
 
-Ptr<Object> Program::NewObjectByType(const TypeID<Object>& aObject, Object& aParent)
+Ptr<Object> Program::NewObjectByType(const TypeID<CogTypeBase>& aObject, Object* aParent)
 {
 	ObjectPool& objectPool = ObjectInstancePool();
 	return objectPool.CreateObjectByType(aObject, aParent);

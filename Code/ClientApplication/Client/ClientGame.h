@@ -11,10 +11,11 @@ class ClientGame final : public Game
 {
 	GENERATED_BODY;
 
-public:
-	void Created() override;
-	void Destroyed() override;
+protected:
+	bool Starting() override;
+	void ShuttingDown() override;
 
+public:
 	bool ShouldKeepRunning() const override;
 
 protected:

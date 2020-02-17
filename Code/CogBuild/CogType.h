@@ -13,6 +13,7 @@ public:
 
 	bool HasBaseType() const { return myBaseTypeName.GetLength() > 0; }
 	virtual bool ResolveDependencies(const Map<String, CogType*>& aCogTypes);
+	virtual void PostResolveDependencies();
 
 	virtual String GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const;
 	virtual String GenerateSourceFileContents(const DocumentTemplates& aTemplates) const;

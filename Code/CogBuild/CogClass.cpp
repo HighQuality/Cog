@@ -20,46 +20,62 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 	if (HasBaseType())
 		generatedLines.Add(Format(L"using Base = %;", GetBaseTypeName()));
 	else
-		generatedLines.Add(Format(L"using Base = void;"));
+		generatedLines.Add(Format(L"using Base = CogTypeBase;"));
 
-	if (GetTypeName() != L"Object")
+	if (GetTypeName() != L"Object" && !myIsSingleton)
 	{
-		generatedLines.Add(String(L"void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const override"));
-		generatedLines.Add(String(L"{ aFunction(TypeID<Object>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }"));
+		generatedLines.Add(String(L"void GetBaseClasses(const FunctionView<void(const TypeID<CogTypeBase>&)>& aFunction) const override"));
+		generatedLines.Add(String(L"{ aFunction(TypeID<CogTypeBase>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }"));
 	}
 
 	generatedLines.Add(String(L"private:"));
 
-	generatedLines.Add(Format(L"FORCEINLINE const %CogTypeChunk& GetChunk() const { return static_cast<const %CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
-	generatedLines.Add(Format(L"FORCEINLINE %CogTypeChunk& GetChunk() { return static_cast<%CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
+	if (!myIsSingleton)
+	{
+		generatedLines.Add(Format(L"FORCEINLINE const %CogTypeChunk& GetChunk() const { return static_cast<const %CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
+		generatedLines.Add(Format(L"FORCEINLINE %CogTypeChunk& GetChunk() { return static_cast<%CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
+	}
 
 	for (const CogProperty& prop : myProperties)
 	{
+		const bool hasSpecialName = prop.propertyName.StartsWith(L"Is");
+		const String getterName = hasSpecialName ? String(prop.propertyName) : Format(L"Get%", prop.propertyName);
+
+		String accessor;
+
+		if (!myIsSingleton)
+		{
+			accessor = Format(L"GetChunk().Access%(myChunkIndex)", prop.propertyName);
+		}
+		else
+		{
+			accessor = Format(L"_data_%", prop.propertyName);
+			generatedLines.Add(String(L"private:"));
+			generatedLines.Add(Format(L"% _data_%;", prop.propertyType, prop.propertyName));
+		}
+
 		if (prop.publicRead)
 			generatedLines.Add(String(L"public:"));
 		else
 			generatedLines.Add(String(L"private:"));
-		
-		const bool hasSpecialName = prop.propertyName.StartsWith(L"Is");
-		const String getterName = hasSpecialName ? String(prop.propertyName) : Format(L"Get%", prop.propertyName);
 
 		// Only generate the shorthand special name if we haven't specified DirectAccess in order to avoid a naming conflict
 		if (!hasSpecialName || !prop.directAccess)
-			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, getterName, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return %; }", prop.propertyType, getterName, accessor));
 
 		generatedLines.Add(String(L"private:"));
 
 		if (prop.directAccess)
 		{
 			// This is mainly a template so we can SFINAE it out in case of it not being copy-constructible
-			generatedLines.Add(Format(L"template<typename TCopyType, typename = EnableIf<std::is_copy_constructible_v<%>>> FORCEINLINE ReferenceOf<%> Set%(TCopyType aNewValue) { auto& value = GetChunk().Access%(myChunkIndex); value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyType, prop.propertyName, prop.propertyName));
+			generatedLines.Add(Format(L"template<typename TCopyType, typename = EnableIf<std::is_copy_constructible_v<%>>> FORCEINLINE ReferenceOf<%> Set%(TCopyType aNewValue) { auto& value = %; value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyType, prop.propertyName, accessor));
 			
-			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
-			generatedLines.Add(Format(L"FORCEINLINE ReferenceOf<%> %() { return GetChunk().Access%(myChunkIndex); }", prop.propertyType, prop.propertyName, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return %; }", prop.propertyType, prop.propertyName, accessor));
+			generatedLines.Add(Format(L"FORCEINLINE ReferenceOf<%> %() { return %; }", prop.propertyType, prop.propertyName, accessor));
 		}
 		else
 		{
-			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> Set%(% aNewValue) { auto& value = GetChunk().Access%(myChunkIndex); value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, prop.propertyName));
+			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> Set%(% aNewValue) { auto& value = %; value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, accessor));
 		}
 	}
 	
@@ -71,6 +87,9 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 
 Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 {
+	// Singletons don't have CogTypeChunks
+	CHECK(!myIsSingleton);
+
 	Array<String> generatedLines;
 
 	const String baseChunkName = Format(L"%CogTypeChunk", HasBaseType() ? GetBaseTypeName() : L"");
@@ -105,6 +124,9 @@ Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 
 Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
 {
+	// Singletons don't have CogTypeChunks
+	CHECK(!myIsSingleton);
+
 	Array<String> generatedLines;
 	
 	generatedLines.Add(Format(L"UniquePtr<Object> %::CreateDefaultObject() const", myChunkTypeName));
@@ -173,7 +195,7 @@ String CogClass::GenerateHeaderFileContents(const DocumentTemplates& aTemplates,
 		headerOutput.Add(L'\n');
 	}
 
-	
+	if (!myIsSingleton)
 	{
 		const Array<String> chunkContents = GenerateCogTypeChunkHeaderContents();
 
@@ -193,6 +215,7 @@ String CogClass::GenerateSourceFileContents(const DocumentTemplates& aTemplates)
 {
 	String sourceOutput = Base::GenerateSourceFileContents(aTemplates);
 
+	if (!myIsSingleton)
 	{
 		const Array<String> chunkContents = GenerateCogTypeChunkSourceContents();
 
@@ -216,6 +239,25 @@ void CogClass::SetIsFinal(const bool aIsFinal)
 void CogClass::RegisterCogProperty(CogProperty aProperty)
 {
 	myProperties.Add(Move(aProperty));
+}
+
+void CogClass::PostResolveDependencies()
+{
+	const CogClass* root = GetRootClass();
+	CHECK(root);
+	if (root->GetTypeName() == L"Singleton")
+		myIsSingleton = true;
+	else if (root->GetTypeName() == L"Object")
+		myIsSingleton = false;
+	else
+		FATAL(L"Unknown root class ", root->GetTypeName());
+}
+
+const CogClass* CogClass::GetRootClass() const
+{
+	if (const CogClass* base = GetBaseType())
+		return base->GetRootClass();
+	return this;
 }
 
 void CogClass::GatherPropertyInitializers(Map<StringView, ClassPropertyInitializerData>& aPropertyInitializers) const

@@ -1,20 +1,22 @@
 #include "CogPch.h"
 #include "CogGame.h"
 
-void CogGame::Created()
+bool CogGame::Starting()
 {
-	Base::Created();
+	if (!Base::Starting())
+		return false;
 
 	SetFrameData(MakeUnique<FrameData>());
 
-	SetResourceManager(NewChild<ResourceManager>());
+	SetResourceManager(NewObject<ResourceManager>(nullptr));
+	return true;
 }
 
-void CogGame::Destroyed()
+void CogGame::ShuttingDown()
 {
 	GetResourceManager()->Destroy();
 
-	Base::Destroyed();
+	Base::ShuttingDown();
 }
 
 void CogGame::SynchronizedTick(const Time& aDeltaTime)

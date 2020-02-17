@@ -22,7 +22,7 @@ public:
 
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(CogTypeChunk);
 
-	Program& GetProgram() const;
+	FORCEINLINE Program& GetProgram() const { CHECK_PEDANTIC(myProgram); return *myProgram; }
 
 	virtual void Initialize();
 
@@ -93,7 +93,7 @@ private:
 #endif
 
 	UniquePtr<Object> myDefaultObject;
-	char myProgram[PtrSize];
+	Program* myProgram = nullptr;
 	
 	volatile u64 myFreeSlots[4];
 

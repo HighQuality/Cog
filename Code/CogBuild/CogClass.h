@@ -28,9 +28,12 @@ public:
 
 	void RegisterCogProperty(CogProperty aProperty);
 
+	void PostResolveDependencies() override;
+	
 protected:
 	FORCEINLINE const CogClass* GetBaseType() const { return static_cast<const CogClass*>(Base::GetBaseType()); }
-	
+	const CogClass* GetRootClass() const;
+
 	void GatherPropertyInitializers(Map<StringView, ClassPropertyInitializerData>& aPropertyInitializers) const;
 
 private:
@@ -42,6 +45,7 @@ private:
 	bool mySpecializesBaseClass = false;
 	bool myIsFinal = false;
 	bool myDebugFlag = false;
+	bool myIsSingleton = false;
 };
 
 struct ClassPropertyInitializerData

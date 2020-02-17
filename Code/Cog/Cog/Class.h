@@ -2,7 +2,7 @@
 #include <TypeFundamentals/TypeID.h>
 #include <TypeFundamentals/TypeTraits.h>
 
-class Object;
+class CogTypeBase;
 
 template <typename T>
 class Class
@@ -10,10 +10,10 @@ class Class
 public:
 	Class()
 	{
-		myType = &TypeID<Object>::Resolve<T>();
+		myType = &TypeID<CogTypeBase>::Resolve<T>();
 	}
 
-	explicit Class(const TypeID<Object>& aType)
+	explicit Class(const TypeID<CogTypeBase>& aType)
 	{
 		myType = &aType;
 	}
@@ -30,7 +30,7 @@ public:
 	template <typename TOtherType, EnableIf<IsDerivedFrom<TOtherType, T>, int> = 0>
 	Class& operator=(const Class<TOtherType>& aCopy);
 
-	const TypeID<Object>& GetTypeID() const
+	const TypeID<CogTypeBase>& GetTypeID() const
 	{
 		return *myType;
 	}
@@ -39,7 +39,7 @@ private:
 	template <typename TOtherType>
 	friend class Class;
 
-	const TypeID<Object>* myType;
+	const TypeID<CogTypeBase>* myType;
 };
 
 template <typename T>

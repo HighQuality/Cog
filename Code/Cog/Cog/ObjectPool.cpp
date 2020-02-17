@@ -12,29 +12,33 @@ UniquePtr<TypeList> RegisterTypeList()
 
 static UniquePtr<const TypeList> gTypeList = RegisterTypeList();
 
-static UniquePtr<CogTypeChunk> CreateChunkOfType(const TypeID<Object>& aType)
+static UniquePtr<CogTypeChunk> CreateChunkOfType(const TypeID<CogTypeBase>& aType)
 {
 	return gTypeList->GetTypeData(aType).AllocateFactory();
 }
 
-Ptr<Object> ObjectPool::CreateObjectByType(const TypeID<Object>& aType, const Ptr<Object>& aOwner)
+Ptr<Object> ObjectPool::CreateObjectByType(const TypeID<CogTypeBase>& aType, const Ptr<Object>& aOwner)
 {
 	bool created;
 	CogTypeChunk& chunk = FindOrCreateObjectChunk(created, aType, aOwner, &CreateChunkOfType);
 	return chunk.Allocate(aOwner, created && !aOwner.IsValid());
 }
 
-CogTypeChunk& ObjectPool::FindOrCreateObjectChunk(bool& aCreated, const TypeID<Object>& aObjectType, const Ptr<Object>& aOwner, UniquePtr<CogTypeChunk> (*aChunkCreator)(const TypeID<Object>&))
+void ObjectPool::SetProgram(Program& aProgram)
+{
+	myProgram = &aProgram;
+}
+
+CogTypeChunk& ObjectPool::FindOrCreateObjectChunk(bool& aCreated, const TypeID<CogTypeBase>& aObjectType, const Ptr<Object>& aOwner, UniquePtr<CogTypeChunk> (*aChunkCreator)(const TypeID<CogTypeBase>&))
 {
 	const u16 index = aObjectType.GetUnderlyingInteger();
-	myObjectChunks.Resize(TypeID<Object>::MaxUnderlyingInteger());
+	myObjectChunks.Resize(TypeID<CogTypeBase>::MaxUnderlyingInteger());
 
 	UniquePtr<CogTypeChunk>& chunk = myObjectChunks[index];
 	if (!chunk)
 	{
 		chunk = aChunkCreator(aObjectType);
-		if (aOwner)
-			chunk->SetProgram(aOwner->GetProgram());
+		chunk->SetProgram(*myProgram);
 		chunk->Initialize();
 		aCreated = true;
 	}

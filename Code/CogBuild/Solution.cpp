@@ -263,6 +263,9 @@ bool Solution::GenerateCode()
 			return false;
 	}
 
+	for (Project* project : preprocessProjects)
+		project->PostResolveDependencies();
+
 	for (const Project* project : preprocessProjects)
 		project->GenerateFiles(templates);
 

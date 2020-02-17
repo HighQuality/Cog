@@ -19,23 +19,10 @@ bool ClientGame::ShouldKeepRunning() const
 	return GetWindow() && GetWindow()->IsOpen();
 }
 
-void ClientGame::Created()
+bool ClientGame::Starting()
 {
-	{
-		std::mutex mtx;
-
-		scoped_lock(mtx)
-			Println(L"locked");
-
-		Println(L"unlocked");
-		
-		scoped_lock(mtx)
-			Println(L"locked");
-
-		Println(L"unlocked");
-	}
-
-	Base::Created();
+	if (!Base::Starting())
+		return false;
 
 	SetNextFramesGpuCommands(MakeUnique<EventList<GpuCommand>>());
 	SetCurrentlyExecutingGpuCommands(MakeUnique<Array<GpuCommand>>());
@@ -51,7 +38,7 @@ void ClientGame::Created()
 
 	RenderEngine& renderer = *SetRenderer(MakeUnique<RenderEngine>(GetWindow()->GetHandle(), renderingMode));
 
-	SetCamera(NewChild<Camera>());
+	SetCamera(NewObject<Camera>(nullptr));
 
 	window.SetVisible(true);
 	window.RequestFocus();
@@ -82,13 +69,16 @@ void ClientGame::Created()
 	Texture texture(renderer, L"../assets/textures/logo.png");
 
 	texture.BindToPS(0);
+
+	return true;
 }
 
-void ClientGame::Destroyed()
+void ClientGame::ShuttingDown()
 {
-	GetCamera()->Destroy();
+	if (Camera* camera = GetCamera())
+		camera->Destroy();
 
-	Base::Destroyed();
+	Base::ShuttingDown();
 }
 
 void ClientGame::SynchronizedTick(const Time& aDeltaTime)

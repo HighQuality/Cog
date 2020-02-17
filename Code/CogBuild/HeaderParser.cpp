@@ -109,26 +109,27 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 	const StringView className = myWordReader.GetCurrentWordOrGroup();
 	StringView baseClass;
 
-	if (className != L"Object")
+	if (!MoveNextExpectWord())
+		return;
+
+	TryConsume(L"final");
+
+	if (!Expect(L":"))
+		return;
+
+	if (!Expect(L"public"))
+		return;
+
+	if (!myWordReader.IsAtWord())
 	{
-		myWordReader.Next();
-
-		TryConsume(L"final");
-
-		if (!Expect(L":"))
-			return;
-
-		if (!Expect(L"public"))
-			return;
-
-		if (!myWordReader.IsAtWord())
-		{
-			ReportError(L"Expected word");
-			return;
-		}
-
-		baseClass = myWordReader.GetCurrentWordOrGroup();
+		ReportError(L"Expected word");
+		return;
 	}
+
+	baseClass = myWordReader.GetCurrentWordOrGroup();
+
+	if (baseClass == L"IObject")
+		baseClass = StringView();
 
 	if (!MoveNextExpectBracesGroup())
 		return;

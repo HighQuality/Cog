@@ -6,59 +6,93 @@ void RegisterExecutableTypes_Generated(TypeList* aTypeList);
 
 void TypeList::BuildList()
 {
-	Internal_AddType(TypeID<Object>::Resolve<Object>().GetUnderlyingInteger(), L"Object", &CreateObjectChunk<Object, ObjectCogTypeChunk>, nullptr);
+	Internal_AddType(TypeID<CogTypeBase>::Resolve<Object>(), L"Object", &CreateObjectChunk<Object, ObjectCogTypeChunk>, nullptr);
 	
 	RegisterExecutableTypes_Generated(this);
 
-	for (auto& pair : myIDToData)
+	for (TypeData* type : myIDToData)
 	{
-		TypeData& type = *pair.value;
-
-		const StringView& specializationOf = type.GetSpecializationOf();
+		const StringView& specializationOf = type->GetSpecializationOf();
 
 		if (specializationOf.GetLength() > 0)
 		{
 			if (const u16* specializationOfID = myTypeNameToID.Find(specializationOf))
 			{
-				UniquePtr<TypeData>* base = myIDToData.Find(*specializationOfID);
+				CHECK(myIDToData.IsValidIndex(*specializationOfID));
+				TypeData* base = myIDToData[*specializationOfID];
 				CHECK(base);
-				CHECK(base->IsValid());
-				CHECK(!base->Get()->GetSpecialization());
-				base->Get()->SetSpecialization(type);
+				CHECK(!base->GetSpecialization());
+				base->SetSpecialization(*type);
 			}
 			else
 			{
-				FATAL(L"Component % specializes an unknown component: %", type.GetName(), specializationOf);
+				FATAL(L"Component % specializes an unknown type: %", type->GetName(), specializationOf);
 			}
 		}
 	}
 
-	for (auto& pair : myIDToData)
+	for (TypeData* type : myIDToData)
 	{
-		if (!pair.value->HasOutermostSpecialization())
-			pair.value->AssignOutermostSpecialization();
+		if (!type->HasOutermostSpecialization())
+			type->AssignOutermostSpecialization();
 	}
 }
 
-TypeData& TypeList::Internal_AddType(const u16 aTypeID, const StringView& aTypeName, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t)
+const TypeData& TypeList::GetTypeDataByIndex(const u16 aTypeIndex, const bool aOutermost) const
+{
+	CHECK_MSG(myIDToData.IsValidIndex(aTypeIndex), L"Type index out of range");
+
+	const TypeData* data = myIDToData[aTypeIndex];
+
+	if (!data)
+		FATAL(L"This type has not been registered");
+
+	return aOutermost ? data->GetOutermostSpecialization() : *data;
+}
+
+TypeData& TypeList::Internal_AddGenericType(const TypeID<CogTypeBase>& aTypeID, const StringView& aTypeName)
 {
 	CHECK(aTypeName.GetLength() > 0);
 
-	myTypeNameToID.Add(aTypeName, aTypeID);
+	const u16 typeIndex = aTypeID.GetUnderlyingInteger();
+	myTypeNameToID.Add(aTypeName, typeIndex);
 
-	TypeData& data = *myIDToData.Add(aTypeID, MakeUnique<TypeData>());
+	if (typeIndex >= myIDToData.GetLength())
+		myIDToData.Resize(typeIndex + 1);
+
+	myIDToData[typeIndex] = MakeUnique<TypeData>();
+	TypeData& data = *myIDToData[typeIndex];
 
 	if (data.GetName().GetLength() > 0)
 		FATAL("Double registration on type ", aTypeName);
 
 	data.SetName(aTypeName);
-	data.SetFactoryAllocator(aFactoryAllocator);
 
 	return data;
 }
 
-void TypeList::Internal_AddSpecialization(const StringView& aBaseName, const u16 aTypeID, const StringView& aSpecializationName, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t)
+TypeData& TypeList::Internal_AddType(const TypeID<CogTypeBase>& aTypeID, const StringView& aTypeName, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t)
 {
-	TypeData& componentData = Internal_AddType(aTypeID, aSpecializationName, aFactoryAllocator, nullptr);
-	componentData.SetSpecializationOf(aBaseName);
+	TypeData& data = Internal_AddGenericType(aTypeID, aTypeName);
+	data.SetFactoryAllocator(aFactoryAllocator);
+	return data;
+}
+
+void TypeList::Internal_AddSpecialization(const StringView& aBaseName, const TypeID<CogTypeBase>& aTypeID, const StringView& aSpecializationName, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t)
+{
+	TypeData& typeData = Internal_AddType(aTypeID, aSpecializationName, aFactoryAllocator, nullptr);
+	typeData.SetSpecializationOf(aBaseName);
+}
+
+TypeData& TypeList::Internal_AddSingleton(const TypeID<CogTypeBase>& aTypeID, const StringView& aTypeName, UniquePtr<Singleton>(*aSingletonAllocator)(), nullptr_t)
+{
+	TypeData& data = Internal_AddGenericType(aTypeID, aTypeName);
+	data.SetSingletonAllocator(aSingletonAllocator);
+	return data;
+}
+
+void TypeList::Internal_AddSingletonSpecialization(const StringView& aBaseName, const TypeID<CogTypeBase>& aTypeID, const StringView& aSpecializationName, UniquePtr<Singleton>(*aSingletonAllocator)(), nullptr_t)
+{
+	TypeData& typeData = Internal_AddSingleton(aTypeID, aSpecializationName, aSingletonAllocator, nullptr);
+	typeData.SetSpecializationOf(aBaseName);
 }

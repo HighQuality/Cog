@@ -28,6 +28,10 @@ bool CogType::ResolveDependencies(const Map<String, CogType*>& aCogTypes)
 	return true;
 }
 
+void CogType::PostResolveDependencies()
+{
+}
+
 String CogType::GenerateHeaderFileContents(const DocumentTemplates& aTemplates, const StringView aGeneratedHeaderIdentifier) const
 {
 	return String();

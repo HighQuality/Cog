@@ -7,9 +7,10 @@ class ServerGame final : public Game
 {
 	GENERATED_BODY;
 
+protected:
+	bool Starting() override;
+	void ShuttingDown() override;
+
 public:
 	bool ShouldKeepRunning() const override;
-
-	ServerGame();
-	~ServerGame();
 };

@@ -14,8 +14,8 @@ class CogGame : public Program
 	GENERATED_BODY;
 
 protected:
-	void Created() override;
-	void Destroyed() override;
+	bool Starting() override;
+	void ShuttingDown() override;
 
 	void SynchronizedTick(const Time& aDeltaTime) override;
 

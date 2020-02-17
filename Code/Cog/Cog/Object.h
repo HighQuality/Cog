@@ -1,20 +1,14 @@
 #pragma once
 #include "CogTypeChunk.h"
+#include "CogTypeBase.h"
 #include "Object.generated.h"
 
 COGTYPE()
-class Object
+class Object : public CogTypeBase
 {
 	GENERATED_BODY;
 	
 public:
-	using Base = void;
-
-	Object();
-	virtual ~Object();
-	
-	DELETE_COPYCONSTRUCTORS_AND_MOVES(Object);
-
 	virtual bool Destroy();
 
 	void ReturnToAllocator();
@@ -23,16 +17,10 @@ public:
 
 	u8 GetGeneration() const;
 
-	virtual void GetBaseClasses(const FunctionView<void(const TypeID<Object>&)>& aFunction) const { aFunction(TypeID<Object>::Resolve<Object>()); }
+	virtual void GetBaseClasses(const FunctionView<void(const TypeID<CogTypeBase>&)>& aFunction) const { aFunction(TypeID<CogTypeBase>::Resolve<Object>()); }
 
-	Program& GetProgram() const;
+	Program& GetProgram() const final;
 	const Ptr<Object>& GetOwner() const;
-
-	template <typename T>
-	T& GetProgram() const
-	{
-		return CheckedCast<T>(GetProgram());
-	}
 
 	template <typename T>
 	Ptr<T> NewChild(Class<T> aClass = Class<T>())
@@ -40,7 +28,7 @@ public:
 		return reinterpret_cast<T*>(NewChildByType(aClass.GetTypeID()).Get());
 	}
 
-	Ptr<Object> NewChildByType(const TypeID<Object>& aType);
+	Ptr<Object> NewChildByType(const TypeID<CogTypeBase>& aType);
 
 	/** Returns false if this instance's memory has been given to another instance. */
 	FORCEINLINE bool IsValid() const { return myGeneration == GetGeneration(); }
