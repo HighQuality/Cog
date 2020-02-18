@@ -24,19 +24,10 @@ public:
 		return *singleton;
 	}
 
-	// This should only be used when initializing singletons as it creates singletons that haven't been created yet.
-	// Use GetSingleton<T>() during runtime instead.
-	template <typename T>
-	T& ResolveSingleton()
-	{
-		return reinterpret_cast<T&>(ResolveSingleton(TypeID<CogTypeBase>::Resolve<T>()));
-	}
-
 private:
 	void InitializeSingletons();
-	Singleton& ResolveSingleton(const TypeID<CogTypeBase>& aTypeId);
+	void DestroySingletons();
 
 	Array<UniquePtr<Singleton>> mySingletonInstances;
 	Array<Singleton*> myTypeIdToSingleton;
-	bool myIsInitializingSingletons = false;
 };

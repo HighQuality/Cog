@@ -19,4 +19,5 @@ void Camera::Created()
 
 void Camera::Destroyed()
 {
+	Base::Destroyed();
 }
