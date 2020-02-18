@@ -3,14 +3,7 @@
 #include "Object.h"
 #include "TypeList.h"
 
-UniquePtr<TypeList> RegisterTypeList()
-{
-	UniquePtr<TypeList> typeList = MakeUnique<TypeList>();
-	typeList->BuildList();
-	return typeList;
-}
-
-static UniquePtr<const TypeList> gTypeList = RegisterTypeList();
+extern UniquePtr<const TypeList> gTypeList;
 
 static UniquePtr<CogTypeChunk> CreateChunkOfType(const TypeID<CogTypeBase>& aType)
 {
@@ -21,12 +14,14 @@ Ptr<Object> ObjectPool::CreateObjectByType(const TypeID<CogTypeBase>& aType, con
 {
 	bool created;
 	CogTypeChunk& chunk = FindOrCreateObjectChunk(created, aType, aOwner, &CreateChunkOfType);
-	return chunk.Allocate(aOwner, created && !aOwner.IsValid());
+	if (created)
+		chunk.SetProgramContext(*myProgramContext);
+	return chunk.Allocate(aOwner);
 }
 
-void ObjectPool::SetProgram(Program& aProgram)
+void ObjectPool::SetProgramContext(ProgramContext& aProgramContext)
 {
-	myProgram = &aProgram;
+	myProgramContext = &aProgramContext;
 }
 
 CogTypeChunk& ObjectPool::FindOrCreateObjectChunk(bool& aCreated, const TypeID<CogTypeBase>& aObjectType, const Ptr<Object>& aOwner, UniquePtr<CogTypeChunk> (*aChunkCreator)(const TypeID<CogTypeBase>&))
@@ -38,7 +33,7 @@ CogTypeChunk& ObjectPool::FindOrCreateObjectChunk(bool& aCreated, const TypeID<C
 	if (!chunk)
 	{
 		chunk = aChunkCreator(aObjectType);
-		chunk->SetProgram(*myProgram);
+		chunk->SetProgramContext(*myProgramContext);
 		chunk->Initialize();
 		aCreated = true;
 	}

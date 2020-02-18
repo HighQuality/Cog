@@ -396,14 +396,7 @@ void Project::GenerateFiles(const DocumentTemplates& aTemplates) const
 
 			for (const CogClass* cogClass : cogClasses)
 			{
-				// Object is registered explicitly in the base TypeList object
-				if (cogClass->GetTypeName() == L"Object")
-					continue;
-
-				if (cogClass->SpecializesBaseClass())
-					typeListRegistrations.Append(Format(L"\tREGISTER_TYPE_SPECIALIZATION(aTypeList, %, %);\n", cogClass->GetBaseTypeName(), cogClass->GetTypeName()).View());
-				else
-					typeListRegistrations.Append(Format(L"\tREGISTER_TYPE(aTypeList, %);\n", cogClass->GetTypeName()).View());
+				typeListRegistrations.Append(Format(L"\tREGISTER_TYPE(aTypeList, %);\n", cogClass->GetTypeName()).View());
 			}
 
 			typeList.AddParameter(String(L"TypeListRegistrations"), Move(typeListRegistrations));

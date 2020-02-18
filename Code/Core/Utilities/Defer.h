@@ -24,8 +24,10 @@ Defer<T> operator+(DeferDummy, T&& f)
 	return MakeDefer<T>(std::forward<T>(f));
 }
 
+// TODO: Change to uppercase
 #define defer auto JOIN(__defer_, __LINE__ ) = DeferDummy( ) + [ & ]( )
 
+// TODO: Change to uppercase
 #define scoped_lock(mutex) \
 	mutex.lock(); \
 	if (defer { mutex.unlock(); })

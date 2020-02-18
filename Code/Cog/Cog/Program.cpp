@@ -10,7 +10,7 @@ bool Program::Starting()
 	if (!Base::Starting())
 		return false;
 
-	ObjectInstancePool().SetProgram(*this);
+	ObjectInstancePool().SetProgramContext(GetProgramContext());
 
 	// Destroyed objects are scheduled for the entirety of the current and next frame before being destroyed
 	ScheduledDestroys().Resize(2);

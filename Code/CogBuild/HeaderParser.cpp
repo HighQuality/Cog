@@ -128,7 +128,7 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 
 	baseClass = myWordReader.GetCurrentWordOrGroup();
 
-	if (baseClass == L"IObject")
+	if (baseClass == L"CogTypeBase")
 		baseClass = StringView();
 
 	if (!MoveNextExpectBracesGroup())

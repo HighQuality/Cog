@@ -18,9 +18,9 @@ CogTypeChunk::~CogTypeChunk()
 {
 }
 
-void CogTypeChunk::SetProgram(Program& aProgram)
+void CogTypeChunk::SetProgramContext(ProgramContext& aProgramContext)
 {
-	myProgram = &aProgram;
+	myProgramContext = &aProgramContext;
 }
 
 void CogTypeChunk::Initialize()
@@ -82,7 +82,7 @@ void CogTypeChunk::SendMessageById(const Message& aMessage, const TypeID<Message
 	}
 }
 
-Ptr<Object> CogTypeChunk::Allocate(const Ptr<Object>& aOwner, const bool aIsRootInstance)
+Ptr<Object> CogTypeChunk::Allocate(const Ptr<Object>& aOwner)
 {
 	u8 allocatedIndex;
 
@@ -96,10 +96,7 @@ Ptr<Object> CogTypeChunk::Allocate(const Ptr<Object>& aOwner, const bool aIsRoot
 		rawObject->myChunkIndex = allocatedIndex;
 		rawObject->myGeneration = ++(myGeneration[allocatedIndex]);
 
-		if (aIsRootInstance)
-			SetProgram(CheckedCast<Program>(*rawObject));
-
-		rawObject->SetOwner(aOwner);
+		SetOwner(allocatedIndex, aOwner);
 		
 		InitializeObjectAtIndex(allocatedIndex);
 

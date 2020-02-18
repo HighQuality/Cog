@@ -175,6 +175,7 @@ private:
 	COGPROPERTY(Array<QueuedProgramWork> WorkQueue, DirectAccess);
 	COGPROPERTY(Array<Fiber*> QueuedFibers, DirectAccess);
 
+	// TODO: Default values on singletons
 	COGPROPERTY(bool IsMainRunning = true);
 	
 	COGPROPERTY(Stopwatch Watch, DirectAccess);

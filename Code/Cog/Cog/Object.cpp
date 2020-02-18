@@ -15,6 +15,11 @@ bool Object::Destroy()
 	return true;
 }
 
+ProgramContext& Object::GetProgramContext() const
+{
+	return GetChunk().GetProgramContext();
+}
+
 Ptr<Object> Object::NewChildByType(const TypeID<CogTypeBase>& aType)
 {
 	return GetProgram().NewObjectByType(aType, this);
@@ -47,16 +52,6 @@ bool Object::IsPendingDestroy() const
 u8 Object::GetGeneration() const
 {
 	return GetChunk().GetGeneration(myChunkIndex);
-}
-
-Program& Object::GetProgram() const
-{
-	return GetChunk().GetProgram();
-}
-
-void Object::SetOwner(const Ptr<Object>& aNewObject)
-{
-	GetChunk().SetOwner(myChunkIndex, aNewObject);
 }
 
 const Ptr<Object>& Object::GetOwner() const

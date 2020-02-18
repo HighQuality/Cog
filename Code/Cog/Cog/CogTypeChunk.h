@@ -5,7 +5,8 @@ class Ptr;
 
 class Message;
 class CogTypeChunk;
-class Program;
+class Object;
+class ProgramContext;
 
 struct EventDispatcherInfo
 {
@@ -22,7 +23,7 @@ public:
 
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(CogTypeChunk);
 
-	FORCEINLINE Program& GetProgram() const { CHECK_PEDANTIC(myProgram); return *myProgram; }
+	FORCEINLINE ProgramContext& GetProgramContext() const { CHECK_PEDANTIC(myProgramContext); return *myProgramContext; }
 
 	virtual void Initialize();
 
@@ -50,7 +51,7 @@ public:
 
 	void SendMessageById(const Message& aMessage, TypeID<Message>::CounterType aIndex, u8 aReceiver);
 
-	Ptr<Object> Allocate(const Ptr<Object>& aOwner, bool aIsRootInstance);
+	Ptr<Object> Allocate(const Ptr<Object>& aOwner);
 
 	void SetOwner(u8 aIndex, const Ptr<Object>& aNewOwner);
 	FORCEINLINE const Ptr<Object>& GetOwner(const u8 aIndex) const { reinterpret_cast<const Ptr<Object>&>(myOwners[aIndex].Get()); }
@@ -60,7 +61,7 @@ protected:
 	friend class Ptr;
 
 	friend class ObjectPool;
-	void SetProgram(Program& aProgram);
+	void SetProgramContext(ProgramContext& aProgramContext);
 
 	virtual UniquePtr<Object> CreateDefaultObject() const;
 	virtual void InitializeObjectAtIndex(u8 aIndex);
@@ -93,7 +94,7 @@ private:
 #endif
 
 	UniquePtr<Object> myDefaultObject;
-	Program* myProgram = nullptr;
+	ProgramContext* myProgramContext = nullptr;
 	
 	volatile u64 myFreeSlots[4];
 

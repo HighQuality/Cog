@@ -19,7 +19,6 @@ public:
 
 	virtual void GetBaseClasses(const FunctionView<void(const TypeID<CogTypeBase>&)>& aFunction) const { aFunction(TypeID<CogTypeBase>::Resolve<Object>()); }
 
-	Program& GetProgram() const final;
 	const Ptr<Object>& GetOwner() const;
 
 	template <typename T>
@@ -37,13 +36,13 @@ protected:
 	virtual void Created();
 	virtual void Destroyed();
 
+	ProgramContext& GetProgramContext() const final;
+
 	template <typename T>
 	friend class Ptr;
 
 	friend class CogTypeChunk;
 	friend class ObjectPool;
-
-	void SetOwner(const Ptr<Object>& aNewOwner);
 
 	// TODO: Try inlining myChunkIndex into myChunk's memory and mask them out as needed, this allows myGeneration to be moved out into Ptr<T> and the padding to be removed thus reducing the size of Object from 24 to 16 bytes
 	CogTypeChunk* myChunk;

@@ -22,6 +22,9 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 	else
 		generatedLines.Add(Format(L"using Base = CogTypeBase;"));
 
+	generatedLines.Add(Format(L"static constexpr bool StaticIsSpecialization = %;", mySpecializesBaseClass));
+	generatedLines.Add(Format(L"inline static const StringView StaticTypeName = L\"%\";", GetTypeName()));
+
 	if (GetTypeName() != L"Object" && !myIsSingleton)
 	{
 		generatedLines.Add(String(L"void GetBaseClasses(const FunctionView<void(const TypeID<CogTypeBase>&)>& aFunction) const override"));

@@ -1,11 +1,15 @@
 #pragma once
 
 class Program;
+class Singleton;
+class ProgramContext;
 
 class CogTypeBase
 {
 public:
 	using Base = CogTypeBase;
+	inline static const StringView StaticTypeName = L"CogTypeBase";
+	static constexpr bool StaticIsSpecialization = false;
 
 	CogTypeBase() = default;
 	virtual ~CogTypeBase() = default;
@@ -13,11 +17,19 @@ public:
 	DELETE_COPYCONSTRUCTORS_AND_MOVES(CogTypeBase);
 
 protected:
-	virtual Program& GetProgram() const = 0;
-
 	template <typename T>
+	FORCEINLINE T& GetSingleton() const
+	{
+		return reinterpret_cast<T&>(GetSingleton(TypeID<CogTypeBase>::Resolve<T>()));
+	}
+
+	template <typename T = Program>
 	FORCEINLINE T& GetProgram() const
 	{
-		return CheckedCast<T>(GetProgram());
+		return GetSingleton<T>();
 	}
+
+	Singleton& GetSingleton(const TypeID<CogTypeBase>& aTypeId) const;
+
+	virtual ProgramContext& GetProgramContext() const = 0;
 };

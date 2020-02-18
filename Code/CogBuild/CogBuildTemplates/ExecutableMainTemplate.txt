@@ -1,6 +1,5 @@
 #include "${PchFileName}"
-#include <Cog/Program.h>
-#include <Cog/ObjectPool.h>
+#include <Cog/ProgramContext.h>
 
 constexpr bool HasProgramSpecialization = ${HasProgramSpecialization};
 constexpr i32 NumUnitTests = ${NumUnitTests};
@@ -127,11 +126,8 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
 	if constexpr (HasProgramSpecialization)
 	{
-		ObjectPool programPool;
-		Ptr<Program> program = CheckedCast<Program>(*programPool.CreateObjectByType(TypeID<Object>::Resolve<Program>(), nullptr));
-		program->Run();
-		program->Destroy();
-		program->ReturnToAllocator();
+		ProgramContext programContext;
+		programContext.Run();
 	}
 	else
 	{

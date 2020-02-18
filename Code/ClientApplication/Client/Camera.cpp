@@ -3,6 +3,7 @@
 #include "RenderTarget.h"
 #include "ClientGame.h"
 #include "RenderEngine.h"
+#include "ClientGame.h"
 
 void Camera::Created()
 {
