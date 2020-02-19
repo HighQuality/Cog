@@ -13,7 +13,7 @@ public:
 
 	void Submit(DrawCall aDrawCall)
 	{
-		DrawCallList().Submit(Move(aDrawCall));
+		GetDrawCallList().Submit(Move(aDrawCall));
 	}
 
 private:

@@ -289,11 +289,15 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 
 	CogProperty newProperty;
 
+	bool typeCanBeName = true;
+
 	for (;;)
 	{
 		while (parameterReader.GetCurrentWord() == L"const" ||
 			parameterReader.GetCurrentWord() == L"volatile")
 		{
+			typeCanBeName = false;
+
 			newProperty.propertyType.Append(parameterReader.GetCurrentWord());
 			newProperty.propertyType.Add(L' ');
 
@@ -314,6 +318,8 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 
 		if (parameterReader.IsAtGroup())
 		{
+			typeCanBeName = false;
+
 			newProperty.propertyType.Append(parameterReader.GetOpeningSequence());
 			newProperty.propertyType.Append(parameterReader.GetCurrentWordOrGroup());
 			newProperty.propertyType.Append(parameterReader.GetClosingSequence());
@@ -329,6 +335,8 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 			parameterReader.GetCurrentWord() == L"&" ||
 			parameterReader.GetCurrentWord() == L"const")
 		{
+			typeCanBeName = false;
+
 			newProperty.propertyType.Append(parameterReader.GetCurrentWord());
 			newProperty.propertyType.Add(L' ');
 
@@ -347,6 +355,8 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 
 		if (parameterReader.GetCurrentWordOrGroup() == L"::")
 		{
+			typeCanBeName = false;
+
 			newProperty.propertyType.Append(L"::");
 			
 			if (!parameterReader.Next())
@@ -361,9 +371,27 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 		break;
 	}
 	
-	newProperty.propertyName = String(parameterReader.GetCurrentWordOrGroup());
+	bool canContinue;
 
-	if (parameterReader.Next())
+	if (parameterReader.GetCurrentWordOrGroup() != L"=" &&
+		parameterReader.GetCurrentWordOrGroup() != L"," &&
+		parameterReader.GetCurrentWordOrGroup() != L"")
+	{
+		newProperty.propertyName = String(parameterReader.GetCurrentWordOrGroup());
+		canContinue = parameterReader.Next();
+	}
+	else if (typeCanBeName)
+	{
+		newProperty.propertyName = String(newProperty.propertyType);
+		canContinue = true;
+	}
+	else
+	{
+		ReportErrorWithInnerReader(parameterReader, L"Missing COGPROPERTY name");
+		return false;
+	}
+
+	if (canContinue)
 	{
 		bool reachedEnd = false;
 
@@ -448,13 +476,17 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 					{
 						TODO;
 					}
-					else if (parameter == L"Config") /* Default value read from config file, default value from declaration is used if not specified in config file. Figure out priority system and syntax for these files. Subclasses that override the default value will override the config. If the config wants priority it should change the subclass' default for this property. */
+					else if (parameter == L"Config") /* Default value read from config file, default value from declaration is used if not specified in config file or command line. Figure out priority system and syntax for these files. Subclasses that override the default value will override the config. If the config wants priority it should change the subclass' default for this property. */
 					{
 						TODO;
 					}
 					else if (parameter == L"Uninitialized") /* The memory occupied by this property should not be zeroed before a new instance gets access to it. We might want to be implicit if a default value is specified. */
 					{
 						newProperty.zeroMemory = false;
+					}
+					else if (parameter == L"CommandLine") /* CommandLine = (Name = "commandline", Required/Optional, Help = ""). Has higer priority than Config. */
+					{
+						TODO;
 					}
 					else
 					{

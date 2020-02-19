@@ -10,10 +10,10 @@ bool Program::Starting()
 	if (!Base::Starting())
 		return false;
 
-	ObjectInstancePool().SetProgramContext(GetProgramContext());
+	GetObjectPool().SetProgramContext(GetProgramContext());
 
 	// Destroyed objects are scheduled for the entirety of the current and next frame before being destroyed
-	ScheduledDestroys().Resize(2);
+	GetScheduledDestroys().Resize(2);
 
 	SetMessageSystem(NewObject<MessageSystem>(nullptr));
 
@@ -22,11 +22,11 @@ bool Program::Starting()
 
 	CogTLS::MarkThreadAsManaged();
 
-	BackgroundWorkThreadPool() = MakeUnique<ThreadPool>();
+	GetBackgroundWorkThreadPool() = MakeUnique<ThreadPool>();
 
 	const auto numWorkers = SetNumWorkers(CastBoundsChecked<i32>(std::thread::hardware_concurrency()));
 
-	Workers().PrepareAdd(numWorkers);
+	GetWorkers().PrepareAdd(numWorkers);
 
 	Println(L"Program starting % worker threads...", numWorkers);
 
@@ -35,13 +35,13 @@ bool Program::Starting()
 	MemoryBarrier();
 
 	for (i32 i = 0; i < numWorkers; ++i)
-		Workers().Emplace(std::thread(&Program::WorkerThread, this, i));
+		GetWorkers().Emplace(std::thread(&Program::WorkerThread, this, i));
 
 	// Wait for all threads to start sleeping
-	std::unique_lock<std::mutex> lck(WakeMainMutex());
+	std::unique_lock<std::mutex> lck(GetWakeMainMutex());
 
 	while (!IsMainRunning())
-		WakeMainNotify().wait(lck);
+		GetWakeMainNotify().wait(lck);
 
 	return true;
 }
@@ -50,25 +50,25 @@ void Program::ShuttingDown()
 {
  	Println(L"Program shutting down...");
 
-	for (i32 i = 0; i < ScheduledDestroys().GetLength(); ++i)
+	for (i32 i = 0; i < GetScheduledDestroys().GetLength(); ++i)
 		TickDestroys();
 
-	BackgroundWorkThreadPool().Clear();
+	GetBackgroundWorkThreadPool().Clear();
 
 	Println(L"Notifying worker threads to stop...");
 
+	scoped_lock (GetWorkMutex())
 	{
-		std::unique_lock<std::mutex> lck(WorkMutex());
 		SetIsStopping(true);
 		// Worker threads don't run while this is true
 		SetIsMainRunning(false);
 	}
 
-	WorkNotify().notify_all();
+	GetWorkNotify().notify_all();
 
 	Println(L"Waiting for worker threads to stop...");
 
-	for (std::thread& thread : Workers())
+	for (std::thread& thread : GetWorkers())
 		thread.join();
 
 	SetIsMainRunning(true);
@@ -76,10 +76,10 @@ void Program::ShuttingDown()
 	Println(L"Finished stopping worker threads!");
 
 	Fiber* fiber;
-	while (UnusedFibers().TryPop(fiber))
+	while (GetUnusedFibers().TryPop(fiber))
 		delete fiber;
 
-	while (QueuedFibers().TryPop(fiber))
+	while (GetQueuedFibers().TryPop(fiber))
 		delete fiber;
 
 	Base::ShuttingDown();
@@ -124,13 +124,13 @@ void Program::SynchronizedTick(const Time& aDeltaTime)
 
 void Program::Step(const bool aPrintDebugInfo)
 {
-	std::unique_lock<std::mutex> workMutexLck(WorkMutex(), std::defer_lock);
+	std::unique_lock<std::mutex> workMutexLck(GetWorkMutex(), std::defer_lock);
 
 	for (;;)
 	{
 		workMutexLck.lock();
 
-		const i32 numWork = WorkQueue().GetLength() + HighPrioWorkQueue().GetLength() + QueuedFibers().GetLength();
+		const i32 numWork = GetWorkQueue().GetLength() + GetHighPrioWorkQueue().GetLength() + GetQueuedFibers().GetLength();
 
 		if (numWork > 0)
 		{
@@ -138,21 +138,21 @@ void Program::Step(const bool aPrintDebugInfo)
 
 			if (numWorkersToWake == GetNumWorkers())
 			{
-				WorkNotify().notify_all();
+				GetWorkNotify().notify_all();
 			}
 			else
 			{
 				// PERF: Try making the switch to notify_all more sensitive
 				for (i32 i = 0; i < numWorkersToWake; ++i)
-					WorkNotify().notify_one();
+					GetWorkNotify().notify_one();
 			}
 
 			// Wait for all work to finish
-			std::unique_lock<std::mutex> wakeMainLck(WakeMainMutex());
+			std::unique_lock<std::mutex> wakeMainLck(GetWakeMainMutex());
 			SetIsMainRunning(false);
 			workMutexLck.unlock();
 
-			WakeMainNotify().wait(wakeMainLck, [this]() { return IsMainRunning(); });
+			GetWakeMainNotify().wait(wakeMainLck, [this]() { return IsMainRunning(); });
 
 			workMutexLck.lock();
 
@@ -160,15 +160,17 @@ void Program::Step(const bool aPrintDebugInfo)
 		}
 		else
 		{
-			std::unique_lock<std::mutex> fibersLck(FiberMutex());
-			// TODO: Make this check "better"?
-			// Basically, if the number of unused fibers added to the number of workers equal the next fiber index we have no live fibers waiting on something
-			// Each worker thread always have exactly one fiber allocated to itself
-			if (UnusedFibers().GetLength() + GetNumWorkers() == gNextFiberIndex)
+			scoped_lock (GetFiberMutex())
 			{
-				if (aPrintDebugInfo)
-					Println(L"Program finished in %ms", (static_cast<float>(GetElapsedSeconds()) + GetWatch().GetElapsedTime().Seconds()) * 1000.f);
-				break;
+				// TODO: Make this check "better"?
+				// Basically, if the number of unused fibers added to the number of workers equal the next fiber index we have no live fibers waiting on something
+				// Each worker thread always have exactly one fiber allocated to itself
+				if (GetUnusedFibers().GetLength() + GetNumWorkers() == gNextFiberIndex)
+				{
+					if (aPrintDebugInfo)
+						Println(L"Program finished in %ms", (static_cast<float>(GetElapsedSeconds()) + GetWatch().GetElapsedTime().Seconds()) * 1000.f);
+					break;
+				}
 			}
 		}
 
@@ -178,7 +180,7 @@ void Program::Step(const bool aPrintDebugInfo)
 
 		if (GetWatch().GetElapsedTime().Seconds() > 1.f)
 		{
-			Watch().Restart();
+			GetWatch().Restart();
 
 			Println(L"% FPS", GetFramesThisSecond());
 			SetFramesThisSecond(0);
@@ -196,13 +198,13 @@ void Program::FiberMain()
 	Fiber* currentFiber = Fiber::GetCurrentlyExecutingFiber();
 
 	{
-		std::unique_lock<std::mutex> lck(WorkMutex());
+		std::unique_lock<std::mutex> lck(GetWorkMutex());
 
 		while (!IsStopping())
 		{
 			if (GetHighPrioWorkQueue().GetLength() > 0)
 			{
-				QueuedProgramWork work = HighPrioWorkQueue().RemoveAt(0);
+				QueuedProgramWork work = GetHighPrioWorkQueue().RemoveAt(0);
 				lck.unlock();
 
 				work.function(work.argument);
@@ -213,7 +215,7 @@ void Program::FiberMain()
 
 			if (GetQueuedFibers().GetLength() > 0)
 			{
-				Fiber* fiberToExecute = QueuedFibers().Pop();
+				Fiber* fiberToExecute = GetQueuedFibers().Pop();
 				lck.unlock();
 
 				FiberResumeData resumeData(FiberResumeType::ResumeFromAwait);
@@ -226,7 +228,7 @@ void Program::FiberMain()
 
 			if (GetWorkQueue().GetLength() > 0)
 			{
-				QueuedProgramWork work = WorkQueue().RemoveAt(0);
+				QueuedProgramWork work = GetWorkQueue().RemoveAt(0);
 				lck.unlock();
 
 				work.function(work.argument);
@@ -241,16 +243,16 @@ void Program::FiberMain()
 			{
 				{
 					// Could probably be changed to a memory barrier
-					std::unique_lock<std::mutex> mainLock(WakeMainMutex());
-					SetIsMainRunning(true);
+					scoped_lock (GetWakeMainMutex())
+						SetIsMainRunning(true);
 				}
 
-				WakeMainNotify().notify_one();
+				GetWakeMainNotify().notify_one();
 			}
 
 			do
 			{
-				WorkNotify().wait(lck);
+				GetWorkNotify().wait(lck);
 
 			} while (IsMainRunning());
 
@@ -317,22 +319,22 @@ void Program::RegisterUnusedFiber(Fiber * aFiber)
 {
 	// Println(L"Registering fiber % as unused", aFiber->GetName());
 
-	std::unique_lock<std::mutex> lck(FiberMutex());
-	UnusedFibers().Push(aFiber);
+	std::unique_lock<std::mutex> lck(GetFiberMutex());
+	GetUnusedFibers().Push(aFiber);
 }
 
 void Program::QueueFiber(Fiber * aFiber)
 {
-	std::unique_lock<std::mutex> lck(WorkMutex());
-	QueuedFibers().Add(aFiber);
+	std::unique_lock<std::mutex> lck(GetWorkMutex());
+	GetQueuedFibers().Add(aFiber);
 	lck.unlock();
 
-	WorkNotify().notify_one();
+	GetWorkNotify().notify_one();
 }
 
 void Program::QueueBackgroundWork(void(*aFunction)(void*), void* aArgument)
 {
-	BackgroundWorkThreadPool()->QueueSingle([aFunction, aArgument]()
+	GetBackgroundWorkThreadPool()->QueueSingle([aFunction, aArgument]()
 		{
 			aFunction(aArgument);
 		});
@@ -340,11 +342,10 @@ void Program::QueueBackgroundWork(void(*aFunction)(void*), void* aArgument)
 
 Fiber* Program::GetUnusedFiber()
 {
+	scoped_lock (GetFiberMutex())
 	{
-		std::unique_lock<std::mutex> lck(FiberMutex());
-
 		Fiber* fiber;
-		if (UnusedFibers().TryPop(fiber))
+		if (GetUnusedFibers().TryPop(fiber))
 			return fiber;
 	}
 
@@ -366,7 +367,7 @@ Fiber* Program::GetUnusedFiber()
 
 Ptr<Object> Program::NewObjectByType(const TypeID<CogTypeBase>& aObject, Object* aParent)
 {
-	ObjectPool& objectPool = ObjectInstancePool();
+	ObjectPool& objectPool = GetObjectPool();
 	return objectPool.CreateObjectByType(aObject, aParent);
 }
 
@@ -374,10 +375,10 @@ void Program::TickDestroys()
 {
 	Array<Object*> destroyNow;
 
+	scoped_lock (GetDestroyMutex())
 	{
-		std::unique_lock<std::mutex> lck(DestroyMutex());
 
-		Array<Array<Object*>>& scheduledDestroys = ScheduledDestroys();
+		Array<Array<Object*>>& scheduledDestroys = GetScheduledDestroys();
 
 		if (scheduledDestroys.GetLength() == 0)
 			return;
@@ -394,15 +395,13 @@ void Program::TickDestroys()
 		obj->ReturnToAllocator();
 
 	destroyNow.Empty();
-
-	{
-		std::unique_lock<std::mutex> lck(DestroyMutex());
-		ScheduledDestroys().Last() = Move(destroyNow);
-	}
+	
+	scoped_lock (GetDestroyMutex())
+		GetScheduledDestroys().Last() = Move(destroyNow);
 }
 
 void Program::ScheduleDestruction(Object& aObject)
 {
-	std::unique_lock<std::mutex> lck(DestroyMutex());
-	ScheduledDestroys().Last().Add(&aObject);
+	scoped_lock(GetDestroyMutex())
+		GetScheduledDestroys().Last().Add(&aObject);
 }

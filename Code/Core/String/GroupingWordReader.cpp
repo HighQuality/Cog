@@ -13,7 +13,10 @@ bool GroupingWordReader::Next()
 	const StringView current = NextWord();
 
 	if (!current)
+	{
+		myCurrentContent = StringView();
 		return false;
+	}
 
 	GroupingWordReaderGroup currentGroup = GroupingWordReaderGroup::None;
 
@@ -47,6 +50,7 @@ bool GroupingWordReader::Next()
 						currentParent = currentParent->myParentReader;
 					}
 
+					myCurrentContent = StringView();
 					return false;
 				}
 			}
@@ -131,6 +135,9 @@ bool GroupingWordReader::Next()
 
 	myCurrentContent = GetString().Slice(innerReaderStart, innerReaderStop - innerReaderStart);
 	myCurrentContent.Trim();
+
+	if (myHasShortCircuited)
+		myCurrentContent = StringView();
 
 	return !myHasShortCircuited;
 }

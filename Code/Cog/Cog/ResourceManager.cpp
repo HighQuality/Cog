@@ -12,7 +12,7 @@ ResourceManager::~ResourceManager()
 
 void ResourceManager::Tick()
 {
-	for (const Function<void()>& loader : ScheduledLoads().Gather())
+	for (const Function<void()>& loader : GetScheduledLoads().Gather())
 		loader();
 }
 

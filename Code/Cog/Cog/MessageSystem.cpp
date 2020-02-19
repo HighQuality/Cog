@@ -6,9 +6,9 @@ bool MessageSystem::PostMessages()
 {
 	// Program& program = *gProgram;
 
-	Array<ScheduledMessage> messages = Messages().Gather();
+	Array<ScheduledMessage> messages = GetMessages().Gather();
 
-	Map<const Object*, Array<ScheduledMessage>>& currentMessages = CurrentMessages();
+	Map<const Object*, Array<ScheduledMessage>>& currentMessages = GetCurrentMessages();
 	currentMessages.Clear();
 
 	for (ScheduledMessage& aMessage : messages)
@@ -33,5 +33,5 @@ void MessageSystem::SubmitMessage(ScheduledMessage aMessage)
 {
 	// Needed to avoid locking in PostMessages and here
 	CHECK(GetProgram().IsInManagedThread());
-	Messages().Submit(Move(aMessage));
+	GetMessages().Submit(Move(aMessage));
 }

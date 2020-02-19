@@ -62,9 +62,7 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 		else
 			generatedLines.Add(String(L"private:"));
 
-		// Only generate the shorthand special name if we haven't specified DirectAccess in order to avoid a naming conflict
-		if (!hasSpecialName || !prop.directAccess)
-			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return %; }", prop.propertyType, getterName, accessor));
+		generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return %; }", prop.propertyType, getterName, accessor));
 
 		generatedLines.Add(String(L"private:"));
 
@@ -72,13 +70,12 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 		{
 			// This is mainly a template so we can SFINAE it out in case of it not being copy-constructible
 			generatedLines.Add(Format(L"template<typename TCopyType, typename = EnableIf<std::is_copy_constructible_v<%>>> FORCEINLINE ReferenceOf<%> Set%(TCopyType aNewValue) { auto& value = %; value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyType, prop.propertyName, accessor));
-			
-			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> %() const { return %; }", prop.propertyType, prop.propertyName, accessor));
-			generatedLines.Add(Format(L"FORCEINLINE ReferenceOf<%> %() { return %; }", prop.propertyType, prop.propertyName, accessor));
+
+			generatedLines.Add(Format(L"FORCEINLINE ReferenceOf<%> %() { return %; }", prop.propertyType, getterName, accessor));
 		}
 		else
 		{
-			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> Set%(% aNewValue) { auto& value = %; value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, accessor));
+			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> Set%(typename % aNewValue) { auto& value = %; value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, accessor));
 		}
 	}
 	

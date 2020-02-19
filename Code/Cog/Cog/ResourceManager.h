@@ -24,9 +24,9 @@ public:
 	{
 		CHECK(aFunctionCallback.IsValid());
 
-		std::unique_lock<std::mutex> lck(Mutex());
+		std::unique_lock<std::mutex> lck(GetMutex());
 
-		auto& loadedResources = LoadedResources();
+		auto& loadedResources = GetLoadedResources();
 
 		if (Ptr<Resource>* alreadyLoadedResource = loadedResources.Find(aResourcePath))
 		{
@@ -43,7 +43,7 @@ public:
 			
 		String resourcePath(aResourcePath);
 
-		ScheduledLoads().Submit([&loadedResources, resourcePath, aFunctionCallback]()
+		GetScheduledLoads().Submit([&loadedResources, resourcePath, aFunctionCallback]()
 		{
 			auto callback = [aFunctionCallback](Resource& aResource)
 			{

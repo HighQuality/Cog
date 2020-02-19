@@ -37,19 +37,19 @@ public:
 	template <typename TExtraData>
 	void QueueHighPrioWork(void(*aFunction)(TExtraData*), TExtraData* aArgument)
 	{
-		scoped_lock (WorkMutex())
-			HighPrioWorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
+		scoped_lock (GetWorkMutex())
+			GetHighPrioWorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
 
-		WorkNotify().notify_one();
+		GetWorkNotify().notify_one();
 	}
 
 	template <typename TExtraData>
 	void QueueWork(void(*aFunction)(TExtraData*), TExtraData* aArgument)
 	{
-		scoped_lock (WorkMutex())
-			WorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
+		scoped_lock (GetWorkMutex())
+			GetWorkQueue().Add({ reinterpret_cast<void(*)(void*)>(aFunction), aArgument });
 
-		WorkNotify().notify_one();
+		GetWorkNotify().notify_one();
 	}
 
 	void QueueFiber(Fiber* aFiber);
@@ -151,7 +151,7 @@ private:
 	void ScheduleDestruction(Object& aObject);
 	void TickDestroys();
 
-	COGPROPERTY(ObjectPool ObjectInstancePool, DirectAccess);
+	COGPROPERTY(ObjectPool, DirectAccess);
 
 	COGPROPERTY(UniquePtr<ThreadPool> BackgroundWorkThreadPool, DirectAccess);
 
