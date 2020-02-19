@@ -11,12 +11,12 @@ File::File(Directory & aParentDirectory, const StringView & aAbsolutePath, const
 	{
 		if (filename[i] == L'.')
 		{
-			myExtension = filename.ChopFromStart(i);
+			myExtension = filename.RemoveFromStart(i);
 			break;
 		}
 	}
 
-	myFilenameWithoutExtension = filename.ChopFromEnd(myExtension.GetLength());
+	myFilenameWithoutExtension = filename.RemoveFromEnd(myExtension.GetLength());
 
 	myFileSize = aFileSize;
 	myLastWriteTime = aLastWriteTime;

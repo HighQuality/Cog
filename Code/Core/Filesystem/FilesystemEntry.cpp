@@ -15,7 +15,7 @@ FileSystemEntry::FileSystemEntry(Directory * aParentDirectory, const StringView 
 	{
 		if (myAbsolutePath[i] == L'\\' || myAbsolutePath[i] == L'/')
 		{
-			myName = myAbsolutePath.ChopFromStart(i + 1);
+			myName = myAbsolutePath.RemoveFromStart(i + 1);
 			break;
 		}
 	}
@@ -70,7 +70,7 @@ String FileSystemEntry::GetRelativePath(const Directory& aBaseDirectory) const
 	const StringView ourPath = GetAbsolutePath();
 	if (ourPath.ClampedSliceFromStart(baseDirectoryPath.GetLength()) == baseDirectoryPath)
 	{
-		return String(ourPath.ChopFromStart(baseDirectoryPath.GetLength() + 1));
+		return String(ourPath.RemoveFromStart(baseDirectoryPath.GetLength() + 1));
 	}
 	else
 	{

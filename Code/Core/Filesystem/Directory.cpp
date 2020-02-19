@@ -10,7 +10,7 @@ Directory::Directory(Directory * aParentDirectory, const StringView & aAbsoluteP
 	StringView path = GetAbsolutePath();
 	const Char lastCharacter = path.Last();
 	if (lastCharacter == L'\\' || lastCharacter == '/')
-		path = aAbsolutePath.ChopFromEnd(1);
+		path = aAbsolutePath.RemoveFromEnd(1);
 	
 	String searchPatern(path);
 	searchPatern.Add(L'\\');
@@ -60,7 +60,7 @@ Directory::~Directory()
 FileSystemEntry* Directory::GetEntry(StringView aPath)
 {
 	if (aPath.GetLength() > 0 && (aPath[0] == '\\' || aPath[0] == L'/'))
-		aPath = aPath.ChopFromStart(1);
+		aPath = aPath.RemoveFromStart(1);
 	
 	for (i32 i = 0; i < aPath.GetLength(); ++i)
 	{
@@ -70,7 +70,7 @@ FileSystemEntry* Directory::GetEntry(StringView aPath)
 	
 			if (ourEntry != nullptr)
 			{
-				return static_cast<Directory*>(ourEntry)->GetEntry(aPath.ChopFromStart(i + 1));
+				return static_cast<Directory*>(ourEntry)->GetEntry(aPath.RemoveFromStart(i + 1));
 			}
 	
 			return nullptr;

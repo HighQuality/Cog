@@ -156,6 +156,8 @@
 
 #include <Time/CogTime.h>
 
+#include <Utilities/CommandLine.h>
+
 template <typename ...TArgs>
 void Println(const TArgs& ...aArgs)
 {

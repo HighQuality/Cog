@@ -207,13 +207,13 @@ public:
 	}
 
 	/** Returns the part at the end, use SliceFromStart to return from the start instead. */
-	FORCEINLINE ArrayView ChopFromStart(const i32 aElements) const
+	FORCEINLINE ArrayView RemoveFromStart(const i32 aElements) const
 	{
 		return Slice(aElements, this->myLength - aElements);
 	}
 
 	/** Returns the part at the start, use SliceFromEnd to return from the start instead. */
-	FORCEINLINE ArrayView ChopFromEnd(const i32 aElements) const
+	FORCEINLINE ArrayView RemoveFromEnd(const i32 aElements) const
 	{
 		return Slice(0, this->myLength - aElements);
 	}
@@ -336,5 +336,5 @@ FORCEINLINE ::std::wostream& operator<<(::std::wostream& aOut, const ArrayView<T
 	FORCEINLINE ClassName ClampedSlice(const i32 aBegin, const i32 aLength) const { return ClassName(Super::ClampedSlice(aBegin, aLength), ClassName::UpcastType()); } \
 	FORCEINLINE ClassName ClampedSliceFromStart(const i32 aElements) const { return ClassName(Super::ClampedSliceFromStart(aElements), ClassName::UpcastType()); } \
 	FORCEINLINE ClassName ClampedSliceFromEnd(const i32 aElements) const { return ClassName(Super::ClampedSliceFromEnd(aElements), ClassName::UpcastType()); } \
-	FORCEINLINE ClassName ChopFromStart(const i32 aElements) const { return ClassName(Super::ChopFromStart(aElements), ClassName::UpcastType()); } \
-	FORCEINLINE ClassName ChopFromEnd(const i32 aElements) const { return ClassName(Super::ChopFromEnd(aElements), ClassName::UpcastType()); }
+	FORCEINLINE ClassName RemoveFromStart(const i32 aElements) const { return ClassName(Super::RemoveFromStart(aElements), ClassName::UpcastType()); } \
+	FORCEINLINE ClassName RemoveFromEnd(const i32 aElements) const { return ClassName(Super::RemoveFromEnd(aElements), ClassName::UpcastType()); }

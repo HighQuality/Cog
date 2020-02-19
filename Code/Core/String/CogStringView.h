@@ -102,7 +102,7 @@ public:
 		{
 			if (!iswspace((*this)[i]))
 			{
-				*this = ChopFromStart(i);
+				*this = RemoveFromStart(i);
 				break;
 			}
 		}

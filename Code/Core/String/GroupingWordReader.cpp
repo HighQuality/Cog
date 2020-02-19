@@ -25,7 +25,7 @@ bool GroupingWordReader::Next()
 		bool isOpening;
 		bool isClosing;
 
-		if (GetGroupingPair(current.ChopFromStart(i), currentGroup, openingSequence, closingSequence, isOpening, isClosing))
+		if (GetGroupingPair(current.RemoveFromStart(i), currentGroup, openingSequence, closingSequence, isOpening, isClosing))
 		{
 			if (isClosing)
 			{
@@ -87,7 +87,7 @@ bool GroupingWordReader::Next()
 	const bool exclusiveMode = IsGroupExclusive(currentGroup);
 
 	const i32 innerReaderStart = GetReadIndex();
-	const StringView innerReaderString = GetString().ChopFromStart(innerReaderStart);
+	const StringView innerReaderString = GetString().RemoveFromStart(innerReaderStart);
 	i32 innerReaderStop = -1;
 
 	if (!exclusiveMode)
@@ -108,7 +108,7 @@ bool GroupingWordReader::Next()
 		const i32 innerLength = innerReaderString.GetLength();
 		for (i32 i = 0; i < innerLength; ++i)
 		{
-			if (innerReaderString.ChopFromStart(i).StartsWith(myCurrentClosingSequence))
+			if (innerReaderString.RemoveFromStart(i).StartsWith(myCurrentClosingSequence))
 			{
 				innerReaderStop = innerReaderStart + i;
 				break;
