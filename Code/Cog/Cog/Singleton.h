@@ -2,6 +2,8 @@
 #include "CogTypeBase.h"
 #include "Singleton.generated.h"
 
+class Program;
+
 COGTYPE()
 class Singleton : public CogTypeBase
 {
@@ -15,12 +17,6 @@ protected:
 	virtual void ShuttingDown();
 
 	FORCEINLINE ProgramContext& GetProgramContext() const final { return *GetOwningProgramContext(); }
-
-	template <typename T>
-	FORCEINLINE T& GetProgram() const
-	{
-		return CheckedCast<T>(GetProgram());
-	}
 
 private:
 	COGPROPERTY(ProgramContext* OwningProgramContext);

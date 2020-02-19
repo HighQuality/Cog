@@ -46,13 +46,23 @@ void ProgramContext::InitializeSingletons()
 	}
 
 	for (Singleton* singleton : mySingletonInstances)
+	{
+		singleton->SetIsBaseCalled(false);
 		singleton->Starting();
+		// TODO: Update with type name
+		CHECK_MSG(singleton->IsBaseCalled() == true, L"Singleton subclass did not call Base::Starting() all the way down to Singleton");
+	}
 }
 
 void ProgramContext::DestroySingletons()
 {
 	for (Singleton* singleton : mySingletonInstances)
+	{
+		singleton->SetIsBaseCalled(false);
 		singleton->ShuttingDown();
+		// TODO: Update with type name
+		CHECK_MSG(singleton->IsBaseCalled() == true, L"Singleton subclass did not call Base::ShuttingDown() all the way down to Singleton");
+	}
 
 	mySingletonInstances.Empty();
 	myTypeIdToSingleton.Empty();

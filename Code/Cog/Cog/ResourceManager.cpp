@@ -2,12 +2,17 @@
 #include "ResourceManager.h"
 #include <Cog\CogGame.h>
 
-ResourceManager::ResourceManager()
+bool ResourceManager::Starting()
 {
+	if (!Base::Starting())
+		return false;
+
+	return true;
 }
 
-ResourceManager::~ResourceManager()
+void ResourceManager::ShuttingDown()
 {
+	Base::ShuttingDown();
 }
 
 void ResourceManager::Tick()

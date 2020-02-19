@@ -11,13 +11,13 @@ class ThreadPool;
 class CogGame;
 
 COGTYPE()
-class ResourceManager : public Object
+class ResourceManager : public Singleton
 {
 	GENERATED_BODY;
 
 public:
-	ResourceManager();
-	~ResourceManager();
+	bool Starting() override;
+	void ShuttingDown() override;
 
 	template <typename TResourceType>
 	void Load(const StringView& aResourcePath, const ObjectFunctionView<void(TResourceType)>& aFunctionCallback)
@@ -76,4 +76,6 @@ private:
 	COGPROPERTY(Map<String, Ptr<Resource>> LoadedResources, DirectAccess);
 
 	COGPROPERTY(std::mutex Mutex, DirectAccess);
+
+	COGPROPERTY(i32 RandomNumber);
 };

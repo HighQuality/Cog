@@ -1,7 +1,6 @@
 #pragma once
 #include <Threading/ThreadID.h>
 #include "ObjectFunctionView.h"
-#include "ResourceManager.h"
 #include "Program.h"
 #include "CogGame.generated.h"
 
@@ -23,5 +22,4 @@ private:
 	virtual void UpdateFrameData(FrameData& aData, const Time& aDeltaTime);
 
 	COGPROPERTY(UniquePtr<FrameData> FrameData);
-	COGPROPERTY(Ptr<ResourceManager> ResourceManager);
 };
