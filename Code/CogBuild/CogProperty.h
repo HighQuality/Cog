@@ -5,7 +5,8 @@ struct CogProperty
 	String propertyName;
 	String propertyType;
 
-	String defaultValue;
+	String constructionArguments;
+	String defaultAssignment;
 
 	bool directAccess = false;
 	bool publicRead = false;

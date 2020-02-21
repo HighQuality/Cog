@@ -4,6 +4,11 @@ template <typename T>
 class ManualInitializationObject
 {
 public:
+	FORCEINLINE void ZeroData()
+	{
+		memset(myData, 0, sizeof(T));
+	}
+	
 	template <typename ...TArgs>
 	FORCEINLINE void Construct(TArgs ...aArgs)
 	{

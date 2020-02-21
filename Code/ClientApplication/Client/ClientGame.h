@@ -7,6 +7,9 @@
 #include "ClientGame.generated.h"
 
 COGTYPE(Specialization)
+class ClientTestType final : public TestType { GENERATED_BODY; };
+
+COGTYPE(Specialization)
 class ClientGame final : public Game
 {
 	GENERATED_BODY;

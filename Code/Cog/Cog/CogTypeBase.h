@@ -3,6 +3,7 @@
 class Program;
 class Singleton;
 class ProgramContext;
+class TypeData;
 
 class CogTypeBase
 {
@@ -32,4 +33,5 @@ protected:
 	Singleton& GetSingleton(const TypeID<CogTypeBase>& aTypeId) const;
 
 	virtual ProgramContext& GetProgramContext() const = 0;
+	virtual const TypeData& GetType() const = 0;
 };

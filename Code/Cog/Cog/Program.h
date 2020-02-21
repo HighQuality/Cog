@@ -14,6 +14,9 @@ class Object;
 class ThreadPool;
 class Fiber;
 
+COGTYPE(SetDebugFlag)
+class TestType : public Object { GENERATED_BODY; COGPROPERTY(i32 = 100);  };
+
 COGTYPE()
 class Program : public Singleton
 {

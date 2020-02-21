@@ -32,14 +32,14 @@ void CogType::PostResolveDependencies()
 {
 }
 
-String CogType::GenerateHeaderFileContents(const DocumentTemplates& aTemplates, const StringView aGeneratedHeaderIdentifier) const
+Array<String> CogType::GenerateHeaderFileContents(const DocumentTemplates& aTemplates, const StringView aGeneratedHeaderIdentifier) const
 {
-	return String();
+	return Array<String>();
 }
 
-String CogType::GenerateSourceFileContents(const DocumentTemplates& aTemplates) const
+Array<String> CogType::GenerateSourceFileContents(const DocumentTemplates& aTemplates) const
 {
-	return String();
+	return Array<String>();
 }
 
 String CogType::GetDeclarationLocation() const

@@ -15,8 +15,8 @@ public:
 	virtual bool ResolveDependencies(const Map<String, CogType*>& aCogTypes);
 	virtual void PostResolveDependencies();
 
-	virtual String GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const;
-	virtual String GenerateSourceFileContents(const DocumentTemplates& aTemplates) const;
+	virtual Array<String> GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const;
+	virtual Array<String> GenerateSourceFileContents(const DocumentTemplates& aTemplates) const;
 
 	String GetDeclarationLocation() const;
 

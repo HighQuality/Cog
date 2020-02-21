@@ -3,11 +3,9 @@
 #include "Object.h"
 #include "TypeList.h"
 
-extern UniquePtr<const TypeList> gTypeList;
-
 static UniquePtr<CogTypeChunk> CreateChunkOfType(const TypeID<CogTypeBase>& aType)
 {
-	return gTypeList->GetTypeData(aType).AllocateFactory();
+	return gTypeList.GetTypeData(aType).AllocateFactory();
 }
 
 Ptr<Object> ObjectPool::CreateObjectByType(const TypeID<CogTypeBase>& aType, const Ptr<Object>& aOwner)

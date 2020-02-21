@@ -6,4 +6,6 @@
 #include "${PchFileName}"
 #include "${MainHeaderFile}"
 
+#include "Cog/TypeList.h"
+
 ${ExtraSourceContent}

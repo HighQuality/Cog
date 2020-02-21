@@ -53,12 +53,16 @@ void GeneratedCode::GenerateHeaderFile(const DocumentTemplates& aTemplates, Stri
 
 		for (const auto& cogType : myDeclaredCogTypes)
 		{
-			String generatedHeaderCode = cogType->GenerateHeaderFileContents(aTemplates, myGeneratedHeaderIdentifier);
+			Array<String> generatedHeaderCode = cogType->GenerateHeaderFileContents(aTemplates, myGeneratedHeaderIdentifier);
 
 			if (generatedHeaderCode.GetLength() > 0)
 			{
 				extraContents.Append(Format(L"// Generated code for type %\n", cogType->GetTypeName()).View());
-				extraContents.Append(generatedHeaderCode.View());
+				for (StringView line : generatedHeaderCode)
+				{
+					extraContents.Append(line);
+					extraContents.Add('\n');
+				}
 				extraContents.Append(Format(L"\n// End generated code for type %\n", cogType->GetTypeName()).View());
 			}
 		}
@@ -83,12 +87,18 @@ void GeneratedCode::GenerateSourceFile(const DocumentTemplates& aTemplates, cons
 
 		for (const auto& cogType : myDeclaredCogTypes)
 		{
-			String generatedHeaderCode = cogType->GenerateSourceFileContents(aTemplates);
+			Array<String> generatedSourceFileCode = cogType->GenerateSourceFileContents(aTemplates);
 
-			if (generatedHeaderCode.GetLength() > 0)
+			if (generatedSourceFileCode.GetLength() > 0)
 			{
 				extraContents.Append(Format(L"// Generated code for type %\n", cogType->GetTypeName()).View());
-				extraContents.Append(generatedHeaderCode.View());
+
+				for (StringView line : generatedSourceFileCode)
+				{
+					extraContents.Append(line);
+					extraContents.Add('\n');
+				}
+
 				extraContents.Append(Format(L"\n// End generated code for type %\n", cogType->GetTypeName()).View());
 			}
 		}

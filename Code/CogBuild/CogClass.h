@@ -16,8 +16,8 @@ public:
 	Array<String> GenerateCogTypeChunkHeaderContents() const;
 	Array<String> GenerateCogTypeChunkSourceContents() const;
 
-	String GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const override;
-	String GenerateSourceFileContents(const DocumentTemplates& aTemplates) const override;
+	Array<String> GenerateHeaderFileContents(const DocumentTemplates& aTemplates, StringView aGeneratedHeaderIdentifier) const override;
+	Array<String> GenerateSourceFileContents(const DocumentTemplates& aTemplates) const override;
 
 	void SetSpecializesBaseClass(const bool aSpecializesBaseClass) { mySpecializesBaseClass = aSpecializesBaseClass; }
 	bool SpecializesBaseClass() const { return mySpecializesBaseClass; }
@@ -37,6 +37,8 @@ protected:
 	void GatherPropertyInitializers(Map<StringView, ClassPropertyInitializerData>& aPropertyInitializers) const;
 
 private:
+	Array<String> GenerateSingletonInitialization() const;
+
 	Array<GeneratedFunction> myGeneratedFunctions;
 	Array<CogProperty> myProperties;
 	
@@ -50,7 +52,8 @@ private:
 
 struct ClassPropertyInitializerData
 {
-	StringView defaultValue;
+	StringView constructionArguments;
+	StringView defaultAssignment;
 	StringView propertyType;
 	bool zeroMemory;
 };

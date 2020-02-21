@@ -2,6 +2,7 @@
 #include "Program.h"
 #include "Threading/Fibers/Fiber.h"
 #include "Threading/Fibers/Awaitable.h"
+#include "TypeData.h"
 
 static std::atomic<i32> gNextFiberIndex = 0;
 
@@ -14,6 +15,8 @@ bool Program::Starting()
 
 	// Destroyed objects are scheduled for the entirety of the current and next frame before being destroyed
 	GetScheduledDestroys().Resize(2);
+
+	Println(NewObject<TestType>(nullptr)->GetType().GetName());
 
 	SetMessageSystem(NewObject<MessageSystem>(nullptr));
 

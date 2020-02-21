@@ -177,6 +177,14 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		{
 			cogClass.SetSpecializesBaseClass(true);
 		}
+		else if (currentParameter == L"ManualSpecialization") /* Specialization that's only activate after calling ProgramContext::ActivateSpecialization<T>(). */
+		{
+			TODO;
+		}
+		else if (currentParameter == L"UnitTestSpecialization") /* ManualSpecialization that's automatically activated when running unit tests. */
+		{
+			TODO;
+		}
 		else if (currentParameter == L"Replicated") /* Should be inherited by subclasses. */
 		{
 			TODO;
@@ -316,7 +324,7 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 			return false;
 		}
 
-		if (parameterReader.IsAtGroup())
+		if (parameterReader.IsAtGroup() && parameterReader.GetOpeningSequence() != L"(")
 		{
 			typeCanBeName = false;
 
@@ -331,9 +339,9 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 			}
 		}
 
-		while (parameterReader.GetCurrentWord() == L"*" ||
-			parameterReader.GetCurrentWord() == L"&" ||
-			parameterReader.GetCurrentWord() == L"const")
+		while (parameterReader.GetCurrentWordOrGroup() == L"*" ||
+			parameterReader.GetCurrentWordOrGroup() == L"&" ||
+			parameterReader.GetCurrentWordOrGroup() == L"const")
 		{
 			typeCanBeName = false;
 
@@ -348,17 +356,14 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 		}
 
 		if (parameterReader.IsAtGroup())
-		{
-			ReportErrorWithInnerReader(parameterReader, L"Invalid C++ type in COGPROPERTY");
-			return false;
-		}
+			break;
 
 		if (parameterReader.GetCurrentWordOrGroup() == L"::")
 		{
 			typeCanBeName = false;
 
 			newProperty.propertyType.Append(L"::");
-			
+
 			if (!parameterReader.Next())
 			{
 				ReportErrorWithInnerReader(parameterReader, L"Invalid C++ type in COGPROPERTY");
@@ -367,14 +372,15 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 
 			continue;
 		}
-		
+
 		break;
 	}
-	
+
 	bool canContinue;
 
 	if (parameterReader.GetCurrentWordOrGroup() != L"=" &&
 		parameterReader.GetCurrentWordOrGroup() != L"," &&
+		!(parameterReader.IsAtGroup() && parameterReader.GetOpeningSequence() == L"(") &&
 		parameterReader.GetCurrentWordOrGroup() != L"")
 	{
 		newProperty.propertyName = String(parameterReader.GetCurrentWordOrGroup());
@@ -394,24 +400,32 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 	if (canContinue)
 	{
 		bool reachedEnd = false;
+		const bool isConstructorCall = parameterReader.IsAtGroup() && parameterReader.GetOpeningSequence() == L"(";
 
-		if (parameterReader.GetCurrentWordOrGroup() == L"=")
+		if (parameterReader.GetCurrentWordOrGroup() == L"=" ||
+			isConstructorCall)
 		{
-			newProperty.zeroMemory = false;
+			newProperty.zeroMemory = !isConstructorCall;
 
-			if (parameterReader.Next())
+			String initString;
+
+			if (!isConstructorCall)
 			{
+				if (!parameterReader.Next())
+				{
+					ReportErrorWithInnerReader(aBodyReader, L"Invalid C++ type in COGPROPERTY");
+					return false;
+				}
+
 				for (;;)
 				{
 					if (parameterReader.IsAtGroup())
-						newProperty.defaultValue.Append(parameterReader.GetOpeningSequence());
+						initString.Append(parameterReader.GetOpeningSequence());
 
-					newProperty.defaultValue.Append(parameterReader.GetCurrentWordOrGroup());
+					initString.Append(parameterReader.GetCurrentWordOrGroup());
 
 					if (parameterReader.IsAtGroup())
-						newProperty.defaultValue.Append(parameterReader.GetClosingSequence());
-
-					newProperty.defaultValue.Add(L' ');
+						initString.Append(parameterReader.GetClosingSequence());
 
 					if (!parameterReader.Next())
 					{
@@ -419,15 +433,24 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 						break;
 					}
 
+					initString.Add(L' ');
+
 					if (parameterReader.GetCurrentWordOrGroup() == L",")
 						break;
 				}
 			}
 			else
 			{
-				ReportErrorWithInnerReader(aBodyReader, L"Invalid C++ type in COGPROPERTY");
-				return false;
+				initString = parameterReader.GetCurrentWordOrGroup();
+
+				if (!parameterReader.Next())
+					reachedEnd = true;
 			}
+
+			if (isConstructorCall)
+				newProperty.constructionArguments = Move(initString);
+			else
+				newProperty.defaultAssignment = Move(initString);
 		}
 
 		if (!reachedEnd)
@@ -514,9 +537,9 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 		ReportErrorWithInnerReader(aBodyReader, L"Expected ';'");
 		return false;
 	}
-	
+
 	aClass.RegisterCogProperty(Move(newProperty));
-	
+
 	return true;
 }
 

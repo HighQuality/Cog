@@ -55,6 +55,12 @@ public:
 	TypeList() = default;
 	virtual ~TypeList() = default;
 
+	TypeList(const TypeList&) = delete;
+	TypeList& operator=(const TypeList&) = delete;
+
+	TypeList(TypeList&&) = default;
+	TypeList& operator=(TypeList&&) = default;
+
 	void BuildList();
 
 	FORCEINLINE ArrayView<const TypeData*> GetSingletons(const bool aOnlyLeafTypes = true) const { return  aOnlyLeafTypes ? myLeafSingletons : myAllSingletons; }
@@ -125,3 +131,5 @@ private:
 	Array<const TypeData*> myLeafObjectTypes;
 	Array<const TypeData*> myAllObjectTypes;
 };
+
+extern const TypeList gTypeList;

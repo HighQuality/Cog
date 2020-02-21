@@ -24,6 +24,7 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 
 	generatedLines.Add(Format(L"static constexpr bool StaticIsSpecialization = %;", mySpecializesBaseClass));
 	generatedLines.Add(Format(L"inline static const StringView StaticTypeName = L\"%\";", GetTypeName()));
+	generatedLines.Add(String(L"const TypeData& GetType() const;"));
 
 	if (GetTypeName() != L"Object" && !myIsSingleton)
 	{
@@ -37,6 +38,24 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 	{
 		generatedLines.Add(Format(L"FORCEINLINE const %CogTypeChunk& GetChunk() const { return static_cast<const %CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
 		generatedLines.Add(Format(L"FORCEINLINE %CogTypeChunk& GetChunk() { return static_cast<%CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
+	}
+	
+	generatedLines.Add(String(L"public:"));
+
+	if (myIsSingleton)
+	{
+		const bool isBaseSingleton = GetTypeName() == L"Singleton";
+
+		if (!isBaseSingleton)
+		{
+			generatedLines.Add(String(L"void ConstructSingleton() override;"));
+			generatedLines.Add(String(L"void DestructSingleton() override;"));
+		}
+		else
+		{
+			generatedLines.Add(String(L"virtual void ConstructSingleton();"));
+			generatedLines.Add(String(L"virtual void DestructSingleton();"));
+		}
 	}
 
 	for (const CogProperty& prop : myProperties)
@@ -52,9 +71,9 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 		}
 		else
 		{
-			accessor = Format(L"_data_%", prop.propertyName);
+			accessor = Format(L"_data_%.Get()", prop.propertyName);
 			generatedLines.Add(String(L"private:"));
-			generatedLines.Add(Format(L"% _data_%;", prop.propertyType, prop.propertyName));
+			generatedLines.Add(Format(L"ManualInitializationObject<%> _data_%;", prop.propertyType, prop.propertyName));
 		}
 
 		if (prop.publicRead)
@@ -75,7 +94,7 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 		}
 		else
 		{
-			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> Set%(typename % aNewValue) { auto& value = %; value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, accessor));
+			generatedLines.Add(Format(L"FORCEINLINE ConstReferenceOf<%> Set%(% aNewValue) { auto& value = %; value = Move(aNewValue); return value; }", prop.propertyType, prop.propertyName, prop.propertyType, accessor));
 		}
 	}
 	
@@ -150,10 +169,13 @@ Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
 		const ClassPropertyInitializerData data = propertyPair.value;
 
 		if (data.zeroMemory)
-			generatedLines.Add(Format(L"\tmemset(&my%Data[aIndex].Get(), 0, sizeof(%));", name, data.propertyType));
+			generatedLines.Add(Format(L"\tmy%Data[aIndex].ZeroData();", name));
 		
+		generatedLines.Add(Format(L"\tmy%Data[aIndex].Construct(%);", name, data.constructionArguments));
 
-		generatedLines.Add(Format(L"\tmy%Data[aIndex].Construct(%);", name, data.defaultValue));
+		if (data.defaultAssignment)
+			generatedLines.Add(Format(L"\tmy%Data[aIndex].Get() = %;", name, data.defaultAssignment));
+
 		generatedLines.Add(String(L""));
 	}
 
@@ -177,58 +199,102 @@ Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
 	return generatedLines;
 }
 
-String CogClass::GenerateHeaderFileContents(const DocumentTemplates& aTemplates, const StringView aGeneratedHeaderIdentifier) const
+Array<String> CogClass::GenerateHeaderFileContents(const DocumentTemplates& aTemplates, const StringView aGeneratedHeaderIdentifier) const
 {
-	String headerOutput = Base::GenerateHeaderFileContents(aTemplates, aGeneratedHeaderIdentifier);
+	Array<String> headerOutput = Base::GenerateHeaderFileContents(aTemplates, aGeneratedHeaderIdentifier);
 
 	{
 		const Array<String> generatedBodyContents = GenerateGeneratedBodyContents(aGeneratedHeaderIdentifier);
 
 		for (i32 i = 0; i < generatedBodyContents.GetLength(); ++i)
 		{
-			if (i > 0)
-				headerOutput.Append(L" \\\n\t");
-
-			headerOutput.Append(generatedBodyContents[i].View());
+			if (i + 1 == generatedBodyContents.GetLength())
+				headerOutput.Add(Format(L"\t%", generatedBodyContents[i]));
+			else if (i > 0)
+				headerOutput.Add(Format(L"\t%\\", generatedBodyContents[i]));
+			else 
+				headerOutput.Add(Format(L"%\\", generatedBodyContents[i]));
 		}
-
-		headerOutput.Add(L'\n');
 	}
 
 	if (!myIsSingleton)
 	{
 		const Array<String> chunkContents = GenerateCogTypeChunkHeaderContents();
-
-		for (i32 i = 0; i < chunkContents.GetLength(); ++i)
-		{
-			if (i > 0)
-				headerOutput.Add(L'\n');
-
-			headerOutput.Append(chunkContents[i].View());
-		}
+		headerOutput.Append(chunkContents);
 	}
 
 	return headerOutput;
 }
 
-String CogClass::GenerateSourceFileContents(const DocumentTemplates& aTemplates) const
+Array<String> CogClass::GenerateSourceFileContents(const DocumentTemplates& aTemplates) const
 {
-	String sourceOutput = Base::GenerateSourceFileContents(aTemplates);
+	Array<String> sourceOutput = Base::GenerateSourceFileContents(aTemplates);
 
 	if (!myIsSingleton)
 	{
 		const Array<String> chunkContents = GenerateCogTypeChunkSourceContents();
-
-		for (i32 i = 0; i < chunkContents.GetLength(); ++i)
-		{
-			if (i > 0)
-				sourceOutput.Add(L'\n');
-
-			sourceOutput.Append(chunkContents[i].View());
-		}
+		sourceOutput.Append(chunkContents);
 	}
-	
+
+	sourceOutput.Add(Format(L"const TypeData& %::GetType() const", GetTypeName()));
+	sourceOutput.Add(String(L"{"));
+	sourceOutput.Add(String(L"\tstatic const TypeData& data = gTypeList.GetTypeData(StaticTypeName, false);"));
+	sourceOutput.Add(String(L"\treturn data;"));
+	sourceOutput.Add(String(L"}"));
+
+	if (myIsSingleton)
+		sourceOutput.Append(GenerateSingletonInitialization());
+
 	return sourceOutput;
+}
+
+Array<String> CogClass::GenerateSingletonInitialization() const
+{
+	CHECK(myIsSingleton);
+
+	Array<String> generatedLines;
+	Array<String> destructFunc;
+	const bool isBaseSingleton = GetTypeName() == L"Singleton";
+
+	if (!isBaseSingleton)
+	{
+		generatedLines.Add(Format(L"void %::ConstructSingleton()", GetTypeName()));
+		generatedLines.Add(String(L"{"));
+		generatedLines.Add(String(L"\tBase::ConstructSingleton();"));
+
+		destructFunc.Add(Format(L"void %::DestructSingleton()", GetTypeName()));
+		destructFunc.Add(String(L"{"));
+	}
+	else
+	{
+		generatedLines.Add(Format(L"void %::ConstructSingleton()", GetTypeName()));
+		generatedLines.Add(String(L"{"));
+
+		destructFunc.Add(Format(L"void %::DestructSingleton()", GetTypeName()));
+		destructFunc.Add(String(L"{"));
+	}
+
+	for (const CogProperty& prop : myProperties)
+	{
+		if (prop.zeroMemory)
+			generatedLines.Add(Format(L"\t_data_%.ZeroData();", prop.propertyName));
+
+		generatedLines.Add(Format(L"\t_data_%.Construct(%);", prop.propertyName, prop.constructionArguments));
+
+		if (prop.defaultAssignment.View())
+			generatedLines.Add(Format(L"\t_data_%.Get() = %;", prop.propertyName, prop.defaultAssignment));
+
+		destructFunc.Add(Format(L"\t_data_%.Destruct();", prop.propertyName));
+	}
+
+	if (!isBaseSingleton)
+		destructFunc.Add(String(L"\tBase::DestructSingleton();"));
+
+	generatedLines.Add(String(L"}"));
+	destructFunc.Add(String(L"}"));
+
+	generatedLines.Append(destructFunc);
+	return generatedLines;
 }
 
 void CogClass::SetIsFinal(const bool aIsFinal)
@@ -267,11 +333,9 @@ void CogClass::GatherPropertyInitializers(Map<StringView, ClassPropertyInitializ
 
 	for (const CogProperty& prop : myProperties)
 	{
-		if (!prop.defaultValue.View() && !prop.zeroMemory)
-			continue;
-
 		ClassPropertyInitializerData& initializerData = aPropertyInitializers.FindOrAdd(prop.propertyName);
-		initializerData.defaultValue = prop.defaultValue;
+		initializerData.constructionArguments = prop.constructionArguments;
+		initializerData.defaultAssignment = prop.defaultAssignment;
 		initializerData.propertyType = prop.propertyType;
 		initializerData.zeroMemory = prop.zeroMemory;
 	}

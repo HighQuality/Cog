@@ -57,7 +57,7 @@ public:
 		this->myLength = 0;
 		myCapacity = 0;
 
-		*this = static_cast<const ArrayView<T>&>(aCopy);
+		*this = aCopy.View();
 	}
 
 	FORCEINLINE explicit Array(const ArrayView<T>& aCopy)

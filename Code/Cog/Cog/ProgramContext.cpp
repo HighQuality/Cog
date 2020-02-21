@@ -3,8 +3,6 @@
 #include "TypeList.h"
 #include "Program.h"
 
-extern UniquePtr<const TypeList> gTypeList;
-
 ProgramContext::ProgramContext() = default;
 ProgramContext::~ProgramContext() = default;
 
@@ -20,14 +18,11 @@ void ProgramContext::Run()
 
 void ProgramContext::InitializeSingletons()
 {
-	CHECK(gTypeList.IsValid());
-
 	myTypeIdToSingleton.Resize(TypeID<CogTypeBase>::MaxUnderlyingInteger() + 1);
 
-	for (const TypeData* singletonType : gTypeList->GetSingletons())
+	for (const TypeData* singletonType : gTypeList.GetSingletons())
 	{
 		Singleton& singleton = *mySingletonInstances.Add(singletonType->AllocateSingleton());
-		singleton.SetOwningProgramContext(this);
 
 		const TypeData* currentType = singletonType;
 
@@ -47,6 +42,9 @@ void ProgramContext::InitializeSingletons()
 
 	for (Singleton* singleton : mySingletonInstances)
 	{
+		singleton->ConstructSingleton();
+		singleton->SetOwningProgramContext(this);
+
 		singleton->SetIsBaseCalled(false);
 		singleton->Starting();
 		// TODO: Update with type name
@@ -62,6 +60,8 @@ void ProgramContext::DestroySingletons()
 		singleton->ShuttingDown();
 		// TODO: Update with type name
 		CHECK_MSG(singleton->IsBaseCalled() == true, L"Singleton subclass did not call Base::ShuttingDown() all the way down to Singleton");
+
+		singleton->DestructSingleton();
 	}
 
 	mySingletonInstances.Empty();
