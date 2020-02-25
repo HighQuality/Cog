@@ -82,29 +82,21 @@ void CogTypeChunk::SendMessageById(const Message& aMessage, const TypeID<Message
 	}
 }
 
-Ptr<Object> CogTypeChunk::Allocate(const Ptr<Object>& aOwner)
+Ptr<Object> CogTypeChunk::Allocate()
 {
 	u8 allocatedIndex;
 
 	if (OccupyFirstFreeSlot(allocatedIndex))
 	{
-		// This looks like it creates a pointer to the default object but in reality it uses it to construct an internal "pointer object"
-		Ptr<Object> obj(myDefaultObject);
+		// This looks like it creates a pointer to the default object but in reality it uses it to construct an internal "pointer object", objects do not store state
+		Ptr<Object> obj = myDefaultObject.Get();
 		
 		Object* rawObject = obj.Read();
 		rawObject->myChunk = this;
 		rawObject->myChunkIndex = allocatedIndex;
 		rawObject->myGeneration = ++(myGeneration[allocatedIndex]);
 
-		SetOwner(allocatedIndex, aOwner);
-		
-		InitializeObjectAtIndex(allocatedIndex);
-
-		// TODO: This should probably be called from the generated function InitializeObjectAtIndex in order to avoid virtual function call
-		rawObject->myBaseCalled = 0;
-		rawObject->Created();
-		CHECK_MSG(rawObject->myBaseCalled == 1, L"Object subclass did not call Base::Created() all the way down to Object");
-
+		CHECK(obj);
 		return obj;
 	}
 

@@ -31,7 +31,7 @@ public:
 	static const TypeID& Resolve()
 	{
 		static_assert(IsDerivedFrom<TType, TBase>, "Invalid inheritance chain");
-		static TypeID type(ourIDCounter++, typeid(TType));
+		static const TypeID type(ourIDCounter++, typeid(TType));
 		return type;
 	}
 

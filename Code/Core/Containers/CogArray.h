@@ -132,6 +132,52 @@ public:
 		return Emplace(Move(aValue));
 	}
 
+	FORCEINLINE T& Insert(const i32 aIndex, const T& aValue)
+	{
+		if (aIndex < 0 || aIndex > this->myLength)
+			abort();
+
+		if (aIndex == this->myLength)
+			return Add(aValue);
+
+		PrepareAdd(1);
+
+		new (static_cast<void*>(&this->myData[this->myLength - 1])) T(Move(this->myData[this->myLength]));
+
+		for (i32 i = this->myLength - 2; i >= aIndex; --i)
+			this->myData[i + 1] = Move(this->myData[i]);
+
+		this->myData[aIndex].~T();
+
+		++this->myLength;
+		new (static_cast<void*>(&this->myData[aIndex])) T(aValue);
+
+		return this->myData[aIndex];
+	}
+
+	FORCEINLINE T& Insert(const i32 aIndex, T&& aValue)
+	{
+		if (aIndex < 0 || aIndex > this->myLength)
+			abort();
+
+		if (aIndex == this->myLength)
+			return Emplace(Move(aValue));
+
+		PrepareAdd(1);
+
+		new (static_cast<void*>(&this->myData[this->myLength - 1])) T(Move(this->myData[this->myLength]));
+
+		for (i32 i = this->myLength - 2; i >= aIndex; --i)
+			this->myData[i + 1] = Move(this->myData[i]);
+
+		this->myData[aIndex].~T();
+		
+		++this->myLength;
+		new (static_cast<void*>(&this->myData[aIndex])) T(Move(aValue));
+
+		return this->myData[aIndex];
+	}
+
 	FORCEINLINE T& AddUnique(const T & aValue)
 	{
 		return AddUnique(T(aValue));
@@ -426,7 +472,7 @@ private:
 			Reallocate(aNewCapacity);
 	}
 
-	FORCEINLINE void Reallocate(const i32 aNewCapacity)
+	void Reallocate(const i32 aNewCapacity)
 	{
 		T* oldData = this->myData;
 

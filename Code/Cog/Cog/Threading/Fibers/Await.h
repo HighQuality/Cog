@@ -13,14 +13,14 @@ public:
 	}
 
 	template <typename T, typename ...TArgs>
-	void While(TArgs ...aArgs)
+	void While(TArgs&& ...aArgs)
 	{
 		CHECK(!myWasExecuted);
 
 		if (!myCounter)
 			myCounter = new std::atomic<u8>(0);
 
-		AwaitableBase* awaitable = new T(std::forward<TArgs>(aArgs)...);
+		AwaitableBase* awaitable = new T(Forward<TArgs>(aArgs)...);
 		awaitable->myAwaiter = this;
 		myAwaitables.Add(awaitable);
 	}
@@ -54,10 +54,10 @@ public:
 	}
 
 	template <typename T, typename ...TArgs>
-	AwaitContext& Then(TArgs & ...aArgs)
+	AwaitContext& Then(TArgs&& ...aArgs)
 	{
 		CHECK(myFollowedBy == nullptr);
-		myFollowedBy = new T(std::forward<TArgs>(aArgs)...);
+		myFollowedBy = new T(Forward<TArgs>(aArgs)...);
 		return *myFollowedBy;
 	}
 
@@ -116,12 +116,12 @@ public:
 	}
 
 	template <typename TAwaitableType, typename ...TArgs>
-	AwaitContext& Simultaneously(TArgs ...aArgs)
+	AwaitContext& Simultaneously(TArgs&& ...aArgs)
 	{
 		if (!myContext)
 			myContext = new AwaitContext();
 
-		myContext->While<TAwaitableType>(std::forward<TArgs>(aArgs)...);
+		myContext->While<TAwaitableType>(Forward<TArgs>(aArgs)...);
 		return *myContext;
 	}
 	
@@ -168,13 +168,13 @@ private:
 };
 
 template <typename T, typename ...TArgs>
-AwaitExecuter<typename T::ReturnType> Await(TArgs & ...aArgs)
+AwaitExecuter<typename T::ReturnType> Await(TArgs&& ...aArgs)
 {
 	// We're either in a fiber where you can't temporarily can't await (look further into the callstack) or in a non-fiber thread
 	CHECK(!CogTLS::GetProhibitAwaits());
 
 	AwaitExecuter<T::ReturnType> awaitExec;
-	awaitExec.Simultaneously<T>(std::forward<TArgs>(aArgs)...);
+	awaitExec.Simultaneously<T>(Forward<TArgs>(aArgs)...);
 	return awaitExec;
 }
 

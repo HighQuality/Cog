@@ -210,6 +210,12 @@ FORCEINLINE RemoveReference<T>&& Move(T&& Object)
 }
 
 template <typename T>
+FORCEINLINE T&& Forward(RemoveReference<T>& Object)
+{
+	return static_cast<T&&>(Object);
+}
+
+template <typename T>
 constexpr T MaxOf = std::numeric_limits<T>::max();
 
 template <typename T>

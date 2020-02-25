@@ -10,9 +10,9 @@ public:
 	}
 	
 	template <typename ...TArgs>
-	FORCEINLINE void Construct(TArgs ...aArgs)
+	FORCEINLINE void Construct(TArgs&& ...aArgs)
 	{
-		new (static_cast<void*>(myData)) T(Move(aArgs)...);
+		new (static_cast<void*>(myData)) T(Forward<TArgs>(aArgs)...);
 	}
 
 	FORCEINLINE void Destruct()

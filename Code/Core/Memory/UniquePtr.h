@@ -16,7 +16,7 @@ public:
 
 	UniquePtr(UniquePtr&& aMove)
 	{
-		if (*this == aMove)
+		if (this == &aMove)
 			return;
 
 		*this = Move(aMove);
@@ -29,7 +29,7 @@ public:
 
 	UniquePtr& operator=(UniquePtr&& aMove)
 	{
-		if (*this == aMove)
+		if (this == &aMove)
 			return *this;
 
 		Clear();
@@ -64,7 +64,7 @@ public:
 	}
 
 	FORCEINLINE explicit operator bool() const { return myObject != nullptr; }
-	FORCEINLINE bool IsValid() const { return *this; }
+	FORCEINLINE bool IsValid() const { return myObject != nullptr; }
 
 	FORCEINLINE operator T* () const
 	{
@@ -73,11 +73,13 @@ public:
 
 	FORCEINLINE T* operator->() const
 	{
+		CHECK(myObject);
 		return myObject;
 	}
 
 	FORCEINLINE T& operator*() const
 	{
+		CHECK(myObject);
 		return *myObject;
 	}
 
@@ -93,13 +95,13 @@ public:
 
 private:
 	template <typename T2, typename ...TArgs>
-	friend UniquePtr<T2> MakeUnique(TArgs ...aArgs);
+	friend UniquePtr<T2> MakeUnique(TArgs&& ...aArgs);
 
 	T* myObject = nullptr;
 };
 
 template <typename T, typename ...TArgs>
-UniquePtr<T> MakeUnique(TArgs ...aArgs)
+UniquePtr<T> MakeUnique(TArgs&& ...aArgs)
 {
-	return UniquePtr<T>(new T(Move(aArgs)...));
+	return UniquePtr<T>(new T(Forward<TArgs>(aArgs)...));
 }

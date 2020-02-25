@@ -10,8 +10,14 @@ public:
 	TypeData();
 	~TypeData();
 
-	FORCEINLINE const StringView& GetName() const { return myName; }
-	FORCEINLINE const StringView& GetBaseName() const { return myBaseName; }
+	TypeData(const TypeData&) = delete;
+	TypeData& operator=(const TypeData&) = delete;
+
+	TypeData(TypeData&&) = delete;
+	TypeData& operator=(TypeData&&) = delete;
+
+	FORCEINLINE StringView GetName() const { return myName; }
+	FORCEINLINE StringView GetBaseName() const { return myBaseName; }
 
 	FORCEINLINE const TypeData* GetBaseType() const { return myBaseType; }
 
@@ -33,10 +39,10 @@ private:
 	TypeData* myBaseType = nullptr;
 	Array<TypeData*> mySubtypes;
 
-	StringView myName;
-	StringView myBaseName;
+	String myName;
+	String myBaseName;
 	UniquePtr<CogTypeChunk>(*myFactoryAllocator)() = nullptr;
 	UniquePtr<Singleton>(*mySingletonAllocator)() = nullptr;
 	const TypeID<CogTypeBase>* myTypeID = nullptr;
-	bool myIsSpecialization;
+	bool myIsSpecialization = false;
 };

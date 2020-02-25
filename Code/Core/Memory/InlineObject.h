@@ -88,12 +88,12 @@ public:
 	FORCEINLINE operator const T&() const { return Get(); }
 
 	template <typename TDerivedType, typename ...TArgs>
-	static InlineObject New(TArgs ...aArgs)
+	static InlineObject New(TArgs&& ...aArgs)
 	{
 		static_assert(sizeof(TDerivedType) <= Size, "Increase or specify InlineObject::T::InlinedSize");
 		
 		InlineObject obj;
-		new (static_cast<void*>(&obj.myStorage)) TDerivedType(Move(aArgs)...);
+		new (static_cast<void*>(&obj.myStorage)) TDerivedType(Forward<TArgs>(aArgs)...);
 
 		static const TypeHelperImpl<TDerivedType> ourTypeHelper;
 		obj.myTypeHelper = &ourTypeHelper;

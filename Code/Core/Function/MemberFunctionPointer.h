@@ -36,9 +36,9 @@ public:
 			myFunction = aFunction;
 	}
 	
-	FORCEINLINE TReturn Call(TObject& aObject, TArgs ...aArgs) const
+	FORCEINLINE TReturn Call(TObject& aObject, TArgs&& ...aArgs) const
 	{
-		return (const_cast<RemoveConst<TObject>*>(&aObject)->*myFunction)(std::forward<TArgs>(aArgs)...);
+		return (const_cast<RemoveConst<TObject>*>(&aObject)->*myFunction)(Forward<TArgs>(aArgs)...);
 	}
 
 	bool operator==(const MemberFunctionPointer&) = delete;
@@ -48,8 +48,8 @@ private:
 	// Makes sure all instantiations of MemberFunctionPointer are equal in size so they can be stored at a fixed size in raw memory
 	union
     {
-        TReturn (TObject::*myFunction)(TArgs...);
-        TReturn (TObject::*myFunctionConst)(TArgs...) const;
+        TReturn (TObject::*myFunction)(TArgs&&...);
+        TReturn (TObject::*myFunctionConst)(TArgs&&...) const;
 
         char buffer[MemberFunctionPointerSize];
     };

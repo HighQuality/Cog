@@ -14,9 +14,9 @@ public:
 	DELETE_MOVES(FiberLocalStorage);
 
 	template <typename ...TArgs>
-	T& Allocate(TArgs ...aArgs)
+	T& Allocate(TArgs&& ...aArgs)
 	{
-		T* value = new T(std::forward<TArgs>(aArgs)...);
+		T* value = new T(Forward<TArgs>(aArgs)...);
 		FlsSetValue(myHandle, value);
 		return *value;
 	}

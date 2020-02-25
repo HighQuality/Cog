@@ -51,7 +51,7 @@ public:
 
 	void SendMessageById(const Message& aMessage, TypeID<Message>::CounterType aIndex, u8 aReceiver);
 
-	Ptr<Object> Allocate(const Ptr<Object>& aOwner);
+	Ptr<Object> Allocate();
 
 	void SetOwner(u8 aIndex, const Ptr<Object>& aNewOwner);
 	FORCEINLINE const Ptr<Object>& GetOwner(const u8 aIndex) const { reinterpret_cast<const Ptr<Object>&>(myOwners[aIndex].Get()); }
@@ -60,10 +60,12 @@ protected:
 	template <typename T>
 	friend class Ptr;
 
-	friend class ObjectPool;
+	friend class ChunkPool;
 	void SetProgramContext(ProgramContext& aProgramContext);
 
 	virtual UniquePtr<Object> CreateDefaultObject() const;
+
+	friend class ObjectPool;
 	virtual void InitializeObjectAtIndex(u8 aIndex);
 	virtual void DestructObjectAtIndex(u8 aIndex);
 

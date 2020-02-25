@@ -23,29 +23,29 @@ public:
 	}
 
 	template <typename TType>
-	void Subscribe(TType* aObject, void (TType::*aFunction)(TArgs ...))
+	void Subscribe(TType* aObject, void (TType::*aFunction)(TArgs&& ...))
 	{
 		CHECK(aObject);
-		Subscribe(*aObject, Move(aFunction));
+		Subscribe(*aObject, aFunction);
 	}
 
 	template <typename TType>
-	void Subscribe(const TType* aObject, void (TType::*aFunction)(TArgs ...) const)
+	void Subscribe(const TType* aObject, void (TType::*aFunction)(TArgs&& ...) const)
 	{
 		CHECK(aObject);
-		Subscribe(*aObject, Move(aFunction));
+		Subscribe(*aObject, aFunction);
 	}
 
 	template <typename TType>
-	void Subscribe(TType& aObject, void (TType::*aFunction)(TArgs ...))
+	void Subscribe(TType& aObject, void (TType::*aFunction)(TArgs&& ...))
 	{
-		mySubscribers.Add(new EventSubscriber(Ptr<TType>(aObject), Move(aFunction)));
+		mySubscribers.Add(new EventSubscriber(Ptr<TType>(&aObject), aFunction));
 	}
 
 	template <typename TType>
-	void Subscribe(const TType& aObject, void (TType::*aFunction)(TArgs ...) const)
+	void Subscribe(const TType& aObject, void (TType::*aFunction)(TArgs&& ...) const)
 	{
-		mySubscribers.Add(new EventSubscriber(Ptr<TType>(const_cast<TType&>(aObject)), Move(aFunction)));
+		mySubscribers.Add(new EventSubscriber(Ptr<TType>(&const_cast<TType&>(aObject)), aFunction));
 	}
 
 	void Broadcast(TArgs ... aArgs)
@@ -67,7 +67,7 @@ private:
 	public:
 		virtual ~EventSubscriberBase() = default;
 
-		virtual EventCallResult Call(TArgs ... aArgs) = 0;
+		virtual EventCallResult Call(const TArgs& ... aArgs) = 0;
 	};
 
 	template <typename TType, typename TCallback>
@@ -83,7 +83,7 @@ private:
 			myFunction = Move(aFunction);
 		}
 
-		EventCallResult Call(TArgs ... aArgs) override
+		EventCallResult Call(const TArgs& ... aArgs) override
 		{
 			if (!myObject.IsValid())
 				return EventCallResult::RemoveSubscription;

@@ -10,7 +10,7 @@ class Function<TReturn(TArgs...)>
 	{
 	public:
 		virtual ~BaseHelper() = default;
-		virtual TReturn Call(TArgs...) const = 0;
+		virtual TReturn Call(TArgs&&...) const = 0;
 		virtual BaseHelper* Copy() const = 0;
 	};
 
@@ -23,9 +23,9 @@ class Function<TReturn(TArgs...)>
 		{
 		}
 
-		TReturn Call(TArgs... aArgs) const final
+		TReturn Call(TArgs&&... aArgs) const final
 		{
-			return myFunction(std::forward<TArgs>(aArgs)...);
+			return myFunction(Forward<TArgs>(aArgs)...);
 		}
 		
 		BaseHelper* Copy() const final
@@ -93,9 +93,9 @@ public:
 		return myFunction != nullptr;
 	}
 
-	FORCEINLINE TReturn operator()(TArgs... aArgs) const
+	FORCEINLINE TReturn operator()(TArgs&&... aArgs) const
 	{
 		CHECK(IsValid());
-		return myFunction->Call(std::forward<TArgs>(aArgs)...);
+		return myFunction->Call(Forward<TArgs>(aArgs)...);
 	}
 };

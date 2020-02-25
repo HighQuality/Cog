@@ -7,7 +7,7 @@ template <typename TReturn, typename... TArgs>
 class FunctionView<TReturn(TArgs...)>
 {
     const void* myObject;
-    TReturn (*myCaller)(const void*, TArgs...);
+    TReturn (*myCaller)(const void*, TArgs&&...);
 
 public:
     FunctionView()
@@ -21,16 +21,16 @@ public:
     {
 		myObject = std::addressof(aFunctor);
 
-        myCaller = [](const void* aObject, TArgs... aArgs) -> TReturn {
+        myCaller = [](const void* aObject, TArgs&&... aArgs) -> TReturn {
             return (*static_cast<const T*>(aObject))(
-				std::forward<TArgs>(aArgs)...
+                Forward<TArgs>(aArgs)...
 			);
         };
     }
 
-    TReturn operator()(TArgs... aArgs) const
+    TReturn operator()(TArgs&&... aArgs) const
     {
 		CHECK(myObject && myCaller);
-        return myCaller(myObject, std::forward<TArgs>(aArgs)...);
+        return myCaller(myObject, Forward<TArgs>(aArgs)...);
     }
 };

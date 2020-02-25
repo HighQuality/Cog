@@ -52,21 +52,21 @@ UniquePtr<Singleton> CreateSingleton()
 class TypeList
 {
 public:
-	TypeList() = default;
-	virtual ~TypeList() = default;
+	TypeList();
+	virtual ~TypeList();
 
 	TypeList(const TypeList&) = delete;
 	TypeList& operator=(const TypeList&) = delete;
 
-	TypeList(TypeList&&) = default;
-	TypeList& operator=(TypeList&&) = default;
-
-	void BuildList();
+	TypeList(TypeList&&) = delete;
+	TypeList& operator=(TypeList&&) = delete;
 
 	FORCEINLINE ArrayView<const TypeData*> GetSingletons(const bool aOnlyLeafTypes = true) const { return  aOnlyLeafTypes ? myLeafSingletons : myAllSingletons; }
 	FORCEINLINE ArrayView<const TypeData*> GetObjectTypes(const bool aOnlyLeafTypes = true) const { return aOnlyLeafTypes ? myLeafObjectTypes : myAllObjectTypes; }
 
 public:
+	void BuildList();
+
 	template <typename T>
 	const TypeData& GetTypeData(const bool aOutermost = true) const
 	{

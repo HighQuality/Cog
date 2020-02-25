@@ -18,25 +18,15 @@ public:
 
 	FORCEINLINE ~Ptr()
 	{
-	}
-
-	FORCEINLINE Ptr(T& aReference)
-	{
-		memcpy(&myObject, &aReference, sizeof Object);
-	}
-
-	template <typename TOther, typename = EnableIf<IsDerivedFrom<TOther, T>>>
-	FORCEINLINE Ptr(TOther& aReference)
-		: Ptr(&static_cast<T&>(aReference))
-	{
+		Read()->myChunk = nullptr;
 	}
 
 	FORCEINLINE Ptr(T* aPointer)
 	{
 		if (aPointer)
-			memcpy(&myObject, aPointer, sizeof Object);
+			memcpy(&myObject.Get(), aPointer, sizeof Object);
 		else
-			memset(&myObject, 0, sizeof Object);
+			memset(&myObject.Get(), 0, sizeof Object);
 	}
 
 	template <typename TOther, typename = EnableIf<IsDerivedFrom<TOther, T>>>
@@ -47,20 +37,20 @@ public:
 
 	FORCEINLINE Ptr(const Ptr& aOther)
 	{
-		memcpy(&myObject, &aOther.myObject, sizeof Object);
+		memcpy(&myObject.Get(), &aOther.myObject.Get(), sizeof Object);
 	}
 
 	template <typename TOther, typename = EnableIf<IsDerivedFrom<TOther, T>>>
 	FORCEINLINE Ptr(const Ptr<TOther>& aOther)
 	{
-		memcpy(&myObject, &aOther.myObject, sizeof Object);
+		memcpy(&myObject.Get(), &aOther.myObject.Get(), sizeof Object);
 	}
 
 	template <typename TOther>
 	FORCEINLINE bool operator==(const Ptr<TOther>& aOther) const
 	{
 		// Perf: This comparison could skip the vtable
-		return memcmp(&myObject, &aOther.myObject, sizeof Object) == 0;
+		return memcmp(&myObject.Get(), &aOther.myObject.Get(), sizeof Object) == 0;
 	}
 
 	template <typename TOther>
@@ -95,12 +85,12 @@ public:
 	}
 
 private:
-	FORCEINLINE Object* Read() const { return reinterpret_cast<Object*>(&myObject); }
+	FORCEINLINE Object* Read() const { return &myObject.Get(); }
 
 	friend class CogTypeChunk;
 
 	template <typename TOther>
 	friend class Ptr;
 
-	alignas(Object) mutable char myObject[sizeof Object];
+	mutable ManualInitializationObject<Object> myObject;
 };

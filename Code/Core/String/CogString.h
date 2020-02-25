@@ -59,7 +59,11 @@ public:
 			abort();
 	}
 
-	FORCEINLINE explicit String(const String&) = default;
+	FORCEINLINE explicit String(const String& aData)
+		: String(aData.View())
+	{
+	}
+
 	FORCEINLINE String& operator=(const String&) = delete;
 	FORCEINLINE ~String() = default;
 
