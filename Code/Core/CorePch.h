@@ -154,7 +154,7 @@
 #include <Math/Vec2.h>
 #include <Math/Vec4.h>
 
-#include <Time/CogTime.h>
+#include <Time/TimeSpan.h>
 
 #include <Utilities/CommandLine.h>
 

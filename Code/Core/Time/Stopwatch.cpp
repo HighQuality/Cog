@@ -1,7 +1,7 @@
 #include "CorePch.h"
 #include "Stopwatch.h"
 
-static u64 GetFrequency()
+static u64 GetPerformanceCounterFrequency()
 {
 	LARGE_INTEGER frequency;
 	if (!QueryPerformanceFrequency(&frequency))
@@ -9,7 +9,9 @@ static u64 GetFrequency()
 	return frequency.QuadPart;
 }
 
-f32 Stopwatch::ourFrequency = static_cast<f32>(GetFrequency());
+u64 Stopwatch::ourNativeTicksPerSecond = GetPerformanceCounterFrequency();
+// NOTE: Since Windows 10 version 1809 this always seems to be 1, could potentially be used for a fast-path, google "queryperformancefrequency 10 mhz" for more info
+f64 Stopwatch::ourInvNativeTicksPerTimeSpanTick = 1.0 / (ourNativeTicksPerSecond / 10000000.0);
 
 Stopwatch::Stopwatch()
 {
@@ -18,10 +20,5 @@ Stopwatch::Stopwatch()
 
 void Stopwatch::Restart()
 {
-	myStartTime = GetCurrentTimeStamp();
-}
-
-u64 Stopwatch::GetElapsedTicks() const
-{
-	return GetCurrentTimeStamp() - myStartTime;
+	myStartTime = GetPerformanceCounter();
 }

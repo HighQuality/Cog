@@ -3,6 +3,7 @@
 #include "Threading/Fibers/Fiber.h"
 #include "Threading/Fibers/Awaitable.h"
 #include "TypeData.h"
+#include <Threading\ThreadNotify.h>
 
 static std::atomic<i32> gNextFiberIndex = 0;
 
@@ -95,21 +96,21 @@ void Program::Run()
 
 	while (ShouldKeepRunning())
 	{
-		Time deltaTime;
+		f32 deltaSeconds;
 
 		if (isFirstFrame)
 		{
-			deltaTime = Time::Seconds(1.f / 60.f);
+			deltaSeconds = 1.f / 60.f;
 			isFirstFrame = false;
 		}
 		else
 		{
-			deltaTime = watch.GetElapsedTime();
+			deltaSeconds = watch.GetElapsedTime().GetTotalSeconds();
 		}
 
 		watch.Restart();
 
-		SynchronizedTick(deltaTime);
+		SynchronizedTick(deltaSeconds);
 
 		// Execute this frame's work
 		Step(false);
@@ -121,7 +122,7 @@ void Program::Run()
 	}
 }
 
-void Program::SynchronizedTick(const Time& aDeltaTime)
+void Program::SynchronizedTick(const f32 aDeltaSeconds)
 {
 }
 
@@ -171,7 +172,7 @@ void Program::Step(const bool aPrintDebugInfo)
 				if (GetUnusedFibers().GetLength() + GetNumWorkers() == gNextFiberIndex)
 				{
 					if (aPrintDebugInfo)
-						Println(L"Program finished in %ms", (static_cast<float>(GetElapsedSeconds()) + GetWatch().GetElapsedTime().Seconds()) * 1000.f);
+						Println(L"Program finished in %ms", (static_cast<f32>(GetElapsedSeconds()) + GetWatch().GetElapsedTime().GetTotalSeconds()) * 1000.f);
 					break;
 				}
 			}
@@ -181,7 +182,7 @@ void Program::Step(const bool aPrintDebugInfo)
 
 		SetFramesThisSecond(GetFramesThisSecond() + 1);
 
-		if (GetWatch().GetElapsedTime().Seconds() > 1.f)
+		if (GetWatch().GetElapsedTime().GetTotalSeconds() > 1.f)
 		{
 			GetWatch().Restart();
 

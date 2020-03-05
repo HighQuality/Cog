@@ -22,9 +22,7 @@ public:
 	bool ShouldKeepRunning() const override;
 
 protected:
-	void SynchronizedTick(const Time& aDeltaTime) override;
-
-	void UpdateFrameData(FrameData& aData, const Time& aDeltaTime) override;
+	void SynchronizedTick(f32 aDeltaSeconds) override;
 
 private:
 	void ProcessInput();

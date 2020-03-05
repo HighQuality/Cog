@@ -81,7 +81,7 @@ void ClientGame::ShuttingDown()
 	Base::ShuttingDown();
 }
 
-void ClientGame::SynchronizedTick(const Time& aDeltaTime)
+void ClientGame::SynchronizedTick(const f32 aDeltaSeconds)
 {
 	ProcessInput();
 
@@ -89,7 +89,7 @@ void ClientGame::SynchronizedTick(const Time& aDeltaTime)
 	GetCurrentlyExecutingGpuCommands()->Empty();
 	GetNextFramesGpuCommands()->GatherInto(*GetCurrentlyExecutingGpuCommands());
 
-	Base::SynchronizedTick(aDeltaTime);
+	Base::SynchronizedTick(aDeltaSeconds);
 
 	RenderEngine* renderer = GetRenderer();
 
@@ -129,8 +129,4 @@ void ClientGame::ProcessInput()
 			break;
 		}
 	}
-}
-
-void ClientGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
-{
 }

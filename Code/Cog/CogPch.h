@@ -18,7 +18,6 @@ bool IsInGameThread();
 #include <Cog/Casts.h>
 #include <Cog/Class.h>
 #include <Cog/Pointer.h>
-#include <Cog/FrameData.h>
 
 #include <Cog/Object.h>
 #include <Cog/Singleton.h>

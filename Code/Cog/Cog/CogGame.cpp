@@ -7,7 +7,6 @@ bool CogGame::Starting()
 	if (!Base::Starting())
 		return false;
 
-	SetFrameData(MakeUnique<FrameData>());
 	return true;
 }
 
@@ -16,14 +15,7 @@ void CogGame::ShuttingDown()
 	Base::ShuttingDown();
 }
 
-void CogGame::SynchronizedTick(const Time& aDeltaTime)
+void CogGame::SynchronizedTick(const f32 aDeltaSeconds)
 {
 	GetSingleton<ResourceManager>().Tick();
-
-	UpdateFrameData(*GetFrameData(), aDeltaTime);
-}
-
-void CogGame::UpdateFrameData(FrameData& aData, const Time& aDeltaTime)
-{
-	aData.deltaTime = aDeltaTime;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "RenderTexture.h"
 #include "DrawCall.h"
+#include <Containers/EventList.h>
 #include "RenderTarget.generated.h"
 
 COGTYPE()

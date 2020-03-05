@@ -142,7 +142,7 @@ public:
 
 protected:
 	virtual bool ShouldKeepRunning() const = 0;
-	virtual void SynchronizedTick(const Time& aDeltaTime);
+	virtual void SynchronizedTick(f32 aDeltaSeconds);
 
 private:
 	void WorkerThread(i32 aThreadIndex);

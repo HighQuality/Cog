@@ -1,6 +1,6 @@
 #pragma once
 #include <Function/FunctionView.h>
-#include <Time/CogTime.h>
+#include <Time/TimeSpan.h>
 
 class Stopwatch
 {
@@ -10,39 +10,42 @@ public:
 
 	void Restart();
 
-	u64 GetElapsedTicks() const;
-
-	FORCEINLINE static f32 GetTickFrequency()
+	// Gets the elapsed number of ticks using the highest available frequency, note that these are not the same kind of ticks used in TimeSpan
+	FORCEINLINE u64 GetElapsedNativeTicks() const
 	{
-		return ourFrequency;
+		return GetPerformanceCounter() - myStartTime;
 	}
 
-	FORCEINLINE Time GetElapsedTime() const
+	FORCEINLINE static u64 GetNativeTicksPerSecond()
 	{
-		return Time::Seconds(static_cast<f32>(GetElapsedTicks()) / ourFrequency);
+		return ourNativeTicksPerSecond;
 	}
 
-	static Time Time(FunctionView<void()> aFunction, StringView name, bool printResult = true)
+	FORCEINLINE TimeSpan GetElapsedTime() const
+	{
+		return TimeSpan::FromTicks(static_cast<i64>(static_cast<f64>(GetElapsedNativeTicks()) * ourInvNativeTicksPerTimeSpanTick));
+	}
+
+	static TimeSpan Time(FunctionView<void()> aFunction, StringView name, bool printResult = true)
 	{
 		Stopwatch w;
 		aFunction();
 		const auto result = w.GetElapsedTime();
 		if (printResult)
-			Println(L"% took %ms to execute", name, result.Milliseconds());
+			Println(L"% took %ms to execute", name, result.GetTotalMilliseconds());
 		return result;
 	}
 
-	FORCEINLINE static u64 GetCurrentTimeStamp()
+	FORCEINLINE static u64 GetPerformanceCounter()
 	{
 		LARGE_INTEGER time;
-		if (!QueryPerformanceCounter(&time))
-			FATAL(L"QueryPerformanceCounter failed");
+		QueryPerformanceCounter(&time);
 		return time.QuadPart;
 	}
 
-
 private:
-	static f32 ourFrequency;
+	static u64 ourNativeTicksPerSecond;
+	static f64 ourInvNativeTicksPerTimeSpanTick;
 
 	u64 myStartTime;
 };
