@@ -17,5 +17,5 @@ void CogGame::ShuttingDown()
 
 void CogGame::SynchronizedTick(const f32 aDeltaSeconds)
 {
-	GetSingleton<ResourceManager>().Tick();
+	Base::SynchronizedTick(aDeltaSeconds);
 }

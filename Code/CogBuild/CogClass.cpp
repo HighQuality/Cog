@@ -23,14 +23,8 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 		generatedLines.Add(Format(L"using Base = CogTypeBase;"));
 
 	generatedLines.Add(Format(L"static constexpr bool StaticIsSpecialization = %;", mySpecializesBaseClass));
-	generatedLines.Add(Format(L"inline static const StringView StaticTypeName = L\"%\";", GetTypeName()));
+	generatedLines.Add(Format(L"static StringView GetStaticTypeName() { return L\"%\"; }", GetTypeName()));
 	generatedLines.Add(String(L"const TypeData& GetType() const;"));
-
-	if (GetTypeName() != L"Object" && !myIsSingleton)
-	{
-		generatedLines.Add(String(L"void GetBaseClasses(const FunctionView<void(const TypeID<CogTypeBase>&)>& aFunction) const override"));
-		generatedLines.Add(String(L"{ aFunction(TypeID<CogTypeBase>::Resolve<Base>()); Base::GetBaseClasses(aFunction); }"));
-	}
 
 	generatedLines.Add(String(L"private:"));
 
@@ -238,7 +232,7 @@ Array<String> CogClass::GenerateSourceFileContents(const DocumentTemplates& aTem
 
 	sourceOutput.Add(Format(L"const TypeData& %::GetType() const", GetTypeName()));
 	sourceOutput.Add(String(L"{"));
-	sourceOutput.Add(String(L"\tstatic const TypeData& data = gTypeList.GetTypeData(StaticTypeName, false);"));
+	sourceOutput.Add(String(L"\tstatic const TypeData& data = gTypeList.GetTypeData(GetStaticTypeName(), false);"));
 	sourceOutput.Add(String(L"\treturn data;"));
 	sourceOutput.Add(String(L"}"));
 

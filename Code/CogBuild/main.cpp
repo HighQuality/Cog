@@ -146,7 +146,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 			return 1;
 		}
 
-		Println(L"Done in %ms", w.GetElapsedTime().Milliseconds());
+		Println(L"Done in %ms", w.GetElapsedTime().GetTotalMilliseconds());
 	}
 
 	if (generateBuildProjects)

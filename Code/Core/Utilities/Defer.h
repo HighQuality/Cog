@@ -3,23 +3,23 @@
 template <typename T>
 struct Defer
 {
-	Defer(T f) : f(f) {}
-	~Defer() { f(); }
+	FORCEINLINE Defer(T f) : f(f) {}
+	FORCEINLINE ~Defer() { f(); }
 	
-	explicit operator bool() const { return true; }
+	FORCEINLINE explicit operator bool() const { return true; }
 	
 	T f;
 };
 
 template <typename T>
-Defer<T> MakeDefer(T f)
+FORCEINLINE Defer<T> MakeDefer(T f)
 {
 	return Defer<T>(f);
 };
 
 struct DeferDummy { };
 template<typename T>
-Defer<T> operator+(DeferDummy, T&& f)
+FORCEINLINE Defer<T> operator+(DeferDummy, T&& f)
 {
 	return MakeDefer<T>(std::forward<T>(f));
 }

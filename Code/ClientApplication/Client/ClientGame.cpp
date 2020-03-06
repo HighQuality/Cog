@@ -12,7 +12,6 @@
 #include "VertexBuffer.h"
 #include "InputLayout.h"
 #include "RenderTarget.h"
-#include "GpuCommand.h"
 
 bool ClientGame::ShouldKeepRunning() const
 {
@@ -24,9 +23,6 @@ bool ClientGame::Starting()
 	if (!Base::Starting())
 		return false;
 
-	SetNextFramesGpuCommands(MakeUnique<EventList<GpuCommand>>());
-	SetCurrentlyExecutingGpuCommands(MakeUnique<Array<GpuCommand>>());
-	
 	Window& window = *SetWindow(MakeUnique<Window>());
 	window.Open();
 
@@ -75,19 +71,17 @@ bool ClientGame::Starting()
 
 void ClientGame::ShuttingDown()
 {
-	if (Camera* camera = GetCamera())
-		camera->Destroy();
-
+	// TODO: Figure out how this is supposed to be destroyed?
+	// Maybe it shouldn't, maybe objects themselves should notice their owners being destroyed (this is a singleton though), maybe we should send it an impulse
+	// if (Camera* camera = GetCamera())
+	// 	camera->Destroy();
+	
 	Base::ShuttingDown();
 }
 
 void ClientGame::SynchronizedTick(const f32 aDeltaSeconds)
 {
 	ProcessInput();
-
-	// Gather the previous frame's GPU commands into a list for us to execute this frame
-	GetCurrentlyExecutingGpuCommands()->Empty();
-	GetNextFramesGpuCommands()->GatherInto(*GetCurrentlyExecutingGpuCommands());
 
 	Base::SynchronizedTick(aDeltaSeconds);
 

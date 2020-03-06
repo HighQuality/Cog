@@ -136,14 +136,14 @@ TypeData& TypeList::Internal_AddGenericType(const TypeID<CogTypeBase>& aTypeID, 
 	return data;
 }
 
-TypeData& TypeList::Internal_AddType(const TypeID<CogTypeBase>& aTypeID, const StringView& aTypeName, const StringView& aBaseTypeName, const bool aIsSpecialization, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t)
+TypeData& TypeList::Internal_AddType(const TypeID<CogTypeBase>& aTypeID, StringView aTypeName, StringView aBaseTypeName, const bool aIsSpecialization, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t)
 {
 	TypeData& data = Internal_AddGenericType(aTypeID, aTypeName, aBaseTypeName, aIsSpecialization);
 	data.myFactoryAllocator = aFactoryAllocator;
 	return data;
 }
 
-TypeData& TypeList::Internal_AddSingleton(const TypeID<CogTypeBase>& aTypeID, const StringView& aTypeName, const StringView& aBaseTypeName, const bool aIsSpecialization, UniquePtr<Singleton>(*aSingletonAllocator)(), nullptr_t)
+TypeData& TypeList::Internal_AddSingleton(const TypeID<CogTypeBase>& aTypeID, StringView aTypeName, StringView aBaseTypeName, const bool aIsSpecialization, UniquePtr<Singleton>(*aSingletonAllocator)(), nullptr_t)
 {
 	TypeData& data = Internal_AddGenericType(aTypeID, aTypeName, aBaseTypeName, aIsSpecialization);
 	data.mySingletonAllocator = aSingletonAllocator;

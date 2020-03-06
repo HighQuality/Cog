@@ -43,9 +43,9 @@ UniquePtr<Singleton> CreateSingleton()
 	do { \
 		if constexpr (!IS_SINGLETON(TType)) { \
 			CHECK_SIZE(TType); \
-			TypeListObject->Internal_AddType(TypeID<CogTypeBase>::Resolve<TType>(), TType::StaticTypeName, TType::Base::StaticTypeName, TType::StaticIsSpecialization, &CreateObjectChunk<TType, class JOIN(TType, CogTypeChunk)>, nullptr); \
+			TypeListObject->Internal_AddType(TypeID<CogTypeBase>::Resolve<TType>(), TType::GetStaticTypeName(), TType::Base::GetStaticTypeName(), TType::StaticIsSpecialization, &CreateObjectChunk<TType, class JOIN(TType, CogTypeChunk)>, nullptr); \
 		} else { \
-			TypeListObject->Internal_AddSingleton(TypeID<CogTypeBase>::Resolve<TType>(), TType::StaticTypeName, TType::Base::StaticTypeName, TType::StaticIsSpecialization, &CreateSingleton<TType>, nullptr); \
+			TypeListObject->Internal_AddSingleton(TypeID<CogTypeBase>::Resolve<TType>(), TType::GetStaticTypeName(), TType::Base::GetStaticTypeName(), TType::StaticIsSpecialization, &CreateSingleton<TType>, nullptr); \
 		} \
 	} while (false)
 
@@ -108,10 +108,10 @@ private:
 
 public:
 	// Use macros "REGISTER_TYPE" and "REGISTER_TYPE_SPECIALIZATION" instead
-	TypeData& Internal_AddType(const TypeID<CogTypeBase>& aTypeID, const StringView& aTypeName, const StringView& aBaseTypeName, bool aIsSpecialization, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t);
+	TypeData& Internal_AddType(const TypeID<CogTypeBase>& aTypeID, StringView aTypeName, StringView aBaseTypeName, bool aIsSpecialization, UniquePtr<CogTypeChunk>(*aFactoryAllocator)(), nullptr_t);
 
 	// Use macros "REGISTER_TYPE" and "REGISTER_TYPE_SPECIALIZATION" instead
-	TypeData& Internal_AddSingleton(const TypeID<CogTypeBase>& aTypeID, const StringView& aTypeName, const StringView& aBaseTypeName, bool aIsSpecialization, UniquePtr<Singleton>(*aSingletonAllocator)(), nullptr_t);
+	TypeData& Internal_AddSingleton(const TypeID<CogTypeBase>& aTypeID, StringView aTypeName, StringView aBaseTypeName, bool aIsSpecialization, UniquePtr<Singleton>(*aSingletonAllocator)(), nullptr_t);
 
 private:
 	const TypeData& GetTypeDataByIndex(u16 aTypeIndex, bool aOutermost) const;

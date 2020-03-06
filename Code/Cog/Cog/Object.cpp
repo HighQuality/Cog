@@ -6,11 +6,11 @@
 
 bool Object::Destroy()
 {
-	if (IsPendingDestroy())
-		return false;
+	myBaseCalled = 0;
+	Destroyed();
+	CHECK_MSG(myBaseCalled == 1, L"Object subclass did not call Base::Destroyed() all the way down to Object");
 
-	myChunk->MarkPendingDestroy(myChunkIndex);
-	GetProgram().ScheduleDestruction(*this);
+	ObjectReturner(*myChunk, myChunkIndex);
 	
 	return true;
 }
@@ -33,20 +33,6 @@ void Object::Created()
 void Object::Destroyed()
 {
 	myBaseCalled = 1;
-}
-
-void Object::ReturnToAllocator()
-{
-	myBaseCalled = 0;
-	Destroyed();
-	CHECK_MSG(myBaseCalled == 1, L"Object subclass did not call Base::Destroyed() all the way down to Object");
-
-	ObjectReturner(*myChunk, myChunkIndex);
-}
-
-bool Object::IsPendingDestroy() const
-{
-	return GetChunk().IsPendingDestroy(myChunkIndex);
 }
 
 u8 Object::GetGeneration() const

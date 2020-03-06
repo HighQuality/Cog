@@ -1,6 +1,6 @@
 #pragma once
 #include "RenderingMode.h"
-#include <Cog/Event.h>
+#include <Cog/Delegate.h>
 
 #ifndef SIMULTANEOUS_RENDER_TARGETS
 #define SIMULTANEOUS_RENDER_TARGETS 8
@@ -35,7 +35,7 @@ public:
 
 	const std::shared_ptr<RenderTexture>& GetBackbuffer() const { return myBackbuffer; }
 
-	Event<const std::shared_ptr<RenderTexture>&> OnBackbufferRecreated;
+	Delegate<const std::shared_ptr<RenderTexture>&> OnBackbufferRecreated;
 
 private:
 	void CreateBuffers(i32 aWidth, i32 aHeight);

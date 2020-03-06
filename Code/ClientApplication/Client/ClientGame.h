@@ -3,11 +3,7 @@
 #include "Window.h"
 #include "RenderEngine.h"
 #include "Camera.h"
-#include "GpuCommand.h"
 #include "ClientGame.generated.h"
-
-COGTYPE(Specialization)
-class ClientTestType final : public TestType { GENERATED_BODY; };
 
 COGTYPE(Specialization)
 class ClientGame final : public Game
@@ -29,8 +25,6 @@ private:
 
 	COGPROPERTY(UniquePtr<Window> Window);
 	COGPROPERTY(UniquePtr<RenderEngine> Renderer, PublicRead);
-	COGPROPERTY(UniquePtr<EventList<GpuCommand>> NextFramesGpuCommands);
-	COGPROPERTY(UniquePtr<Array<GpuCommand>> CurrentlyExecutingGpuCommands);
 
 	COGPROPERTY(Ptr<Camera> Camera);
 };

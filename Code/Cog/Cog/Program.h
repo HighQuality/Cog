@@ -6,16 +6,12 @@
 #include <Threading/ThreadPool/ThreadPool.h>
 #include "Threading/Fibers/Await.h"
 #include "QueuedProgramWork.h"
-#include "MessageSystem.h"
 #include "ObjectPool.h"
 #include "Program.generated.h"
 
 class Object;
 class ThreadPool;
 class Fiber;
-
-COGTYPE(SetDebugFlag)
-class TestType : public Object { GENERATED_BODY; COGPROPERTY(i32 = 100);  };
 
 COGTYPE()
 class Program : public Singleton
@@ -149,11 +145,6 @@ private:
 
 	void FiberMain();
 
-	friend Object;
-
-	void ScheduleDestruction(Object& aObject);
-	void TickDestroys();
-
 	COGPROPERTY(ObjectPool, DirectAccess);
 
 	COGPROPERTY(UniquePtr<ThreadPool> BackgroundWorkThreadPool, DirectAccess);
@@ -187,8 +178,5 @@ private:
 
 	COGPROPERTY(const ThreadID* MainThreadID);
 
-	COGPROPERTY(Ptr<MessageSystem> MessageSystem);
-
 	COGPROPERTY(std::mutex DestroyMutex, DirectAccess);
-	COGPROPERTY(Array<Array<Object*>> ScheduledDestroys, DirectAccess);
 };

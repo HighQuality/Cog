@@ -9,7 +9,7 @@ class CogTypeBase
 {
 public:
 	using Base = CogTypeBase;
-	inline static const StringView StaticTypeName = L"CogTypeBase";
+	static StringView GetStaticTypeName() { return L"CogTypeBase"; }
 	static constexpr bool StaticIsSpecialization = false;
 
 	CogTypeBase() = default;

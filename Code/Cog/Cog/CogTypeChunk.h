@@ -1,18 +1,44 @@
 #pragma once
+#include "Event.h"
+#include "Impulse.h"
+#include <Memory/InlineObject.h>
+#include <Threading\Spinlock.h>
 
 template <class T>
 class Ptr;
 
-class Message;
+class Event;
+class Impulse;
 class CogTypeChunk;
 class Object;
 class ProgramContext;
 
-struct EventDispatcherInfo
+struct ScheduledEvent
 {
-	void(*messageBroadcaster)(const Message&, CogTypeChunk*, ArrayView<u8>) = nullptr;
-	void(*messageSender)(const Message&, CogTypeChunk*, u8) = nullptr;
-	TypeID<Message>::CounterType typeId;
+	ScheduledEvent(InlineObject<Event> aEvent, const TypeID<Event>& aEventType)
+		: event(Move(aEvent)),
+		eventType(aEventType)
+	{
+	}
+
+	InlineObject<Event> event;
+	const TypeID<Event>& eventType;
+};
+
+struct ScheduledImpulse
+{
+	ScheduledImpulse(InlineObject<Impulse> aImpulse, const TypeID<Impulse>& aImpulseType, u8 aReceiverIndex, u8 aReceiverGeneration)
+		: impulse(Move(aImpulse)),
+		impulseType(aImpulseType),
+		receiverIndex(aReceiverIndex),
+		receiverGeneration(aReceiverGeneration)
+	{
+	}
+
+	InlineObject<Impulse> impulse;
+	const TypeID<Impulse>& impulseType;
+	u8 receiverIndex;
+	u8 receiverGeneration;
 };
 
 class CogTypeChunk
@@ -27,29 +53,29 @@ public:
 
 	virtual void Initialize();
 
-	FORCEINLINE bool IsPendingDestroy(const u8 aIndex) const { return myIsPendingDestroy[aIndex]; }
-
-	void MarkPendingDestroy(u8 aIndex);
-	
 	FORCEINLINE u8 GetGeneration(const u8 aIndex) const { return myGeneration[aIndex]; }
 	
-	virtual Array<EventDispatcherInfo> GetInterestingEvents() const { return Array<EventDispatcherInfo>(); }
+	using EventBroadcastFunctionPtr = void(*)(const Event&, ArrayView<u8>);
+	virtual Array<EventBroadcastFunctionPtr> GatherEventBroadcasters() const { return Array<EventBroadcastFunctionPtr>(); }
+
+	using ImpulseInvokerFunctionPtr = void(*)(const Event&, u8);
+	virtual Array<ImpulseInvokerFunctionPtr> GatherImpulseInvokers() const { return Array<ImpulseInvokerFunctionPtr>(); }
 
 	template <typename T>
-	void BroadcastMessage(const T& aMessage)
+	void BroadcastEvent(T aEvent)
 	{
-		BroadcastMessageById(aMessage, TypeID<Message>::Resolve<T>().GetUnderlyingInteger());
+		BroadcastEventById(InlineObject<Event>::New<T>(Move(aEvent)), TypeID<Event>::Resolve<T>());
 	}
 
-	void BroadcastMessageById(const Message& aMessage, TypeID<Message>::CounterType aIndex);
+	void BroadcastEventById(InlineObject<Event> aEvent, const TypeID<Event>& aEventType);
 
 	template <typename T>
-	void SendMessage(const T& aMessage, const u8 aReceiver)
+	void SendImpulse(T aImpulse, const u8 aReceiver, const u8 aReceiverGeneration)
 	{
-		SendMessageById(aMessage, TypeID<Message>::Resolve<T>().GetUnderlyingInteger(), aReceiver);
+		SendImpulseById(InlineObject<Impulse>::New<T>(Move(aImpulse)), TypeID<Impulse>::Resolve<T>(), aReceiver, aReceiverGeneration);
 	}
 
-	void SendMessageById(const Message& aMessage, TypeID<Message>::CounterType aIndex, u8 aReceiver);
+	void SendImpulseById(InlineObject<Impulse> aImpulse, const TypeID<Impulse>& aImpulseType, u8 aReceiver, u8 aReceiverGeneration);
 
 	Ptr<Object> Allocate();
 
@@ -76,8 +102,16 @@ protected:
 	}
 
 private:
-	Array<void(*)(const Message&, CogTypeChunk*, ArrayView<u8>)> myMessageBroadcasters;
-	Array<void(*)(const Message&, CogTypeChunk*, u8)> myMessageSenders;
+	Array<EventBroadcastFunctionPtr> myEventBroadcasters;
+	Array<ImpulseInvokerFunctionPtr> myImpulseInvokers;
+
+	void ScheduleTick();
+	void Tick();
+
+	Array<ScheduledImpulse> myScheduledImpulses;
+	Array<ScheduledEvent> myScheduledEvents;
+
+	Spinlock myMessageLock;
 
 	bool OccupyFirstFreeSlot(u8& aFreeIndex);
 	/** Returns number of elements filled in aOccupiedSlots output */
@@ -101,7 +135,6 @@ private:
 	volatile u64 myFreeSlots[4];
 
 	ManualInitializationObject<char[PtrSize]> myOwners[256];
-	bool myIsPendingDestroy[256];
 	u8 myGeneration[256];
 };
 

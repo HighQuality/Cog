@@ -1,7 +1,5 @@
 #pragma once
 #include "RenderTexture.h"
-#include "DrawCall.h"
-#include <Containers/EventList.h>
 #include "RenderTarget.generated.h"
 
 COGTYPE()
@@ -12,14 +10,7 @@ class RenderTarget : public Object
 public:
 	void SetRenderTexture(const std::shared_ptr<RenderTexture>& aNewRenderTexture);
 
-	void Submit(DrawCall aDrawCall)
-	{
-		GetDrawCallList().Submit(Move(aDrawCall));
-	}
-
 private:
-	COGPROPERTY(EventList<DrawCall> DrawCallList, DirectAccess);
-
 	COGPROPERTY(Ptr<RenderTexture> RenderTexture);
 	COGPROPERTY(Vec2 Size, PublicRead);
 	COGPROPERTY(i32 Width = 0, PublicRead);

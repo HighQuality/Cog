@@ -15,6 +15,7 @@ struct InlineObjectTypeHelper
 {
 	virtual void ConstructMove(void* aTarget, void* aSource) const = 0;
 	virtual void ConstructCopy(void* aTarget, const void* aSource) const = 0;
+	virtual void Destruct(void* aTarget) const = 0;
 };
 
 template <typename T>
@@ -22,13 +23,12 @@ class InlineObject
 {
 	static constexpr i32 Size = decltype(GetInlineObjectSizeHelper<T>(0))::Size;
 	
-	static_assert(std::has_virtual_destructor_v<T>, "Base must have a virtual destructor");
 	static_assert(sizeof(T) <= Size, "Increase or specify T::InlinedSize");
 
 public:
 	FORCEINLINE ~InlineObject()
 	{
-		Get().~T();
+		myTypeHelper->Destruct(&Get());
 	}
 
 	InlineObject(const InlineObject& aCopy)
@@ -41,8 +41,8 @@ public:
 	{
 		if (&aCopy == this)
 			return;
-		
-		Get().~T();
+
+		myTypeHelper->Destruct(&Get());
 		ZeroOurMemory();
 		myTypeHelper = aCopy.myTypeHelper;
 		myTypeHelper->ConstructCopy(&Get(), &aCopy);
@@ -61,7 +61,7 @@ public:
 		if (&aMove == this)
 			return;
 
-		Get().~T();
+		myTypeHelper->Destruct(&Get());
 		ZeroOurMemory();
 		myTypeHelper = aMove.myTypeHelper;
 		myTypeHelper->ConstructMove(&Get(), &aMove);
@@ -118,6 +118,11 @@ private:
 				new (aTarget) TDerivedType(*static_cast<const TDerivedType*>(aSource));
 			else
 				FATAL(L"Object not copy constructible");
+		}
+
+		void Destruct(void* aTarget) const override
+		{
+			static_cast<TDerivedType*>(aTarget)->~TDerivedType();
 		}
 	};
 

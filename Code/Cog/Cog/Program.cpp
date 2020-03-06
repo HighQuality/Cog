@@ -14,13 +14,6 @@ bool Program::Starting()
 
 	GetObjectPool().SetProgramContext(GetProgramContext());
 
-	// Destroyed objects are scheduled for the entirety of the current and next frame before being destroyed
-	GetScheduledDestroys().Resize(2);
-
-	Println(NewObject<TestType>(nullptr)->GetType().GetName());
-
-	SetMessageSystem(NewObject<MessageSystem>(nullptr));
-
 	ThreadID::SetName(String(L"Main Thread"));
 	SetMainThreadID(&ThreadID::Get());
 
@@ -53,9 +46,6 @@ bool Program::Starting()
 void Program::ShuttingDown()
 {
  	Println(L"Program shutting down...");
-
-	for (i32 i = 0; i < GetScheduledDestroys().GetLength(); ++i)
-		TickDestroys();
 
 	GetBackgroundWorkThreadPool().Clear();
 
@@ -114,11 +104,6 @@ void Program::Run()
 
 		// Execute this frame's work
 		Step(false);
-
-		while (GetMessageSystem()->PostMessages())
-			Step(false);
-
-		TickDestroys();
 	}
 }
 
@@ -373,39 +358,4 @@ Ptr<Object> Program::NewObjectByType(const TypeID<CogTypeBase>& aObject, Object*
 {
 	ObjectPool& objectPool = GetObjectPool();
 	return objectPool.CreateObjectByType(aObject, aParent);
-}
-
-void Program::TickDestroys()
-{
-	Array<Object*> destroyNow;
-
-	scoped_lock (GetDestroyMutex())
-	{
-
-		Array<Array<Object*>>& scheduledDestroys = GetScheduledDestroys();
-
-		if (scheduledDestroys.GetLength() == 0)
-			return;
-
-		destroyNow = Move(scheduledDestroys[0]);
-
-		for (i32 i = 1; i < scheduledDestroys.GetLength(); ++i)
-		{
-			scheduledDestroys[i - 1] = Move(scheduledDestroys[i]);
-		}
-	}
-
-	for (Object* obj : destroyNow)
-		obj->ReturnToAllocator();
-
-	destroyNow.Empty();
-	
-	scoped_lock (GetDestroyMutex())
-		GetScheduledDestroys().Last() = Move(destroyNow);
-}
-
-void Program::ScheduleDestruction(Object& aObject)
-{
-	scoped_lock(GetDestroyMutex())
-		GetScheduledDestroys().Last().Add(&aObject);
 }

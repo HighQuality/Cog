@@ -2,16 +2,18 @@
 #include "CogTypeChunk.h"
 #include "Program.h"
 #include "Pointer.h"
+#include "ProgramContext.h"
 
 CogTypeChunk::CogTypeChunk()
 {
+	myScheduledEvents.PrepareAdd(128);
+	myScheduledImpulses.PrepareAdd(256);
+
 	// All slots are free by default
 	myFreeSlots[0] = MaxOf<u64>;
 	myFreeSlots[1] = MaxOf<u64>;
 	myFreeSlots[2] = MaxOf<u64>;
 	myFreeSlots[3] = MaxOf<u64>;
-
-	memset(myIsPendingDestroy, 0, sizeof myIsPendingDestroy);
 }
 
 CogTypeChunk::~CogTypeChunk()
@@ -27,59 +29,53 @@ void CogTypeChunk::Initialize()
 {
 	myDefaultObject = CreateDefaultObject();
 
-	const Array<EventDispatcherInfo> interestedInEvents = GetInterestingEvents();
-
-	i32 maxId = -1;
-	for (i32 i = 0; i < interestedInEvents.GetLength(); ++i)
-	{
-		if (interestedInEvents[i].typeId > maxId)
-			maxId = interestedInEvents[i].typeId;
-	}
-
-	if (maxId >= 0)
-	{
-		myMessageBroadcasters.Resize(maxId + 1);
-
-		for (i32 i = 0; i < interestedInEvents.GetLength(); ++i)
-		{
-			const EventDispatcherInfo dispatcherInfo = interestedInEvents[i];
-			myMessageBroadcasters[dispatcherInfo.typeId] = dispatcherInfo.messageBroadcaster;
-		}
-
-		myMessageSenders.Resize(maxId + 1);
-
-		for (i32 i = 0; i < interestedInEvents.GetLength(); ++i)
-		{
-			const EventDispatcherInfo dispatcherInfo = interestedInEvents[i];
-			myMessageSenders[dispatcherInfo.typeId] = dispatcherInfo.messageSender;
-		}
-	}
+	myEventBroadcasters = GatherEventBroadcasters();
+	myImpulseInvokers = GatherImpulseInvokers();
 }
 
-void CogTypeChunk::MarkPendingDestroy(const u8 aIndex)
+void CogTypeChunk::BroadcastEventById(InlineObject<Event> aEvent, const TypeID<Event>& aEventType)
 {
-	myIsPendingDestroy[aIndex] = true;
+	ScheduledEvent impulse(Move(aEvent), aEventType);
+
+	bool scheduleTick = false;
+
+	scoped_lock(myMessageLock)
+	{
+		myScheduledEvents.Add(Move(impulse));
+
+		if (myScheduledEvents.GetLength() == 1 && myScheduledImpulses.GetLength() == 0)
+			scheduleTick = true;
+	}
+
+	if (scheduleTick)
+		ScheduleTick();
+
+	// if (myMessageBroadcasters.IsValidIndex(aIndex))
+	// {
+	// 	u8 indices[256];
+	// 	const u16 length = GatherOccupiedSlots(indices);
+	// 
+	// 	if (auto* dispatcher = myMessageBroadcasters[aIndex])
+	// 		dispatcher(aMessage, this, ArrayView<u8>(indices, length));
+	// }
 }
 
-void CogTypeChunk::BroadcastMessageById(const Message& aMessage, const TypeID<Message>::CounterType aIndex)
+void CogTypeChunk::SendImpulseById(InlineObject<Impulse> aImpulse, const TypeID<Impulse>& aImpulseType, const u8 aReceiver, const u8 aReceiverGeneration)
 {
-	if (myMessageBroadcasters.IsValidIndex(aIndex))
-	{
-		u8 indices[256];
-		const u16 length = GatherOccupiedSlots(indices);
+	ScheduledImpulse impulse(Move(aImpulse), aImpulseType, aReceiver, aReceiverGeneration);
 
-		if (auto* dispatcher = myMessageBroadcasters[aIndex])
-			dispatcher(aMessage, this, ArrayView<u8>(indices, length));
-	}
-}
+	bool scheduleTick = false;
 
-void CogTypeChunk::SendMessageById(const Message& aMessage, const TypeID<Message>::CounterType aIndex, const u8 aReceiver)
-{
-	if (myMessageSenders.IsValidIndex(aIndex))
+	scoped_lock(myMessageLock)
 	{
-		if (auto* sender = myMessageSenders[aIndex])
-			sender(aMessage, this, aReceiver);
+		myScheduledImpulses.Add(Move(impulse));
+
+		if (myScheduledImpulses.GetLength() == 1 && myScheduledEvents.GetLength() == 0)
+			scheduleTick = true;
 	}
+	
+	if (scheduleTick)
+		ScheduleTick();
 }
 
 Ptr<Object> CogTypeChunk::Allocate()
@@ -121,6 +117,20 @@ void CogTypeChunk::InitializeObjectAtIndex(const u8 aIndex)
 void CogTypeChunk::DestructObjectAtIndex(const u8 aIndex)
 {
 	FATAL_PURE_VIRTUAL();
+}
+
+void CogTypeChunk::ScheduleTick()
+{
+	Program& program = GetProgramContext().GetSingleton<Program>();
+	program.QueueWork<CogTypeChunk>([](CogTypeChunk* aSelf)
+	{
+		aSelf->Tick();
+	}, this);
+}
+
+void CogTypeChunk::Tick()
+{
+
 }
 
 bool CogTypeChunk::OccupyFirstFreeSlot(u8& aFreeIndex)

@@ -8,16 +8,11 @@ class Object : public CogTypeBase
 {
 	GENERATED_BODY;
 	
-public:
+protected:
 	virtual bool Destroy();
 
-	void ReturnToAllocator();
-
-	bool IsPendingDestroy() const;
-
-	u8 GetGeneration() const;
-
-	virtual void GetBaseClasses(const FunctionView<void(const TypeID<CogTypeBase>&)>& aFunction) const { aFunction(TypeID<CogTypeBase>::Resolve<Object>()); }
+	virtual void Created();
+	virtual void Destroyed();
 
 	const Ptr<Object>& GetOwner() const;
 
@@ -29,12 +24,11 @@ public:
 
 	Ptr<Object> NewChildByType(const TypeID<CogTypeBase>& aType);
 
+private:
+	u8 GetGeneration() const;
+
 	/** Returns false if this instance's memory has been given to another instance. */
 	FORCEINLINE bool IsValid() const { return myGeneration == GetGeneration(); }
-
-protected:
-	virtual void Created();
-	virtual void Destroyed();
 
 	ProgramContext& GetProgramContext() const final;
 
@@ -44,9 +38,12 @@ protected:
 	friend class CogTypeChunk;
 	friend class ObjectPool;
 
+protected:
 	// TODO: Try inlining myChunkIndex into myChunk's memory and mask them out as needed, this allows myGeneration to be moved out into Ptr<T> and the padding to be removed thus reducing the size of Object from 24 to 16 bytes
 	CogTypeChunk* myChunk;
 	u8 myChunkIndex;
+	
+private:
 	u8 myGeneration;
 	
 	// Set to 0 and then check if it's 1 to ensure all overriden functions have been called

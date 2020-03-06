@@ -3,7 +3,7 @@
 using ThreadIDInteger = u8;
 
 constexpr ThreadIDInteger MaxThreadID = 128;
-	
+
 static_assert(MaxThreadID != MaxOf<ThreadIDInteger>, "Max thread ID may not be the max of it's type");
 
 class ThreadID
