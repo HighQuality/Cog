@@ -24,7 +24,7 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 
 	generatedLines.Add(Format(L"static constexpr bool StaticIsSpecialization = %;", mySpecializesBaseClass));
 	generatedLines.Add(Format(L"static StringView GetStaticTypeName() { return L\"%\"; }", GetTypeName()));
-	generatedLines.Add(String(L"const TypeData& GetType() const;"));
+	generatedLines.Add(String(L"const TypeData& GetType() const override;"));
 
 	generatedLines.Add(String(L"private:"));
 
@@ -32,6 +32,7 @@ Array<String> CogClass::GenerateGeneratedBodyContents(const StringView aGenerate
 	{
 		generatedLines.Add(Format(L"FORCEINLINE const %CogTypeChunk& GetChunk() const { return static_cast<const %CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
 		generatedLines.Add(Format(L"FORCEINLINE %CogTypeChunk& GetChunk() { return static_cast<%CogTypeChunk&>(*myChunk); }", GetTypeName(), GetTypeName()));
+		generatedLines.Add(Format(L"friend class %CogTypeChunk;", GetTypeName()));
 	}
 	
 	generatedLines.Add(String(L"public:"));
@@ -113,6 +114,8 @@ Array<String> CogClass::GenerateCogTypeChunkHeaderContents() const
 	generatedLines.Add(String(L"public:"));
 	generatedLines.Add(Format(L"\tusing Base = %;", baseChunkName));
 
+	generatedLines.Add(String(L"\tvoid GatherListeners(TypeMap<Event, EventBroadcastFunctionPtr>& aEventListeners, TypeMap<Impulse, ImpulseInvokerFunctionPtr>& aImpulseListeners) const override;"));
+
 	generatedLines.Add(Format(L"\tUniquePtr<Object> CreateDefaultObject() const override;"));
 	generatedLines.Add(Format(L"\tvoid InitializeObjectAtIndex(u8 aIndex) override;"));
 	generatedLines.Add(Format(L"\tvoid DestructObjectAtIndex(u8 aIndex) override;"));
@@ -141,7 +144,30 @@ Array<String> CogClass::GenerateCogTypeChunkSourceContents() const
 	CHECK(!myIsSingleton);
 
 	Array<String> generatedLines;
+
+	generatedLines.Add(String(L"template <typename TVoid = void>"));
+	generatedLines.Add(Format(L"static void GatherListenersFor_%(TypeMap<Event, CogTypeChunk::EventBroadcastFunctionPtr>& aEventListeners, TypeMap<Impulse, CogTypeChunk::ImpulseInvokerFunctionPtr>& aImpulseListeners)", GetTypeName()));
+	generatedLines.Add(String(L"{"));
+
+	Array<CogListener> eventListeners;
+	Array<CogListener> impulseListeners;
+
+	GatherListeners(eventListeners, impulseListeners);
+
+	for (const CogListener& listener : myEventListeners)
+		generatedLines.Add(Format(L"\taEventListeners.FindOrAdd<%>() = [](const Event& aEvent, CogTypeChunk& aChunk, const ArrayView<u8> aIndices)\n\t{\n\t\t% obj;\n\t\tobj.myChunk = &aChunk;\n\t\tfor (const u8 index : aIndices)\n\t\t{\n\t\t\tobj.myChunkIndex = index;\n\t\t\tobj.%::%(static_cast<const %&>(aEvent));\n\t\t}\n\t};", listener.listenerType, GetTypeName(), GetTypeName(), listener.methodName, listener.listenerType));
 	
+	for (const CogListener& listener : myImpulseListeners)
+		generatedLines.Add(Format(L"\taImpulseListeners.FindOrAdd<%>() = [](const Impulse& aImpulse, CogTypeChunk& aChunk, const u8 aIndex)\n\t{\n\t\t% obj;\n\t\tobj.myChunk = &aChunk;\n\t\tobj.myChunkIndex = aIndex;\n\t\tobj.%::%(static_cast<const %&>(aImpulse));\n\t};", listener.listenerType, GetTypeName(), GetTypeName(), listener.methodName, listener.listenerType));
+	
+	generatedLines.Add(String(L"}"));
+
+	generatedLines.Add(Format(L"void %::GatherListeners(TypeMap<Event, EventBroadcastFunctionPtr>& aEventListeners, TypeMap<Impulse, ImpulseInvokerFunctionPtr>& aImpulseListeners) const", myChunkTypeName));
+	generatedLines.Add(String(L"{"));
+	generatedLines.Add(Format(L"\tif constexpr (!std::is_abstract_v<%>)", GetTypeName()));
+	generatedLines.Add(Format(L"\t\tGatherListenersFor_%<>(aEventListeners, aImpulseListeners);", GetTypeName()));
+	generatedLines.Add(String(L"}"));
+
 	generatedLines.Add(Format(L"UniquePtr<Object> %::CreateDefaultObject() const", myChunkTypeName));
 	generatedLines.Add(String(L"{"));
 	generatedLines.Add(Format(L"\tif constexpr (!std::is_abstract_v<%>)", GetTypeName()));
@@ -301,6 +327,16 @@ void CogClass::RegisterCogProperty(CogProperty aProperty)
 	myProperties.Add(Move(aProperty));
 }
 
+void CogClass::RegisterEventListener(CogListener aListener)
+{
+	myEventListeners.Add(Move(aListener));
+}
+
+void CogClass::RegisterImpulseListener(CogListener aListener)
+{
+	myImpulseListeners.Add(Move(aListener));
+}
+
 void CogClass::PostResolveDependencies()
 {
 	const CogClass* root = GetRootClass();
@@ -333,4 +369,13 @@ void CogClass::GatherPropertyInitializers(Map<StringView, ClassPropertyInitializ
 		initializerData.propertyType = prop.propertyType;
 		initializerData.zeroMemory = prop.zeroMemory;
 	}
+}
+
+void CogClass::GatherListeners(Array<CogListener>& aEventListeners, Array<CogListener>& aImpulseListeners) const
+{
+	if (const CogClass* base = GetBaseType())
+		base->GatherListeners(aEventListeners, aImpulseListeners);
+
+	aEventListeners.Append(myEventListeners);
+	aImpulseListeners.Append(myImpulseListeners);
 }

@@ -31,6 +31,10 @@ public:
 	GroupingWordReader() = default;
 	explicit GroupingWordReader(StringView aContent);
 
+	StringView NextWord();
+	bool NextWord(StringView aView);
+	bool NextGroup(StringView aOpener);
+	bool NextGroup(GroupingWordReader& aReader, StringView aOpener);
 	bool Next();
 	
 	void EnableGroup(GroupingWordReaderGroup aGroup);
@@ -44,8 +48,13 @@ public:
 	StringView GetCurrentWord() const { CHECK(!IsAtGroup()); return myCurrentContent; }
 	StringView GetCurrentGroup() const { CHECK(IsAtGroup()); return myCurrentContent; }
 
-	bool IsAtGroup() const { return myIsAtGroup; }
-	bool IsAtWord() const { return !myIsAtGroup; }
+	FORCEINLINE bool IsAtGroup() const { return myIsAtGroup; }
+	bool IsAtGroup(StringView aOpeningSequence) const;
+
+	FORCEINLINE bool IsAtWord() const { return !myIsAtGroup; }
+	bool IsAtWord(StringView aWord) const;
+	
+	FORCEINLINE bool IsAtEnd() const { return myHasReachedEnd; }
 
 	StringView GetOpeningSequence() const { CHECK(IsAtGroup()); return myCurrentOpeningSequence; }
 	StringView GetClosingSequence() const { CHECK(IsAtGroup()); return myCurrentClosingSequence; }
@@ -53,11 +62,9 @@ public:
 	/** Current refers to the word that was previously returned by NextWord */
 	i32 CalculateAndGetCurrentLineIndex() { return Base::CalculateAndGetCurrentLineIndex() + myLineOffset; }
 	/** Current refers to the word that was previously returned by NextWord */
-	i32 CalculateAndGetCurrentColumnIndex() { return Base::CalculateAndGetCurrentColumnIndex(); }
+	i32 CalculateAndGetCurrentColumnIndex() { if (CalculateAndGetCurrentLineIndex() == myLineOffset) return Base::CalculateAndGetCurrentColumnIndex(); return Base::CalculateAndGetCurrentColumnIndex() + myColumnOffset; }
 
 	i32 GetCurrentGroupFirstContentLineIndex() const { CHECK(IsAtGroup()); return myCurrentGroupFirstContentLineIndex; }
-
-	void SetLineOffset(const i32 aLineOffset) { myLineOffset = aLineOffset; }
 
 	void CopySettingsFrom(const GroupingWordReader& aOther);
 
@@ -69,10 +76,12 @@ private:
 	StringView myCurrentContent;
 	GroupingWordReader* myParentReader = nullptr;
 	i32 myLineOffset = 0;
+	i32 myColumnOffset = 0;
 	i32 myCurrentGroupFirstContentLineIndex = 0;
 	StringView myCurrentOpeningSequence;
 	StringView myCurrentClosingSequence;
 	u8 myEnabledGroups = static_cast<u8>(GroupingWordReaderGroup::Default);
 	bool myIsAtGroup = false;
 	bool myHasShortCircuited = false;
+	bool myHasReachedEnd = false;
 };

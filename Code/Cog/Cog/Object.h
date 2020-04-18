@@ -38,12 +38,11 @@ private:
 	friend class CogTypeChunk;
 	friend class ObjectPool;
 
-protected:
+public:
 	// TODO: Try inlining myChunkIndex into myChunk's memory and mask them out as needed, this allows myGeneration to be moved out into Ptr<T> and the padding to be removed thus reducing the size of Object from 24 to 16 bytes
 	CogTypeChunk* myChunk;
 	u8 myChunkIndex;
 	
-private:
 	u8 myGeneration;
 	
 	// Set to 0 and then check if it's 1 to ensure all overriden functions have been called

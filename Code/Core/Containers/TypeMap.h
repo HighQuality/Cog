@@ -20,9 +20,9 @@ public:
 	}
 
 	template <typename T>
-	TValue& Get()
+	TValue& FindOrAdd()
 	{
-		return (*this)[TypeID<TBase>::Resolve<T>()];
+		return (*this)[TypeID<TBase>::template Resolve<T>()];
 	}
 
 private:

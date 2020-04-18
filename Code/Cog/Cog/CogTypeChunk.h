@@ -1,8 +1,9 @@
 #pragma once
+#include <Memory/InlineObject.h>
+#include <Threading/Spinlock.h>
+#include <Containers/TypeMap.h>
 #include "Event.h"
 #include "Impulse.h"
-#include <Memory/InlineObject.h>
-#include <Threading\Spinlock.h>
 
 template <class T>
 class Ptr;
@@ -55,11 +56,9 @@ public:
 
 	FORCEINLINE u8 GetGeneration(const u8 aIndex) const { return myGeneration[aIndex]; }
 	
-	using EventBroadcastFunctionPtr = void(*)(const Event&, ArrayView<u8>);
-	virtual Array<EventBroadcastFunctionPtr> GatherEventBroadcasters() const { return Array<EventBroadcastFunctionPtr>(); }
-
-	using ImpulseInvokerFunctionPtr = void(*)(const Event&, u8);
-	virtual Array<ImpulseInvokerFunctionPtr> GatherImpulseInvokers() const { return Array<ImpulseInvokerFunctionPtr>(); }
+	using EventBroadcastFunctionPtr = void(*)(const Event&, CogTypeChunk&, ArrayView<u8>);
+	using ImpulseInvokerFunctionPtr = void(*)(const Event&, CogTypeChunk&, u8);
+	virtual void GatherListeners(TypeMap<Event, EventBroadcastFunctionPtr>& aEventListeners, TypeMap<Impulse, ImpulseInvokerFunctionPtr>& aImpulseListeners) const = 0;
 
 	template <typename T>
 	void BroadcastEvent(T aEvent)
@@ -89,11 +88,11 @@ protected:
 	friend class ChunkPool;
 	void SetProgramContext(ProgramContext& aProgramContext);
 
-	virtual UniquePtr<Object> CreateDefaultObject() const;
+	virtual UniquePtr<Object> CreateDefaultObject() const = 0;
 
 	friend class ObjectPool;
-	virtual void InitializeObjectAtIndex(u8 aIndex);
-	virtual void DestructObjectAtIndex(u8 aIndex);
+	virtual void InitializeObjectAtIndex(u8 aIndex) = 0;
+	virtual void DestructObjectAtIndex(u8 aIndex) = 0;
 
 	template <typename T>
 	static void DestructObjectHelper(T* aObject)
@@ -102,8 +101,8 @@ protected:
 	}
 
 private:
-	Array<EventBroadcastFunctionPtr> myEventBroadcasters;
-	Array<ImpulseInvokerFunctionPtr> myImpulseInvokers;
+	TypeMap<Event, EventBroadcastFunctionPtr> myEventBroadcasters;
+	TypeMap<Impulse, ImpulseInvokerFunctionPtr> myImpulseInvokers;
 
 	void ScheduleTick();
 	void Tick();

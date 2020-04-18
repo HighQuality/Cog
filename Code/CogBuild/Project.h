@@ -41,6 +41,8 @@ struct Project
 	void GatherHeaderFilesMap(Map<const File*, u8>& aHeaderFiles) const;
 	void GatherSourceFilesMap(Map<const File*, u8>& aSourceFiles) const;
 
+	void GatherPendingTypes(Map<StringView, const PendingCogType*>& aPendingTypes) const;
+
 	String projectName;
 	String projectGuid;
 

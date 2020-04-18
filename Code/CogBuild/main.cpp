@@ -4,35 +4,7 @@
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
-	/*GroupingWordReader reader(L"\
-{\n\
-// {\n\
-// }\n\
-}");
-
-	while (reader.Next())
-	{
-		if (reader.IsAtGroup())
-			Println(L" \"%\"", reader.GetOpeningSequence());
-
-		Println(L"% \"%\"", reader.IsAtGroup() ? L"\t" : L"", reader.GetCurrentWordOrGroup());
-
-		if (reader.IsAtGroup())
-		{
-			Println(L" \"%\"", reader.GetClosingSequence());
-			Println(L"---");
-		}
-	}
-	
-	std::cin.get();*/
-
 	defer { if (IsDebuggerPresent()) std::cin.get(); };
-
-	// Println(L"% args", argc);
-	// for (i32 i = 0; i < argc; ++i)
-	// {
-	// 	Println(L"\t", StringView(argv[i]));
-	// }
 
 	if (argc < 3)
 	{

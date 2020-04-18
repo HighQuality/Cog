@@ -14,6 +14,8 @@ CogTypeChunk::CogTypeChunk()
 	myFreeSlots[1] = MaxOf<u64>;
 	myFreeSlots[2] = MaxOf<u64>;
 	myFreeSlots[3] = MaxOf<u64>;
+
+	static_assert(PtrSize == sizeof(Ptr<Object>), "Invalid Ptr size");
 }
 
 CogTypeChunk::~CogTypeChunk()
@@ -29,8 +31,12 @@ void CogTypeChunk::Initialize()
 {
 	myDefaultObject = CreateDefaultObject();
 
-	myEventBroadcasters = GatherEventBroadcasters();
-	myImpulseInvokers = GatherImpulseInvokers();
+	GatherListeners(myEventBroadcasters, myImpulseInvokers);
+}
+
+void CogTypeChunk::GatherListeners(TypeMap<Event, EventBroadcastFunctionPtr>& aEventListeners, TypeMap<Impulse, ImpulseInvokerFunctionPtr>& aImpulseListeners) const
+{
+	FATAL_PURE_VIRTUAL();
 }
 
 void CogTypeChunk::BroadcastEventById(InlineObject<Event> aEvent, const TypeID<Event>& aEventType)

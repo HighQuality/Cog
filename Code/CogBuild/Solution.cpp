@@ -249,6 +249,40 @@ bool Solution::GenerateCode()
 			return false;
 	}
 
+	{
+		Map<StringView, const PendingCogType*> pendingTypes;
+
+		for (Project* project : preprocessProjects)
+			project->GatherPendingTypes(pendingTypes);
+
+		Map<StringView, StringView> hierarchy;
+
+		for (const KeyValuePair<StringView, const PendingCogType*>& pendingPair : pendingTypes)
+		{
+			const PendingCogType& type = *pendingPair.value;
+			// TODO: Convert to error
+			CHECK(pendingTypes.Find(type.baseType));
+			hierarchy.FindOrAdd(type.typeName) = type.baseType;
+		}
+
+		// TODO: Detect circular dependencies
+
+		auto typeInheritsFrom = [&hierarchy](const StringView aType, const StringView aBaseType)
+		{
+			StringView current = aType;
+
+			while (current)
+			{
+				if (current == aBaseType)
+					return true;
+
+				current = hierarchy[current];
+			}
+
+			return false;
+		};
+	}
+
 	Map<String, CogType*> cogTypes;
 
 	for (const Project* project : preprocessProjects)

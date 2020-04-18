@@ -33,6 +33,11 @@ void GeneratedCode::WriteFiles(const DocumentTemplates& aTemplates, const String
 	GenerateSourceFile(aTemplates, aProjectName, sourceFilePath);
 }
 
+void GeneratedCode::RegisterPendingType(PendingCogType aPendingType)
+{
+	myPendingTypes.Add(Move(aPendingType));
+}
+
 CogClass& GeneratedCode::AddCogClass(String aTypeName, String aBaseTypeName, const i32 aDeclarationLine, const i32 aGeneratedBodyLineIndex)
 {
 	CogClass& type = *new CogClass(String(myMainHeaderFileAbsolutePath), aDeclarationLine, Move(aTypeName), Move(aBaseTypeName), aGeneratedBodyLineIndex);

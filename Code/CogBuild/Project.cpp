@@ -25,8 +25,6 @@ Project::Project(Directory* aProjectDirectory)
 
 	buildProjectFile = Format(L"%/%.vcxproj", aProjectDirectory->GetAbsolutePath(), projectName);
 
-	Println(L"Opening project %...", projectName);
-
 	if (const File* configFile = directory->GetFile(Format(L"%.json", projectName).View()))
 	{
 		const std::string fileContents = configFile->ReadString().View().ToStdString();
@@ -345,6 +343,28 @@ bool Project::ParseHeaders()
 
 			generatedHeaderFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetHeaderFileName()));
 			generatedSourceFiles.Add(Format(L"%/", generatedCodeDirectory, generatedCode.GetSourceFileName()));
+		}
+	}
+
+	Map<StringView, StringView> parentHierarchy;
+	Map<StringView, Array<StringView>> derivedHierarcy;
+	Map<StringView, const PendingCogType*> pendingTypes;
+
+	for (HeaderParser* parser : myHeaderParsers)
+	{
+		for (const PendingCogType& pendingType : parser->GetGeneratedCode().GetPendingTypes())
+		{
+			StringView& parent = parentHierarchy.FindOrAdd(pendingType.typeName);
+
+			if (parent)
+			{
+				FATAL(L"Type % is defined multiple times", pendingType.typeName);
+			}
+			
+			parent = pendingType.baseType;
+
+			derivedHierarcy.FindOrAdd(parent).Add(pendingType.typeName);
+			pendingTypes.Add(pendingType.typeName, &pendingType);
 		}
 	}
 
@@ -680,4 +700,18 @@ void Project::GatherSourceFilesMap(Map<const File*, u8>& aSourceFiles) const
 
 	for (Project* reference : references)
 		reference->GatherSourceFilesMap(aSourceFiles);
+}
+
+void Project::GatherPendingTypes(Map<StringView, const PendingCogType*>& aPendingTypes) const
+{
+	for (const HeaderParser* parser : myHeaderParsers)
+	{
+		for (const PendingCogType& pendingType : parser->GetGeneratedCode().GetPendingTypes())
+		{
+			const PendingCogType*& pendingTypePtr = aPendingTypes.FindOrAdd(pendingType.typeName);
+			// TODO: Convert to error, multiple declarations of same type
+			CHECK(!pendingTypePtr);
+			pendingTypePtr = &pendingType;
+		}
+	}
 }

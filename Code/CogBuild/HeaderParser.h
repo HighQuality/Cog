@@ -28,14 +28,7 @@ private:
 	void ReportErrorAtLine(StringView aMessage, i32 aLine);
 	void ReportPreFormattedError(StringView aMessage, GroupingWordReader* innerReader = nullptr);
 
-	bool At(StringView aString) const;
 	bool Expect(StringView aString);
-	bool TryConsume(StringView aString);
-	bool IsAtGroup(StringView aOpener);
-	bool MoveNext();
-	bool MoveNextExpectWord();
-	bool MoveNextExpectParenthesisGroup();
-	bool MoveNextExpectBracesGroup();
 
 	template <typename ...TArgs>
 	void ReportError(TArgs ...aArgs)

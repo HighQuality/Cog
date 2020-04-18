@@ -117,6 +117,7 @@
   <ItemGroup>
     <ClCompile Include="CogBuildUtilities.cpp" />
     <ClCompile Include="CogClass.cpp" />
+    <ClCompile Include="CogListenerType.cpp" />
     <ClCompile Include="CogType.cpp" />
     <ClCompile Include="DocumentTemplates.cpp" />
     <ClCompile Include="GeneratedCode.cpp" />
@@ -133,12 +134,15 @@
     <ClInclude Include="CogBuildPch.h" />
     <ClInclude Include="CogBuildUtilities.h" />
     <ClInclude Include="CogClass.h" />
+    <ClInclude Include="CogListener.h" />
+    <ClInclude Include="CogListenerType.h" />
     <ClInclude Include="CogProperty.h" />
     <ClInclude Include="CogType.h" />
     <ClInclude Include="DocumentTemplates.h" />
     <ClInclude Include="GeneratedCode.h" />
     <ClInclude Include="GeneratedFunction.h" />
     <ClInclude Include="HeaderParser.h" />
+    <ClInclude Include="PendingCogType.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="Solution.h" />
     <ClInclude Include="UnitTestClass.h" />

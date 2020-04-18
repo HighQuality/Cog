@@ -1,6 +1,7 @@
 #pragma once
 #include "CogType.h"
 #include "GeneratedFunction.h"
+#include "PendingCogType.h"
 
 class GroupingWordReader;
 class CogClass;
@@ -12,6 +13,9 @@ public:
 	GeneratedCode(String aMainHeaderFileAbsolutePath, StringView aMainFileName, String aMainHeaderIncludePath);
 
 	void WriteFiles(const DocumentTemplates& aTemplates, StringView aProjectName, StringView aOutputDirectory) const;
+
+	void RegisterPendingType(PendingCogType aPendingType);
+	ArrayView<PendingCogType> GetPendingTypes() const { return myPendingTypes; }
 
 	CogClass& AddCogClass(String aTypeName, String aBaseTypeName, i32 aDeclarationLine, i32 aGeneratedBodyLineIndex);
 
@@ -31,6 +35,8 @@ private:
 	
 	Map<String, u8> mySourceFileIncludes;
 	Array<GeneratedFunction> myGlobalFunctions;
+
+	Array<PendingCogType> myPendingTypes;
 	
 	Array<UniquePtr<CogType>> myDeclaredCogTypes;
 	Array<CogClass*> myCogClasses;

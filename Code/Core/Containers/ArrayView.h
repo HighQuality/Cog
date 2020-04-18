@@ -154,6 +154,7 @@ public:
 		return this->myLength;
 	}
 
+	template <typename TComparer = LessThanEquals>
 	bool IsSorted() const
 	{
 		if (this->myLength == 0)
@@ -161,7 +162,7 @@ public:
 
 		for (i32 i = 0; i < this->myLength - 1; ++i)
 		{
-			if (this->myData[i] > this->myData[i + 1])
+			if (TComparer::Compare(this->myData[i], this->myData[i + 1]))
 				return false;
 		}
 
@@ -250,6 +251,70 @@ public:
 		}
 
 		return 0;
+	}
+	
+	template <typename TComparer = LessThan>
+	i32 FindLowerBoundIndex(const T& aOther) const
+	{
+		const i32 length = GetLength();
+
+		i32 first = 0;
+
+		while (length > 0)
+		{
+			const i32 step = length / 2;
+			const i32 index = first + step;
+
+			if (!TComparer::Compare(myData[index], aOther))
+			{
+				first = index + 1;
+				length -= step + 1;
+			}
+			else
+			{
+				length = step;
+			}
+		}
+
+		return first;
+	}
+
+	template <typename TComparer = LessThan>
+	FORCEINLINE const T& FindLowerBoundRef(const T& aOther) const
+	{
+		return (*this)[FindLowerBoundIndex<TComparer>(aOther)]; 
+	}
+
+	template <typename TComparer = LessThan>
+	i32 FindUpperBoundIndex(const T& aOther) const
+	{
+		const i32 length = GetLength();
+
+		i32 first = 0;
+
+		while (length > 0)
+		{
+			const i32 step = length / 2;
+			const i32 index = first + step;
+
+			if (!TComparer::Compare(aOther, myData[index]))
+			{
+				first = index + 1;
+				length -= step + 1;
+			}
+			else
+			{
+				length = step;
+			}
+		}
+
+		return first;
+	}
+
+	template <typename TComparer = LessThan>
+	FORCEINLINE const T& FindUpperBoundRef(const T& aOther) const
+	{
+		return (*this)[FindUperBoundIndex<TComparer>(aOther)];
 	}
 
 	bool operator>=(const ArrayView& aOther) const { return Compare(aOther) >= 0; }

@@ -220,3 +220,73 @@ constexpr T MaxOf = std::numeric_limits<T>::max();
 
 template <typename T>
 constexpr T MinOf = std::numeric_limits<T>::min();
+
+template <typename T>
+struct LessThan
+{
+	FORCEINLINE static bool Compare(const T& aA, const T& aB)
+	{
+		return aA < aB;
+	}
+
+	FORCEINLINE bool operator()(const T& aA, const T& aB) const
+	{
+		return Compare(aA, aB);
+	}
+};
+
+template <typename T>
+struct GreaterThanEquals
+{
+	FORCEINLINE static bool Compare(const T& aA, const T& aB)
+	{
+		return !LessThan<T>::Compare(aA, aB);
+	}
+
+	FORCEINLINE bool operator()(const T& aA, const T& aB) const
+	{
+		return Compare(aA, aB);
+	}
+};
+
+template <typename T>
+struct Equals
+{
+	FORCEINLINE static bool Compare(const T& aA, const T& aB)
+	{
+		return !(LessThan<T>::Compare(aA, aB) || LessThan<T>::Compare(aB, aA));
+	}
+
+	FORCEINLINE bool operator()(const T& aA, const T& aB) const
+	{
+		return Compare(aA, aB);
+	}
+};
+
+template <typename T>
+struct GreaterThan
+{
+	FORCEINLINE static bool Compare(const T& aA, const T& aB)
+	{
+		return !(LessThan<T>::Compare(aA, aB) || Equals<T>::Compare(aA, aB));
+	}
+
+	FORCEINLINE bool operator()(const T& aA, const T& aB) const
+	{
+		return Compare(aA, aB);
+	}
+};
+
+template <typename T>
+struct LessThanEquals
+{
+	FORCEINLINE static bool Compare(const T& aA, const T& aB)
+	{
+		return !GreaterThan<T>::Compare(aA, aB);
+	}
+
+	FORCEINLINE bool operator()(const T& aA, const T& aB) const
+	{
+		return Compare(aA, aB);
+	}
+};

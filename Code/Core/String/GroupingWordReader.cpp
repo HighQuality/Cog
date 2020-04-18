@@ -6,15 +6,73 @@ GroupingWordReader::GroupingWordReader(const StringView aContent)
 {
 }
 
+StringView GroupingWordReader::NextWord()
+{
+	const i32 previousIndex = GetReadIndex();
+
+	if (!Next())
+		return StringView();
+
+	if (!IsAtWord())
+	{
+		SetReadIndex(previousIndex);
+		return StringView();
+	}
+
+	return GetCurrentWordOrGroup();
+}
+
+bool GroupingWordReader::NextWord(const StringView aView)
+{
+	const i32 previousIndex = GetReadIndex();
+
+	if (Next() && IsAtWord() &&
+		GetCurrentWordOrGroup() == aView)
+	{
+		return true;
+	}
+
+	SetReadIndex(previousIndex);
+	return false;
+}
+
+bool GroupingWordReader::NextGroup(const StringView aOpener)
+{
+	GroupingWordReader reader;
+	return NextGroup(reader, aOpener);
+}
+
+bool GroupingWordReader::NextGroup(GroupingWordReader& aReader, const StringView aOpener)
+{
+	const i32 previousIndex = GetReadIndex();
+
+	if (Next() && IsAtGroup() &&
+		(!aOpener || GetOpeningSequence() == aOpener))
+	{
+		aReader = GroupingWordReader(GetCurrentWordOrGroup());
+		aReader.myLineOffset = CalculateAndGetCurrentLineIndex();
+		aReader.myColumnOffset = CalculateAndGetCurrentColumnIndex();
+
+		return true;
+	}
+
+	SetReadIndex(previousIndex);
+	return false;
+}
+
 bool GroupingWordReader::Next()
 {
 	myIsAtGroup = false;
+	myCurrentContent = StringView();
+	myCurrentOpeningSequence = StringView();
+	myCurrentClosingSequence = StringView();
 	
-	const StringView current = NextWord();
+	const StringView current = Base::NextWord();
 
 	if (!current)
 	{
 		myCurrentContent = StringView();
+		myHasReachedEnd = true;
 		return false;
 	}
 
@@ -51,6 +109,7 @@ bool GroupingWordReader::Next()
 					}
 
 					myCurrentContent = StringView();
+					myHasReachedEnd = true;
 					return false;
 				}
 			}
@@ -83,7 +142,7 @@ bool GroupingWordReader::Next()
 
 	{
 		const i32 readHeader = GetReadIndex();
-		NextWord();
+		Base::NextWord();
 		myCurrentGroupFirstContentLineIndex = CalculateAndGetCurrentLineIndex();
 		SetReadIndex(readHeader);
 	}
@@ -137,7 +196,10 @@ bool GroupingWordReader::Next()
 	myCurrentContent.Trim();
 
 	if (myHasShortCircuited)
+	{
 		myCurrentContent = StringView();
+		myHasReachedEnd = true;
+	}
 
 	return !myHasShortCircuited;
 }
@@ -161,6 +223,22 @@ void GroupingWordReader::CopySettingsFrom(const GroupingWordReader& aOther)
 {
 	myEnabledGroups = aOther.myEnabledGroups;
 	SetIgnoreNewlines(aOther.IsIgnoringNewlines());
+}
+
+bool GroupingWordReader::IsAtGroup(const StringView aOpeningSequence) const
+{
+	if (!IsAtGroup())
+		return false;
+
+	return GetOpeningSequence() == aOpeningSequence;
+}
+
+bool GroupingWordReader::IsAtWord(const StringView aWord) const
+{
+	if (!IsAtWord())
+		return false;
+
+	return GetCurrentWordOrGroup() == aWord;
 }
 
 bool GroupingWordReader::GetGroupingPair(StringView aView, GroupingWordReaderGroup& aGroup, StringView& aOpeningSequence, StringView& aClosingSequence, bool &aIsOpening, bool& aIsClosing) const

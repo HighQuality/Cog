@@ -35,12 +35,7 @@ void HeaderParser::Parse()
 			}
 			else if (currentWord == L"#")
 			{
-				if (!MoveNextExpectWord())
-					return;
-
-				currentWord = myWordReader.GetCurrentWordOrGroup();
-
-				if (TryConsume(L"include"))
+				if (myWordReader.NextWord(L"include"))
 				{
 					if (hasGeneratedHeaderInclude)
 					{
@@ -48,14 +43,10 @@ void HeaderParser::Parse()
 						return;
 					}
 
-					const bool isOpenedByAngleBracket = IsAtGroup(L"<");
-					const bool isOpenedByQuotationMarks = IsAtGroup(L"\"");
-
-					if (isOpenedByAngleBracket || isOpenedByQuotationMarks)
+					GroupingWordReader includeReader;
+					if (myWordReader.NextGroup(includeReader, L"\""))
 					{
-						StringView includePath = myWordReader.GetCurrentGroup();
-
-						if (isOpenedByQuotationMarks && includePath == myGeneratedHeaderFileName.View())
+						if (myWordReader.GetCurrentGroup() == myGeneratedHeaderFileName.View())
 						{
 							hasGeneratedHeaderInclude = true;
 
@@ -70,49 +61,33 @@ void HeaderParser::Parse()
 
 void HeaderParser::ParseCogType()
 {
-	if (!MoveNextExpectParenthesisGroup())
+	if (!myWordReader.NextGroup(L"("))
+	{
+		ReportError(L"Expected '('");
 		return;
+	}
 
-	GroupingWordReader parameterReader(myWordReader.GetCurrentGroup());
-
-	if (!MoveNextExpectWord())
+	const StringView parameterListContent = myWordReader.GetCurrentWordOrGroup();
+	
+	if (!myWordReader.NextWord())
+	{
+		ReportError(L"Expected word");
 		return;
+	}
 
 	const StringView classType = myWordReader.GetCurrentWordOrGroup();
 
-	if (classType == L"class")
+	if (!myWordReader.NextWord())
 	{
-		ParseCogTypeClass(parameterReader);
-	}
-	else if (classType == L"struct")
-	{
-		TODO;
-	}
-	else if (classType == L"enum")
-	{
-		TODO;
-	}
-	else
-	{
-		ReportError(L"Expected \"struct\", \"class\" or \"enum\", got %", classType);
+		ReportError(L"Syntax error");
 		return;
 	}
-}
-
-void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
-{
-	if (!MoveNextExpectWord())
-		return;
 
 	const i32 declarationLine = myWordReader.CalculateAndGetCurrentLineIndex();
 
-	const StringView className = myWordReader.GetCurrentWordOrGroup();
-	StringView baseClass;
+	const StringView typeName = myWordReader.GetCurrentWordOrGroup();
 
-	if (!MoveNextExpectWord())
-		return;
-
-	TryConsume(L"final");
+	myWordReader.NextWord(L"final");
 
 	if (!Expect(L":"))
 		return;
@@ -120,24 +95,34 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 	if (!Expect(L"public"))
 		return;
 
-	if (!myWordReader.IsAtWord())
+	if (!myWordReader.NextWord())
 	{
 		ReportError(L"Expected word");
 		return;
 	}
 
-	baseClass = myWordReader.GetCurrentWordOrGroup();
+	const StringView baseClass = myWordReader.GetCurrentWordOrGroup();
 
-	if (baseClass == L"CogTypeBase")
-		baseClass = StringView();
-
-	if (!MoveNextExpectBracesGroup())
+	if (!myWordReader.NextGroup(L"{"))
+	{
+		ReportError(L"Expected '{'");
 		return;
+	}
 
+	const StringView bodyContent = myWordReader.GetCurrentWordOrGroup();
+
+	PendingCogType pendingType;
+	pendingType.type = String(classType);
+	pendingType.typeName = String(typeName);
+	pendingType.baseType = String(baseClass);
+	pendingType.body = String(bodyContent);
+	pendingType.parameterList = String(parameterListContent);
+	myGeneratedCode.RegisterPendingType(Move(pendingType));
+}
+
+void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
+{
 	i32 generatedBodyLineIndex = -1;
-
-	GroupingWordReader bodyReader(myWordReader.GetCurrentWordOrGroup());
-	bodyReader.SetLineOffset(myWordReader.GetCurrentGroupFirstContentLineIndex());
 
 	if (bodyReader.Next() && bodyReader.IsAtWord() && bodyReader.GetCurrentWordOrGroup() == L"GENERATED_BODY")
 	{
@@ -189,6 +174,10 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 		{
 			TODO;
 		}
+		else if (currentParameter == L"Version") /* Version = <integer>, used for identifying the version when serializing a something. When serializing, if highest bit is 1, go to next data type. */
+		{
+			TODO;
+		}
 		else if (currentParameter == L"SetDebugFlag")
 		{
 			cogClass.SetDebugFlag(true);
@@ -236,58 +225,80 @@ void HeaderParser::ParseCogTypeClass(GroupingWordReader& aParameterReader)
 
 bool HeaderParser::ParseCogListener(CogClass& aClass, GroupingWordReader& aBodyReader)
 {
-	if (!aBodyReader.Next() || !aBodyReader.IsAtWord() || aBodyReader.GetCurrentWordOrGroup() != L";")
+	if (!aBodyReader.NextWord(L";"))
 	{
 		ReportErrorWithInnerReader(aBodyReader, L"Expected ';'");
 		return false;
 	}
 
-	if (!aBodyReader.Next())
-	{
-		ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of body");
-		return false;
-	}
+	aBodyReader.NextWord(L"virtual");
 
-	const bool isVirtual = aBodyReader.GetCurrentWordOrGroup() == L"virtual";
-
-	if (isVirtual)
-	{
-		if (!aBodyReader.Next())
-		{
-			ReportErrorWithInnerReader(aBodyReader, L"Unexpected end of body");
-			return false;
-		}
-	}
-
-	if (!aBodyReader.IsAtWord() || aBodyReader.GetCurrentWordOrGroup() != L"void")
+	if (!aBodyReader.NextWord(L"void"))
 	{
 		ReportErrorWithInnerReader(aBodyReader, L"Expected 'void'");
 		return false;
 	}
 
-	if (!aBodyReader.Next() || !aBodyReader.IsAtWord())
+	if (!aBodyReader.NextWord())
 	{
 		ReportErrorWithInnerReader(aBodyReader, L"Expected method name");
 		return false;
 	}
 
-	const StringView methodName = aBodyReader.GetCurrentWordOrGroup();
+	CogListener listener;
+	listener.methodName = String(aBodyReader.GetCurrentWordOrGroup());
 
-	Println(L"COGLISTENER % registered for type % and is %", methodName, aClass.GetTypeName(), isVirtual ? L"virtual" : L"not virtual");
+	GroupingWordReader parameterReader;
+	if (!aBodyReader.NextGroup(parameterReader, L"("))
+	{
+		ReportErrorWithInnerReader(aBodyReader, L"Expected '('");
+		return false;
+	}
+
+	if (!parameterReader.NextWord(L"const"))
+	{
+		ReportErrorWithInnerReader(parameterReader, L"Expected 'const'");
+		return false;
+	}
+
+	if (!parameterReader.NextWord())
+	{
+		ReportErrorWithInnerReader(parameterReader, L"Expected type name");
+		return false;
+	}
+
+	listener.listenerType = parameterReader.GetCurrentWordOrGroup();
+
+	if (!parameterReader.NextWord(L"&"))
+	{
+		ReportErrorWithInnerReader(parameterReader, L"Expected '&'");
+		return false;
+	}
+
+	if (listener.listenerType.EndsWith(L"Event"))
+	{
+		aClass.RegisterEventListener(Move(listener));
+	}
+	else if (listener.listenerType.EndsWith(L"Impulse"))
+	{
+		aClass.RegisterImpulseListener(Move(listener));
+	}
+	else
+	{
+		ReportErrorWithInnerReader(parameterReader, L"Types listened on must end with either 'Event' or 'Impulse'");
+	}
 
 	return true;
 }
 
 bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyReader)
 {
-	if (!aBodyReader.Next() || !aBodyReader.IsAtGroup() || aBodyReader.GetOpeningSequence() != L"(")
+	GroupingWordReader parameterReader;
+	if (!aBodyReader.NextGroup(parameterReader, L"("))
 	{
 		ReportErrorWithInnerReader(aBodyReader, L"Expected '('");
 		return false;
 	}
-
-	GroupingWordReader parameterReader(aBodyReader.GetCurrentGroup());
-	parameterReader.SetLineOffset(aBodyReader.GetCurrentGroupFirstContentLineIndex());
 
 	if (!parameterReader.Next())
 	{
@@ -545,7 +556,9 @@ bool HeaderParser::ParseCogProperty(CogClass& aClass, GroupingWordReader& aBodyR
 
 void HeaderParser::ReportErrorAtLine(const StringView aMessage, const  i32 aLineIndex)
 {
-	myErrors.Add(Format(L"%(%): error: %", myFile->GetAbsolutePath(), aLineIndex + 1, aMessage));
+	String message = Format(L"%(%): error: %", myFile->GetAbsolutePath(), aLineIndex + 1, aMessage);
+	ENSURE_MSG(false, L"%", message);
+	myErrors.Add(Move(message));
 }
 
 void HeaderParser::ReportPreFormattedError(const StringView aMessage, GroupingWordReader* innerReader /* = nullptr*/)
@@ -553,116 +566,20 @@ void HeaderParser::ReportPreFormattedError(const StringView aMessage, GroupingWo
 	const i32 lineIndex = innerReader ? innerReader->CalculateAndGetCurrentLineIndex() : myWordReader.CalculateAndGetCurrentLineIndex();
 	const i32 columnIndex = innerReader ? innerReader->CalculateAndGetCurrentColumnIndex() : myWordReader.CalculateAndGetCurrentColumnIndex();
 
-	myErrors.Add(Format(L"%(%,%): error: %", myFile->GetAbsolutePath(), lineIndex + 1, columnIndex + 1, aMessage));
-}
-
-bool HeaderParser::At(const StringView aString) const
-{
-	if (myWordReader.IsAtGroup())
-		return false;
-
-	return myWordReader.GetCurrentWordOrGroup() == aString;
+	String message = Format(L"%(%,%): error: %", myFile->GetAbsolutePath(), lineIndex + 1, columnIndex + 1, aMessage);
+	ENSURE_MSG(false, L"%", message);
+	myErrors.Add(Move(message));
 }
 
 bool HeaderParser::Expect(const StringView aString)
 {
-	if (!At(aString))
+	if (!myWordReader.NextWord(aString))
 	{
 		if (myWordReader.IsAtWord())
 			ReportError(L"Expected %, got %", aString, myWordReader.GetCurrentWordOrGroup());
 		else
-			ReportError(L"Expected %, got group");
+			ReportError(L"Expected %, got group starting with %", aString, myWordReader.GetOpeningSequence());
 
-		return false;
-	}
-
-	myWordReader.Next();
-	return true;
-}
-
-bool HeaderParser::TryConsume(const StringView aString)
-{
-	if (At(aString))
-	{
-		myWordReader.Next();
-		return true;
-	}
-
-	return false;
-}
-
-bool HeaderParser::IsAtGroup(const StringView aOpener)
-{
-	if (myWordReader.IsAtGroup() && myWordReader.GetOpeningSequence() == aOpener)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-bool HeaderParser::MoveNext()
-{
-	return myWordReader.Next();
-}
-
-bool HeaderParser::MoveNextExpectWord()
-{
-	if (!myWordReader.Next())
-	{
-		ReportError(L"Unexpected end of file");
-		return false;
-	}
-
-	if (myWordReader.IsAtGroup())
-	{
-		ReportError(L"Expected word");
-		return false;
-	}
-
-	return true;
-}
-
-bool HeaderParser::MoveNextExpectParenthesisGroup()
-{
-	if (!myWordReader.Next())
-	{
-		ReportError(L"Unexpected end of file");
-		return false;
-	}
-
-	if (!myWordReader.IsAtGroup())
-	{
-		ReportError(L"Expected group");
-		return false;
-	}
-
-	if (myWordReader.GetOpeningSequence() != L"(")
-	{
-		ReportError(L"Expected '(', got '%'", myWordReader.GetOpeningSequence());
-		return false;
-	}
-
-	return true;
-}
-
-bool HeaderParser::MoveNextExpectBracesGroup()
-{
-	if (!myWordReader.Next())
-	{
-		ReportError(L"Unexpected end of file");
-		return false;
-	}
-
-	if (!myWordReader.IsAtGroup())
-	{
-		ReportError(L"Expected group");
-		return false;
-	}
-
-	if (myWordReader.GetOpeningSequence() != L"{")
-	{
-		ReportError(L"Expected '{', got '%'", myWordReader.GetOpeningSequence());
 		return false;
 	}
 

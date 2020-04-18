@@ -2,6 +2,7 @@
 #include "CogType.h"
 #include "GeneratedFunction.h"
 #include "CogProperty.h"
+#include "CogListener.h"
 
 struct ClassPropertyInitializerData;
 
@@ -27,6 +28,8 @@ public:
 	void SetIsFinal(bool aIsFinal);
 
 	void RegisterCogProperty(CogProperty aProperty);
+	void RegisterEventListener(CogListener aListener);
+	void RegisterImpulseListener(CogListener aListener);
 
 	void PostResolveDependencies() override;
 	
@@ -35,12 +38,16 @@ protected:
 	const CogClass* GetRootClass() const;
 
 	void GatherPropertyInitializers(Map<StringView, ClassPropertyInitializerData>& aPropertyInitializers) const;
+	void GatherListeners(Array<CogListener>& aEventListeners, Array<CogListener>& aImpulseListeners) const;
 
 private:
 	Array<String> GenerateSingletonInitialization() const;
 
 	Array<GeneratedFunction> myGeneratedFunctions;
 	Array<CogProperty> myProperties;
+
+	Array<CogListener> myEventListeners;
+	Array<CogListener> myImpulseListeners;
 	
 	String myChunkTypeName;
 	i32 myGeneratedBodyLineIndex = -1;
